@@ -7,7 +7,7 @@ CREATE TABLE "Organization" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "updated_by" TEXT NOT NULL,
+    "updated_by" TEXT,
 
     CONSTRAINT "Organization_pkey" PRIMARY KEY ("id")
 );
