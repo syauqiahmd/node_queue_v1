@@ -16,9 +16,9 @@ module.exports = (schema, type = 'body') => {
 
       switch (type) {
         case 'object.unknown':
-          errorMessage = message;
-          break;
         case 'any.required':
+        case 'string.empty':
+        case 'string.max':
           errorMessage = message;
           break;
         default:
