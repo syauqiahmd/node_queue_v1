@@ -12,6 +12,7 @@ const methodBasedLimiter = require('./middlewares/rateLimiter');
 const { successResponse } = require('./utils/response');
 const logger = require('./utils/logger');
 const { checkDbConnection } = require('./configs/prismaClient');
+const requestIdMiddleware = require('./middlewares/requestId');
 
 // Routes list
 const organizationRoutes = require('./routes/organizationRoutes');
@@ -21,6 +22,7 @@ const userRoutes = require('./routes/userRoutes');
 
 expressJSDocSwagger(app)(swaggerOptions);
 
+app.use(requestIdMiddleware); // Apply rate limiting middleware
 app.use(methodBasedLimiter); // Apply rate limiting middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

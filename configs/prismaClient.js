@@ -11,11 +11,13 @@ const prisma = new PrismaClient({
 });
 
 prisma.$on('query', (e) => {
-  logger.debug(`[Prisma Query] ${e.query}`, {
-    duration: `${e.duration}ms`,
-    params: e.params,
-    target: e.target,
-  });
+  if (process.env.NODE_ENV !== 'production') {
+    logger.debug(`[Prisma Query] ${e.query}`, {
+      duration: `${e.duration}ms`,
+      params: e.params,
+      target: e.target,
+    });
+  }
 });
 
 prisma.$on('info', (e) => {
