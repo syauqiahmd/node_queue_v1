@@ -1,4 +1,4 @@
-const prisma = require('../configs/prismaClient');
+const { prisma } = require('../configs/prismaClient');
 
 exports.getAll = async (payload) => {
   const where = {

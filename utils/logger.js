@@ -1,10 +1,18 @@
 const winston = require('winston');
 require('winston-daily-rotate-file');
 const path = require('path');
+const { getTransactionId } = require('../utils/asyncContext');
 
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.errors({ stack: true }),
+  winston.format((info) => {
+    const transactionId = getTransactionId && getTransactionId();
+    if (transactionId) {
+      info.transactionId = transactionId;
+    }
+    return info;
+  })(),
   winston.format.json()
 );
 

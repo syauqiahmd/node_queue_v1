@@ -10,6 +10,9 @@ const swaggerOptions = require('./configs/swagger');
 const errorHandler = require('./middlewares/errorHandler');
 const methodBasedLimiter = require('./middlewares/rateLimiter');
 const { successResponse } = require('./utils/response');
+const logger = require('./utils/logger');
+const { checkDbConnection } = require('./configs/prismaClient');
+const requestIdMiddleware = require('./middlewares/requestId');
 
 // Routes list
 const organizationRoutes = require('./routes/organizationRoutes');
@@ -19,11 +22,13 @@ const userRoutes = require('./routes/userRoutes');
 
 expressJSDocSwagger(app)(swaggerOptions);
 
+app.use(requestIdMiddleware); // Apply rate limiting middleware
 app.use(methodBasedLimiter); // Apply rate limiting middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check route
+// Health check
+checkDbConnection();
 app.get('/test', (req, res) => {
   return successResponse(res, { message: 'Ready to serve' });
 });
@@ -37,5 +42,5 @@ app.use('/api/v1/users', userRoutes);
 app.use(errorHandler);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  logger.info(`Success to serve at ${port}`, { context: 'Initial Service', port });
 });
