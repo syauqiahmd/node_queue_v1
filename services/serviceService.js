@@ -2,18 +2,9 @@ const prisma = require('../configs/prismaClient');
 
 exports.getAll = async (payload) => {
   const where = {
-    name: payload.name
-      ? { contains: payload.name, mode: 'insensitive' }
-      : undefined,
-    prefix: payload.prefix
-      ? { contains: payload.prefix, mode: 'insensitive' }
-      : undefined,
-    isActive:
-      payload.isActive === 'true'
-        ? true
-        : payload.isActive === 'false'
-          ? false
-          : undefined,
+    name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
+    prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
+    isActive: payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
   };
 
   const [data, count] = await Promise.all([
@@ -40,7 +31,7 @@ exports.create = async (data) => {
 exports.update = async (id, data) => {
   return prisma.service.update({
     where: { id },
-    data
+    data,
   });
 };
 

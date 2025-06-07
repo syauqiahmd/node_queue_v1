@@ -1,7 +1,7 @@
 const successResponse = (res, data = {}, message = 'Success', statusCode = 200) => {
   const response = {
     success: true,
-    message
+    message,
   };
 
   if (typeof data === 'object' && data !== null && 'totalRecord' in data) {
@@ -14,18 +14,21 @@ const successResponse = (res, data = {}, message = 'Success', statusCode = 200) 
   return res.status(statusCode).json(response);
 };
 
-const errorResponse = (res, {
-  message = 'Something went wrong',
-  code = 'INTERNAL_SERVER_ERROR',
-  statusCode = 500,
-  fields = null
-} = {}) => {
+const errorResponse = (
+  res,
+  {
+    message = 'Something went wrong',
+    code = 'INTERNAL_SERVER_ERROR',
+    statusCode = 500,
+    fields = null,
+  } = {}
+) => {
   const errorBody = {
     success: false,
     error: {
       code,
-      message
-    }
+      message,
+    },
   };
 
   if (fields) {
@@ -33,9 +36,9 @@ const errorResponse = (res, {
   }
 
   return res.status(statusCode).json(errorBody);
-}
+};
 
 module.exports = {
   successResponse,
-  errorResponse
+  errorResponse,
 };

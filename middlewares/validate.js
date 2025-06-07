@@ -2,8 +2,32 @@
 const { errorResponse } = require('../utils/response');
 
 module.exports = (schema, type = 'body') => {
+  const allowedTypes = ['body', 'query', 'params'];
   return (req, res, next) => {
-    const { error, value } = schema.validate(req[type], {
+    if (!allowedTypes.includes(type)) {
+      return errorResponse(res, {
+        message: 'Invalid validation type',
+        code: 'VALIDATION_ERROR',
+        statusCode: 400,
+      });
+    }
+    // Prevent prototype pollution and object injection
+    let dataToValidate;
+    switch (type) {
+      case 'body':
+        dataToValidate = req.body;
+        break;
+      case 'query':
+        dataToValidate = req.query;
+        break;
+      case 'params':
+        dataToValidate = req.params;
+        break;
+      default:
+        dataToValidate = {};
+    }
+
+    const { error } = schema.validate(dataToValidate, {
       abortEarly: false,
       stripUnknown: false,
     });
@@ -11,7 +35,7 @@ module.exports = (schema, type = 'body') => {
     let errorMessage = 'Validation failed';
 
     if (error) {
-      const err = error && error.details && error.details[0]
+      const err = error && error.details && error.details[0];
       const { message, type } = err || {};
 
       switch (type) {
@@ -31,7 +55,6 @@ module.exports = (schema, type = 'body') => {
       });
     }
 
-    req[type] = value;
     next();
   };
 };

@@ -2,7 +2,7 @@
 const { Prisma } = require('../generated/prisma');
 const { errorResponse } = require('../utils/response');
 
-module.exports = (err, req, res, next) => {
+module.exports = (err, req, res) => {
   console.error(err);
 
   // Default error format
@@ -39,18 +39,16 @@ module.exports = (err, req, res, next) => {
         statusCode = 400;
         break;
     }
-
   } else if (err instanceof Prisma.PrismaClientValidationError) {
     code = 'VALIDATION_ERROR';
     message = err.message.split('\n').pop().trim();
     statusCode = 400;
-
   } else if (err.name === 'ValidationError') {
     // Joi or custom validation
     code = 'VALIDATION_ERROR';
     message = err.message;
     statusCode = 400;
-    fields = err.details?.map(d => ({
+    fields = err.details?.map((d) => ({
       field: d.path.join('.'),
       message: d.message,
     }));
