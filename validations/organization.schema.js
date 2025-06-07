@@ -19,5 +19,5 @@ const getOrganizationSchema = Joi.object({
 
 module.exports = {
   createOrganizationSchema,
-  getOrganizationSchema
+  getOrganizationSchema,
 };

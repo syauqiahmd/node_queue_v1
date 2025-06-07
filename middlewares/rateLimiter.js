@@ -10,9 +10,9 @@ const limiter = rateLimit({
     success: false,
     error: {
       code: 'TOO_MANY_REQUESTS',
-      message: 'Too many requests. Please try again later.'
-    }
-  }
+      message: 'Too many requests. Please try again later.',
+    },
+  },
 });
 
 // Middleware that only applies the limiter to specific methods

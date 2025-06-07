@@ -20,5 +20,5 @@ const getServiceSchema = Joi.object({
 
 module.exports = {
   createServiceSchema,
-  getServiceSchema
+  getServiceSchema,
 };
