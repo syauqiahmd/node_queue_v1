@@ -1,5 +1,6 @@
 const serviceService = require('../services/serviceService');
 const { successResponse } = require('../utils/response');
+const businessException = require('../utils/businessException');
 
 const getAll = async (req, res, next) => {
   try {
@@ -18,6 +19,9 @@ const getAll = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const data = await serviceService.getById(req.params.id);
+    if (data === null) {
+      throw businessException.NotFound('Counter');
+    }
     return successResponse(res, data);
   } catch (err) {
     next(err);
