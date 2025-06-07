@@ -6,6 +6,12 @@ const createOrganizationSchema = Joi.object({
   fullName: Joi.string().trim().optional(),
 }).required(); // Ensure object is not empty
 
+const updateOrganizationSchema = Joi.object({
+  name: Joi.string().trim().required(),
+  fullName: Joi.string().trim().optional(),
+  isActive: Joi.boolean().required(),
+}).required(); // Ensure object is not empty
+
 const getOrganizationSchema = Joi.object({
   name: Joi.string().trim().optional(),
   fullName: Joi.string().trim().optional(),
@@ -17,7 +23,15 @@ const getOrganizationSchema = Joi.object({
   presence: 'optional',
 });
 
+const idOrganizationSchema = Joi.object({
+  id: Joi.string()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .required(),
+}).required(); // Ensure object is not empty
+
 module.exports = {
   createOrganizationSchema,
   getOrganizationSchema,
+  updateOrganizationSchema,
+  idOrganizationSchema,
 };
