@@ -2,7 +2,11 @@
 const { Prisma } = require('../generated/prisma');
 const { errorResponse } = require('../utils/response');
 
-module.exports = (err, req, res) => {
+module.exports = (err, req, res, _next) => {
+  if (!err) {
+    _next();
+  }
+
   console.error(err);
 
   // Default error format
@@ -22,11 +26,6 @@ module.exports = (err, req, res) => {
         break;
 
       case 'P2025': // Record not found
-        code = 'NOT_FOUND';
-        message = 'Record not found';
-        statusCode = 404;
-        break;
-
       case 'P2023': // Record not found
         code = 'NOT_FOUND';
         message = 'Record not found';

@@ -45,6 +45,9 @@ module.exports = (schema, type = 'body') => {
         case 'string.max':
           errorMessage = message;
           break;
+        case 'string.guid':
+          errorMessage = 'id must be a valid value';
+          break;
         default:
           break;
       }

@@ -1,5 +1,5 @@
 const organizationService = require('../services/organizationService');
-const { successResponse, errorResponse } = require('../utils/response');
+const { successResponse } = require('../utils/response');
 
 const getAll = async (req, res, next) => {
   try {
@@ -18,9 +18,6 @@ const getAll = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const data = await organizationService.getById(req.params.id);
-    if (!data) {
-      return errorResponse(res, { message: 'Not found', statusCode: 404 });
-    }
     return successResponse(res, data);
   } catch (err) {
     next(err);
@@ -43,9 +40,6 @@ const create = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     const data = await organizationService.update(req.params.id, req.body);
-    if (!data) {
-      return errorResponse(res, { message: 'Not found', statusCode: 404 });
-    }
     return successResponse(res, data, 'Updated');
   } catch (err) {
     next(err);
@@ -55,9 +49,6 @@ const update = async (req, res, next) => {
 const remove = async (req, res, next) => {
   try {
     const data = await organizationService.remove(req.params.id);
-    if (!data) {
-      return errorResponse(res, { message: 'Not found', statusCode: 404 });
-    }
     return successResponse(res, data, 'Deleted');
   } catch (err) {
     next(err);
