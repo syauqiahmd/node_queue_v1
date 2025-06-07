@@ -42,7 +42,6 @@ model Service {
 
   organization    Organization @relation(fields: [organizationId], references: [id])
   counters        Counter[]
-  users           User[]
 }
 
 model Counter {
@@ -70,13 +69,11 @@ model User {
   role       Role
   password   String
   isActive   Boolean   @default(true) @map("is_active")
-  serviceId  String    @db.Uuid @map("service_id")
   createdAt  DateTime  @default(now()) @map("created_at")
   createdBy  String    @map("created_by")
   updatedAt  DateTime  @updatedAt @map("updated_at")
   updatedBy  String?   @map("updated_by")
 
-  service   Service   @relation(fields: [serviceId], references: [id])
   orgLinks  UserOrganization[]
 }
 
