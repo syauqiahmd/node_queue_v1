@@ -3,7 +3,18 @@ const Joi = require('joi');
 const createServiceSchema = Joi.object({
   name: Joi.string().trim().required(),
   prefix: Joi.string().trim().max(2).required(),
-  organizationId: Joi.string().trim().required(),
+  organizationId: Joi.string()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .required(),
+}).required();
+
+const updateServiceSchema = Joi.object({
+  name: Joi.string().trim().required(),
+  prefix: Joi.string().trim().max(2).required(),
+  organizationId: Joi.string()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .required(),
+  isActive: Joi.boolean().required(),
 }).required();
 
 const getServiceSchema = Joi.object({
@@ -18,7 +29,15 @@ const getServiceSchema = Joi.object({
   presence: 'optional',
 });
 
+const idServiceSchema = Joi.object({
+  id: Joi.string()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .required(),
+}).required(); // Ensure object is not empty
+
 module.exports = {
   createServiceSchema,
+  updateServiceSchema,
   getServiceSchema,
+  idServiceSchema,
 };
