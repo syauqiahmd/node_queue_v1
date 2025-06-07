@@ -43,6 +43,7 @@ module.exports = (schema, type = 'body') => {
         case 'any.required':
         case 'string.empty':
         case 'string.max':
+        case 'any.unknown':
           errorMessage = message;
           break;
         case 'string.guid':
