@@ -23,8 +23,9 @@ model Organization {
   createdBy String    @map("created_by")
   updatedAt DateTime  @updatedAt @map("updated_at")
   updatedBy String?   @map("updated_by")
-  
+
   services  Service[]
+  users     UserOrganization[]
 }
 
 
@@ -40,7 +41,6 @@ model Service {
   updatedBy       String?      @map("updated_by")
 
   organization    Organization @relation(fields: [organizationId], references: [id])
-  
   counters        Counter[]
 }
 
@@ -54,7 +54,52 @@ model Counter {
   updatedAt       DateTime     @updatedAt @map("updated_at")
   updatedBy       String?      @map("updated_by")
 
-  service         Service @relation(fields: [serviceId], references: [id])
+  service         Service      @relation(fields: [serviceId], references: [id])
 }
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id         String    @id @default(uuid()) @db.Uuid
+  userName   String    @unique
+  fullName   String
+  role       Role
+  password   String
+  isActive   Boolean   @default(true) @map("is_active")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  createdBy  String    @map("created_by")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  updatedBy  String?   @map("updated_by")
+
+  orgLinks  UserOrganization[]
+}
+
+model UserOrganization {
+  id              String         @id @default(uuid()) @db.Uuid
+  userId          String         @db.Uuid @map("user_id")
+  organizationId  String         @db.Uuid @map("organization_id")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  createdBy       String         @map("created_by")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  updatedBy       String?        @map("updated_by")
+
+  user          User            @relation(fields: [userId], references: [id])
+  organization  Organization    @relation(fields: [organizationId], references: [id])
+
+  @@unique([userId, organizationId])
+}
+
+
+
+
+
+
+
+
+
+
 
 
