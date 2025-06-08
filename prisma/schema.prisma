@@ -42,6 +42,7 @@ model Service {
 
   organization    Organization @relation(fields: [organizationId], references: [id])
   counters        Counter[]
+  tickets         Ticket[]     @relation("ServiceTicket")
 }
 
 model Counter {
@@ -55,6 +56,7 @@ model Counter {
   updatedBy       String?      @map("updated_by")
 
   service         Service      @relation(fields: [serviceId], references: [id])
+  assignedTickets Ticket[]     @relation("CounterTicket")
 }
 
 enum Role {
@@ -63,34 +65,55 @@ enum Role {
 }
 
 model User {
-  id         String    @id @default(uuid()) @db.Uuid
-  userName   String    @unique
-  fullName   String
-  role       Role
-  password   String
-  isActive   Boolean   @default(true) @map("is_active")
-  createdAt  DateTime  @default(now()) @map("created_at")
-  createdBy  String    @map("created_by")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
-  updatedBy  String?   @map("updated_by")
+  id                    String    @id @default(uuid()) @db.Uuid
+  userName              String    @unique
+  fullName              String
+  role                  Role
+  password              String
+  isActive              Boolean   @default(true) @map("is_active")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  createdBy             String    @map("created_by")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  updatedBy             String?   @map("updated_by")
 
-  orgLinks  UserOrganization[]
+  assigneeOrganization  UserOrganization[]
 }
 
 model UserOrganization {
-  id              String         @id @default(uuid()) @db.Uuid
-  userId          String         @db.Uuid @map("user_id")
-  organizationId  String         @db.Uuid @map("organization_id")
-  createdAt       DateTime       @default(now()) @map("created_at")
-  createdBy       String         @map("created_by")
-  updatedAt       DateTime       @updatedAt @map("updated_at")
-  updatedBy       String?        @map("updated_by")
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @db.Uuid @map("user_id")
+  organizationId  String          @db.Uuid @map("organization_id")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  createdBy       String          @map("created_by")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  updatedBy       String?         @map("updated_by")
 
-  user          User            @relation(fields: [userId], references: [id])
-  organization  Organization    @relation(fields: [organizationId], references: [id])
+  user            User            @relation(fields: [userId], references: [id])
+  organization    Organization    @relation(fields: [organizationId], references: [id])
 
   @@unique([userId, organizationId])
 }
+
+model Ticket {
+  id                        String   @id @default(uuid()) @db.Uuid
+  queueNumber               Int      
+  queueDate                 DateTime @map("queue_date") // date only, for daily reset and unique
+  prefix                    String   @db.VarChar(3)
+  isCall                    Boolean  @default(false) @map("is_call")
+  isResolved                Boolean  @default(false) @map("is_resolved")
+  serviceId                 String   @db.Uuid @map("service_id")
+  latestAssigneeCounterId   String?  @db.Uuid @map("latest_assignee_counter_id")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+  updatedBy                 String?  @map("updated_by")
+
+  service                   Service  @relation("ServiceTicket", fields: [serviceId], references: [id])
+  latestAssigneeCounter     Counter? @relation("CounterTicket", fields: [latestAssigneeCounterId], references: [id])
+
+  @@index([serviceId, queueDate])
+  @@unique([serviceId, queueNumber, queueDate])
+}
+
 
 
 

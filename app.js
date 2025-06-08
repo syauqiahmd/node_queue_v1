@@ -19,6 +19,7 @@ const organizationRoutes = require('./routes/organizationRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const counterRoutes = require('./routes/counterRoutes');
 const userRoutes = require('./routes/userRoutes');
+const ticketRoutes = require('./routes/ticketRoutes');
 
 expressJSDocSwagger(app)(swaggerOptions);
 
@@ -32,6 +33,8 @@ checkDbConnection();
 app.get('/test', (req, res) => {
   return successResponse(res, { message: 'Ready to serve' });
 });
+
+app.use('/api/v1/tickets', ticketRoutes);
 
 // Register routes
 app.use('/api/v1/organizations', organizationRoutes);

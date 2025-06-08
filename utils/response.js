@@ -1,3 +1,5 @@
+const logger = require('./logger');
+
 const successResponse = (res, data = {}, message = 'Success', statusCode = 200) => {
   const response = {
     success: true,
@@ -10,7 +12,10 @@ const successResponse = (res, data = {}, message = 'Success', statusCode = 200) 
   } else {
     response.data = data;
   }
-
+  logger.info(`response: ${JSON.stringify(response)}`, {
+    context: '[SUCCESS]',
+    statusCode,
+  });
   return res.status(statusCode).json(response);
 };
 
@@ -34,7 +39,12 @@ const errorResponse = (
   if (fields) {
     errorBody.error.fields = fields;
   }
-
+  logger.error(`response: ${JSON.stringify(errorBody)}`, {
+    context: '[ERROR]',
+    statusCode,
+    errorCode: code,
+    errorMessage: message,
+  });
   return res.status(statusCode).json(errorBody);
 };
 
