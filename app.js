@@ -19,7 +19,8 @@ const organizationRoutes = require('./routes/organizationRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const counterRoutes = require('./routes/counterRoutes');
 const userRoutes = require('./routes/userRoutes');
-const ticketRoutes = require('./routes/ticketRoutes');
+const ticketRoutes = require('./routes/publicRoutes');
+const queueRoutes = require('./routes/queueRoutes');
 
 expressJSDocSwagger(app)(swaggerOptions);
 
@@ -34,13 +35,17 @@ app.get('/test', (req, res) => {
   return successResponse(res, { message: 'Ready to serve' });
 });
 
-app.use('/api/v1/tickets', ticketRoutes);
+// public routes
+app.use('/api/v1/public', ticketRoutes);
 
 // Register routes
 app.use('/api/v1/organizations', organizationRoutes);
 app.use('/api/v1/services', serviceRoutes);
 app.use('/api/v1/counters', counterRoutes);
 app.use('/api/v1/users', userRoutes);
+
+// transactional routes
+app.use('/api/v1/queues', queueRoutes);
 
 app.use(errorHandler);
 
