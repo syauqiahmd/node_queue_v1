@@ -28,7 +28,7 @@ const getCounterSchema = Joi.object({
 });
 
 const idCounterSchema = Joi.object({
-  id: Joi.string()
+  counterId: Joi.string()
     .guid({ version: ['uuidv4', 'uuidv5'] })
     .required(),
 }).required(); // Ensure object is not empty

@@ -19,12 +19,12 @@ const counterSchema = require('../validations/counter.schema');
 router.get('/', validate(counterSchema.getCounterSchema, 'query'), controller.getAll);
 
 /**
- * GET /counters/{id}
+ * GET /counters/{counterId}
  * @summary Get counter by ID
  * @tags Counter
- * @param {string} id.path.required - Service ID using UUID format
+ * @param {string} counterId.path.required - Service ID using UUID format
  */
-router.get('/:id', validate(counterSchema.idCounterSchema, 'params'), controller.getById);
+router.get('/:counterId', validate(counterSchema.idCounterSchema, 'params'), controller.getById);
 
 /**
  * POST /counters
@@ -40,10 +40,10 @@ router.get('/:id', validate(counterSchema.idCounterSchema, 'params'), controller
 router.post('/', validate(counterSchema.createCounterSchema), controller.create);
 
 /**
- * PUT /counters/{id}
+ * PUT /counters/{counterId}
  * @summary Update counter by ID
  * @tags Counter
- * @param {string} id.path.required - Service ID using UUID format
+ * @param {string} counterId.path.required - Service ID using UUID format
  * @param {object} request.body.required - Service data
  * @example request - example payload
  * {
@@ -53,18 +53,18 @@ router.post('/', validate(counterSchema.createCounterSchema), controller.create)
  * }
  */
 router.put(
-  '/:id',
+  '/:counterId',
   validate(counterSchema.idCounterSchema, 'params'),
   validate(counterSchema.updateCounterSchema),
   controller.update
 );
 
 /**
- * DELETE /counters/{id}
+ * DELETE /counters/{counterId}
  * @summary Delete counter by ID
  * @tags Counter
- * @param {string} id.path.required - Service ID using UUID format
+ * @param {string} counterId.path.required - Service ID using UUID format
  */
-router.delete('/:id', validate(counterSchema.idCounterSchema, 'params'), controller.remove);
+router.delete('/:counterId', validate(counterSchema.idCounterSchema, 'params'), controller.remove);
 
 module.exports = router;
