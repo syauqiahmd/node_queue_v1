@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const expressJSDocSwagger = require('express-jsdoc-swagger');
+const http = require('http');
 
 // helpers and configs
 const port = process.env.PORT || 3000;
@@ -13,6 +14,7 @@ const { successResponse } = require('./utils/response');
 const logger = require('./utils/logger');
 const { checkDbConnection } = require('./configs/prismaClient');
 const requestIdMiddleware = require('./middlewares/requestId');
+const { initSocket } = require('./configs/socket');
 
 // Routes list
 const organizationRoutes = require('./routes/organizationRoutes');
@@ -49,6 +51,9 @@ app.use('/api/v1/queues', queueRoutes);
 
 app.use(errorHandler);
 
-app.listen(port, () => {
+const server = http.createServer(app);
+initSocket(server);
+
+server.listen(port, () => {
   logger.info(`Success to serve at ${port}`, { context: 'Initial Service', port });
 });
