@@ -82,3 +82,24 @@ exports.callNextQueue = async (payload) => {
 
   return updatedTicket;
 };
+
+// exports.actionQueueById = async (payload) => { };
+
+exports.getCurrentQueueDetailById = async (id) => {
+  return await prisma.ticket.findUnique({
+    where: {
+      id,
+      createdAt: {
+        gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
+        lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
+      },
+    },
+  });
+};
+
+exports.updateQueueById = async (id, payload) => {
+  return await prisma.ticket.update({
+    where: { id },
+    data: payload,
+  });
+};

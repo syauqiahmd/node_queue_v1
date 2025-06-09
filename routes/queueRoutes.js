@@ -20,14 +20,14 @@ const queueSchema = require('../validations/queue.schema');
 router.post('/call', validate(queueSchema.callQueueSchema), controller.callNextQueue);
 
 /**
- * POST /queues/action/{queueId}
+ * POST /queues/action
  * @summary Recall or resolve queue by queueId
  * @tags Queue
  * @param {object} request.body.required - call to counter data
  * @example request - example payload
  * {
  *   "action": "retry",
- *   "queueId": "123123-1234-1234-1234-123456789012"
+ *   "queueId": "123123-1234-1234-1234-123456789012",
  *   "counterId": "123123-1234-1234-1234-123456789012"
  * }
  */
