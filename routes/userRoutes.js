@@ -20,12 +20,12 @@ const userSchema = require('../validations/user.schema');
 router.get('/', validate(userSchema.getUserSchema, 'query'), controller.getAll);
 
 /**
- * GET /users/{id}
+ * GET /users/{userId}
  * @summary Get user by ID
  * @tags User
- * @param {string} id.path.required - User ID using UUID format
+ * @param {string} userId.path.required - User ID using UUID format
  */
-router.get('/:id', validate(userSchema.idUserSchema, 'params'), controller.getById);
+router.get('/:userId', validate(userSchema.idUserSchema, 'params'), controller.getById);
 
 /**
  * POST /users
@@ -44,10 +44,10 @@ router.get('/:id', validate(userSchema.idUserSchema, 'params'), controller.getBy
 router.post('/', validate(userSchema.createUserSchema), controller.create);
 
 /**
- * PUT /users/{id}
+ * PUT /users/{userId}
  * @summary Update user by ID
  * @tags User
- * @param {string} id.path.required - User ID using UUID format
+ * @param {string} userId.path.required - User ID using UUID format
  * @param {object} request.body.required - User data
  * @example request - example payload
  * {
@@ -60,18 +60,18 @@ router.post('/', validate(userSchema.createUserSchema), controller.create);
  * }
  */
 router.put(
-  '/:id',
+  '/:userId',
   validate(userSchema.idUserSchema, 'params'),
   validate(userSchema.updateUserSchema),
   controller.update
 );
 
 /**
- * DELETE /users/{id}
+ * DELETE /users/{userId}
  * @summary Delete user by ID
  * @tags User
- * @param {string} id.path.required - User ID using UUID format
+ * @param {string} userId.path.required - User ID using UUID format
  */
-router.delete('/:id', validate(userSchema.idUserSchema, 'params'), controller.remove);
+router.delete('/:userId', validate(userSchema.idUserSchema, 'params'), controller.remove);
 
 module.exports = router;

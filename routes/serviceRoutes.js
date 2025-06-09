@@ -19,12 +19,12 @@ const serviceSchema = require('../validations/service.schema');
 router.get('/', validate(serviceSchema.getServiceSchema, 'query'), controller.getAll);
 
 /**
- * GET /services/{id}
+ * GET /services/{serviceId}
  * @summary Get services by ID
  * @tags Service
- * @param {string} id.path.required - Service ID using UUID format
+ * @param {string} serviceId.path.required - Service ID using UUID format
  */
-router.get('/:id', validate(serviceSchema.idServiceSchema, 'params'), controller.getById);
+router.get('/:serviceId', validate(serviceSchema.idServiceSchema, 'params'), controller.getById);
 
 /**
  * POST /services
@@ -41,10 +41,10 @@ router.get('/:id', validate(serviceSchema.idServiceSchema, 'params'), controller
 router.post('/', validate(serviceSchema.createServiceSchema), controller.create);
 
 /**
- * PUT /services/{id}
+ * PUT /services/{serviceId}
  * @summary Update services by ID
  * @tags Service
- * @param {string} id.path.required - Service ID using UUID format
+ * @param {string} serviceId.path.required - Service ID using UUID format
  * @param {object} request.body.required - Service data
  * @example request - example payload
  * {
@@ -55,18 +55,18 @@ router.post('/', validate(serviceSchema.createServiceSchema), controller.create)
  * }
  */
 router.put(
-  '/:id',
+  '/:serviceId',
   validate(serviceSchema.idServiceSchema, 'params'),
   validate(serviceSchema.updateServiceSchema),
   controller.update
 );
 
 /**
- * DELETE /services/{id}
+ * DELETE /services/{serviceId}
  * @summary Delete services by ID
  * @tags Service
- * @param {string} id.path.required - Service ID using UUID format
+ * @param {string} serviceId.path.required - Service ID using UUID format
  */
-router.delete('/:id', validate(serviceSchema.idServiceSchema, 'params'), controller.remove);
+router.delete('/:serviceId', validate(serviceSchema.idServiceSchema, 'params'), controller.remove);
 
 module.exports = router;

@@ -44,7 +44,7 @@ const getUserSchema = Joi.object({
 });
 
 const idUserSchema = Joi.object({
-  id: Joi.string()
+  userId: Joi.string()
     .guid({ version: ['uuidv4', 'uuidv5'] })
     .required(),
 }).required(); // Ensure object is not empty

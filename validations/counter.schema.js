@@ -1,14 +1,14 @@
 const Joi = require('joi');
 
 const createCounterSchema = Joi.object({
-  counterNumber: Joi.string().trim().required(),
+  counterNumber: Joi.string().max(3).trim().required(),
   serviceId: Joi.string()
     .guid({ version: ['uuidv4', 'uuidv5'] })
     .required(),
 }).required();
 
 const updateCounterSchema = Joi.object({
-  counterNumber: Joi.string().trim().required(),
+  counterNumber: Joi.string().max(3).trim().required(),
   serviceId: Joi.string()
     .guid({ version: ['uuidv4', 'uuidv5'] })
     .required(),
@@ -28,7 +28,7 @@ const getCounterSchema = Joi.object({
 });
 
 const idCounterSchema = Joi.object({
-  id: Joi.string()
+  counterId: Joi.string()
     .guid({ version: ['uuidv4', 'uuidv5'] })
     .required(),
 }).required(); // Ensure object is not empty

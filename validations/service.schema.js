@@ -30,7 +30,7 @@ const getServiceSchema = Joi.object({
 });
 
 const idServiceSchema = Joi.object({
-  id: Joi.string()
+  serviceId: Joi.string()
     .guid({ version: ['uuidv4', 'uuidv5'] })
     .required(),
 }).required(); // Ensure object is not empty

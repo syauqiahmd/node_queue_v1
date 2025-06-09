@@ -18,7 +18,7 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const data = await organizationService.getById(req.params.id);
+    const data = await organizationService.getById(req.params.organizationId);
     if (data === null) {
       throw businessException.NotFound('Counter');
     }
@@ -43,7 +43,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const data = await organizationService.update(req.params.id, req.body);
+    const data = await organizationService.update(req.params.organizationId, req.body);
     return successResponse(res, data, 'Updated');
   } catch (err) {
     next(err);
@@ -52,7 +52,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const data = await organizationService.remove(req.params.id);
+    const data = await organizationService.remove(req.params.organizationId);
     return successResponse(res, data, 'Deleted');
   } catch (err) {
     next(err);
