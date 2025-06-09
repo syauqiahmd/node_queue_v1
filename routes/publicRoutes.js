@@ -3,7 +3,7 @@ const router = express.Router();
 const controller = require('../controllers/ticketController');
 
 const validate = require('../middlewares/validate');
-const serviceSchema = require('../validations/service.schema');
+const ticketSchema = require('../validations/ticket.schema');
 
 /**
  * POST /public/tickets
@@ -15,6 +15,6 @@ const serviceSchema = require('../validations/service.schema');
  *   "serviceId": "123123-1234-1234-1234-123456789012"
  * }
  */
-router.post('/tickets', validate(serviceSchema.idServiceSchema), controller.create);
+router.post('/tickets', validate(ticketSchema.createTicketSchema), controller.create);
 
 module.exports = router;
