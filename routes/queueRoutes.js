@@ -13,7 +13,7 @@ const queueSchema = require('../validations/queue.schema');
  * @param {object} request.body.required - call to counter data
  * @example request - example payload
  * {
- *   "counterId": "123123-1234-1234-1234-123456789012"
+ *   "counterId": "123123-1234-1234-1234-123456789012",
  *   "serviceId": "123123-1234-1234-1234-123456789012"
  * }
  */
@@ -27,7 +27,7 @@ router.post('/call', validate(queueSchema.callQueueSchema), controller.getTotalQ
  * @param {object} request.body.required - call to counter data
  * @example request - example payload
  * {
- *   "action": "retry"
+ *   "action": "retry",
  *   "counterId": "123123-1234-1234-1234-123456789012"
  * }
  */
