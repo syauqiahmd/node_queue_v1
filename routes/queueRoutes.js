@@ -13,12 +13,13 @@ const queueSchema = require('../validations/queue.schema');
  * @param {object} request.body.required - call to counter data
  * @example request - example payload
  * {
- *   "counterId": "123123-1234-1234-1234-123456789012",
- *   "serviceId": "123123-1234-1234-1234-123456789012"
+ *   "serviceId": "123123-1234-1234-1234-123456789012",
+ *   "counterId": "123123-1234-1234-1234-123456789012"
  * }
  */
-router.post('/call', validate(queueSchema.callQueueSchema), controller.getTotalQueueByServiceId); // TODO: replace controller & Implement the logic to call the next queue
+router.post('/call', validate(queueSchema.callQueueSchema), controller.callNextQueue); // TODO: replace controller & Implement the logic to call the next queue
 
+//TODO: replace controller
 /**
  * POST /queues/action/{queueId}
  * @summary Recall or resolve queue by queueId
@@ -35,8 +36,8 @@ router.post(
   '/action/:queueId',
   validate(queueSchema.idQueueSchema, 'params'),
   validate(queueSchema.actionQueueSchema),
-  controller.getTotalQueueByServiceId
-); // TODO: replace controller & Implement the logic to call the next queue
+  controller.actionQueueById
+);
 
 /**
  * GET /queues/{serviceId}
@@ -49,6 +50,7 @@ router.post(
 router.get(
   '/:serviceId',
   validate(serviceSchema.idServiceSchema, 'params'),
+  validate(queueSchema.getQueueListSchema, 'query'),
   controller.getQueueListByServiceId
 );
 
@@ -62,6 +64,7 @@ router.get(
 router.get(
   '/:serviceId/summary',
   validate(serviceSchema.idServiceSchema, 'params'),
+  validate(queueSchema.getSummaryQueueSchema, 'query'),
   controller.getTotalQueueByServiceId
 );
 

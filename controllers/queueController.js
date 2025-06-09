@@ -1,6 +1,5 @@
 const queueService = require('../services/queueService');
 const { successResponse } = require('../utils/response');
-// const businessException = require('../utils/businessException');
 
 const getQueueListByServiceId = async (req, res, next) => {
   try {
@@ -24,7 +23,32 @@ const getTotalQueueByServiceId = async (req, res, next) => {
   }
 };
 
+const actionQueueById = async (req, res, next) => {
+  try {
+    return successResponse(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const callNextQueue = async (req, res, next) => {
+  try {
+    const { serviceId, counterId } = req.body;
+    const data = await queueService.callNextQueue({ serviceId, counterId });
+
+    // TODO:
+    // add broadcast to all counters by serviceId
+    // add broadcast to monitor queue
+
+    return successResponse(res, data);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getQueueListByServiceId,
   getTotalQueueByServiceId,
+  actionQueueById,
+  callNextQueue,
 };
