@@ -2,6 +2,7 @@
 const { Prisma } = require('../generated/prisma');
 const { errorResponse } = require('../utils/response');
 const { BusinessError } = require('../utils/businessException');
+const logger = require('../utils/logger');
 
 // Default error format
 let code = 'INTERNAL_SERVER_ERROR';
@@ -38,7 +39,11 @@ module.exports = (err, req, res, _next) => {
     _next();
   }
 
-  console.error(err);
+  logger.error('ErrorHandler:', {
+    message: err.message,
+    stack: err.stack,
+    code: err.code,
+  });
 
   // Prisma known errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
