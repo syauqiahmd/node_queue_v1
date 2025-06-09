@@ -5,7 +5,8 @@ const callQueueSchema = Joi.object({
   counterId: Joi.string().uuid().required(),
 });
 const actionQueueSchema = Joi.object({
-  action: Joi.string().valid('in-progress', 'completed').required(),
+  action: Joi.string().valid('retry', 'resolve').required(),
+  queueId: Joi.string().uuid().required(),
   counterId: Joi.string().uuid().optional(),
 });
 

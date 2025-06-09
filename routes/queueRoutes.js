@@ -17,27 +17,21 @@ const queueSchema = require('../validations/queue.schema');
  *   "counterId": "123123-1234-1234-1234-123456789012"
  * }
  */
-router.post('/call', validate(queueSchema.callQueueSchema), controller.callNextQueue); // TODO: replace controller & Implement the logic to call the next queue
+router.post('/call', validate(queueSchema.callQueueSchema), controller.callNextQueue);
 
-//TODO: replace controller
 /**
  * POST /queues/action/{queueId}
  * @summary Recall or resolve queue by queueId
  * @tags Queue
- * @param {string} queueId.path.required - Service ID using UUID format
  * @param {object} request.body.required - call to counter data
  * @example request - example payload
  * {
  *   "action": "retry",
+ *   "queueId": "123123-1234-1234-1234-123456789012"
  *   "counterId": "123123-1234-1234-1234-123456789012"
  * }
  */
-router.post(
-  '/action/:queueId',
-  validate(queueSchema.idQueueSchema, 'params'),
-  validate(queueSchema.actionQueueSchema),
-  controller.actionQueueById
-);
+router.post('/action', validate(queueSchema.actionQueueSchema), controller.actionQueueById);
 
 /**
  * GET /queues/{serviceId}
