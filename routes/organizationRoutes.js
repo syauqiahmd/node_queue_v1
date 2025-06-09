@@ -18,12 +18,16 @@ const organizationSchema = require('../validations/organization.schema');
 router.get('/', validate(organizationSchema.getOrganizationSchema, 'query'), controller.getAll);
 
 /**
- * GET /organizations/{id}
+ * GET /organizations/{organizationId}
  * @summary Get organization by ID
  * @tags Organization
- * @param {string} id.path.required - Organization ID using UUID format
+ * @param {string} organizationId.path.required - Organization ID using UUID format
  */
-router.get('/:id', validate(organizationSchema.idOrganizationSchema, 'params'), controller.getById);
+router.get(
+  '/:organizationId',
+  validate(organizationSchema.idOrganizationSchema, 'params'),
+  controller.getById
+);
 
 /**
  * POST /organizations
@@ -39,10 +43,10 @@ router.get('/:id', validate(organizationSchema.idOrganizationSchema, 'params'), 
 router.post('/', validate(organizationSchema.createOrganizationSchema), controller.create);
 
 /**
- * PUT /organizations/{id}
+ * PUT /organizations/{organizationId}
  * @summary Update organization by ID
  * @tags Organization
- * @param {string} id.path.required - Organization ID using UUID format
+ * @param {string} organizationId.path.required - Organization ID using UUID format
  * @param {object} request.body.required - Organization data
  * @example request - example payload
  * {
@@ -52,20 +56,20 @@ router.post('/', validate(organizationSchema.createOrganizationSchema), controll
  * }
  */
 router.put(
-  '/:id',
+  '/:organizationId',
   validate(organizationSchema.idOrganizationSchema, 'params'),
   validate(organizationSchema.updateOrganizationSchema),
   controller.update
 );
 
 /**
- * DELETE /organizations/{id}
+ * DELETE /organizations/{organizationId}
  * @summary Delete organization by ID
  * @tags Organization
- * @param {string} id.path.required - Organization ID using UUID format
+ * @param {string} organizationId.path.required - Organization ID using UUID format
  */
 router.delete(
-  '/:id',
+  '/:organizationId',
   validate(organizationSchema.idOrganizationSchema, 'params'),
   controller.remove
 );

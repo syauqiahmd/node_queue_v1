@@ -24,7 +24,7 @@ const getOrganizationSchema = Joi.object({
 });
 
 const idOrganizationSchema = Joi.object({
-  id: Joi.string()
+  organizationId: Joi.string()
     .guid({ version: ['uuidv4', 'uuidv5'] })
     .required(),
 }).required(); // Ensure object is not empty
