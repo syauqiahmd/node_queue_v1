@@ -19,7 +19,7 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const data = await userService.getById(req.params.id);
+    const data = await userService.getById(req.params.userId);
     if (data === null) {
       throw businessException.NotFound('User');
     }
@@ -52,7 +52,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const data = await userService.update(req.params.id, req.body);
+    const data = await userService.update(req.params.userId, req.body);
     return successResponse(res, data, 'Updated');
   } catch (err) {
     next(err);
@@ -61,7 +61,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const data = await userService.remove(req.params.id);
+    const data = await userService.remove(req.params.userId);
     return successResponse(res, data, 'Deleted');
   } catch (err) {
     next(err);
