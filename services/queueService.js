@@ -103,3 +103,29 @@ exports.updateQueueById = async (id, payload) => {
     data: payload,
   });
 };
+
+exports.getCallingQueue = async () => {
+  const where = {
+    isCall: true,
+    isResolved: false,
+    updatedAt: {
+      gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
+      lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
+    },
+  };
+
+  return prisma.ticket.findMany({
+    where,
+    include: {
+      service: {
+        include: {
+          organization: true,
+        },
+      },
+      latestAssigneeCounter: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+    skip: 0,
+    take: 4,
+  });
+};

@@ -1,6 +1,7 @@
 const queueService = require('../services/queueService');
 const businessException = require('../utils/businessException');
 const { successResponse } = require('../utils/response');
+const queueResponse = require('../responses/queueResponse');
 
 const getQueueListByServiceId = async (req, res, next) => {
   try {
@@ -72,9 +73,19 @@ const callNextQueue = async (req, res, next) => {
   }
 };
 
+const getCallingQueue = async (req, res, next) => {
+  try {
+    const data = await queueService.getCallingQueue();
+    return successResponse(res, queueResponse.monitorCurrentQueue(data));
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getQueueListByServiceId,
   getTotalQueueByServiceId,
   actionQueueById,
   callNextQueue,
+  getCallingQueue,
 };

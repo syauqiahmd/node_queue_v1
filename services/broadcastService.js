@@ -1,8 +1,8 @@
 const { getIO } = require('../configs/socket');
 const logger = require('../utils/logger');
 
-const createTicketEvent = (payload) => {
-  const { serviceId, data, type = 'ticket', eventName = 'ticket:created' } = payload;
+const createTicketEvent = (payload, type = 'ticket') => {
+  const { serviceId, data, eventName = 'ticket:created' } = payload;
   const roomName = type === 'ticket' ? `service-${serviceId}` : 'monitor-room';
   try {
     const io = getIO();
