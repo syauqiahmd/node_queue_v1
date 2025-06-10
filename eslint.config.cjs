@@ -33,7 +33,7 @@ module.exports = defineConfig([
 
       // Your custom rule preferences
       'no-unused-vars': ['warn'],
-      'no-console': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
       curly: ['error', 'all'],
       'no-var': 'error',

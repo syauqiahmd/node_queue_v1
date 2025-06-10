@@ -19,8 +19,9 @@ const swaggerOptions = {
   baseDir: __dirname,
   filesPattern: '../routes/**/*.js', // adjust based on your folder structure
   swaggerUIPath: '/docs',
+  apiDocsPath: '/api-docs',
   exposeSwaggerUI: true,
-  exposeApiDocs: false,
+  exposeApiDocs: true,
   notRequiredAsNullable: false,
   basePath: '/api',
 };
