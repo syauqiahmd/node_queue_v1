@@ -46,7 +46,7 @@ const logout = async (req, res, next) => {
     if (token) {
       await redisClient.del(`auth:token:${token}`);
     }
-    return successResponse(req, { message: 'logout success' });
+    return successResponse(res, { message: 'logout success' });
   } catch (err) {
     next(err);
   }
