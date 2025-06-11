@@ -51,3 +51,16 @@ exports.update = async (id, data) => {
 exports.remove = async (id) => {
   return prisma.user.delete({ where: { id } });
 };
+
+exports.userDetailByUsername = async (userName) => {
+  return prisma.user.findUnique({
+    where: { userName },
+    include: {
+      assigneeOrganization: {
+        include: {
+          organization: true,
+        },
+      },
+    },
+  });
+};

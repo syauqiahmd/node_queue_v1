@@ -3,6 +3,22 @@ require('winston-daily-rotate-file');
 const path = require('path');
 const { getTransactionId } = require('../utils/asyncContext');
 
+let requestContext = {};
+
+const setRequestContext = (req) => {
+  requestContext = {
+    path: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+    userAgent: req.headers['user-agent'],
+    userId: req.user?.id,
+  };
+};
+
+const clearRequestContext = () => {
+  requestContext = {};
+};
+
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.errors({ stack: true }),
@@ -11,7 +27,7 @@ const logFormat = winston.format.combine(
     if (transactionId) {
       info.transactionId = transactionId;
     }
-    return info;
+    return { ...info, ...requestContext };
   })(),
   winston.format.json()
 );
@@ -53,3 +69,5 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 module.exports = logger;
+module.exports.setRequestContext = setRequestContext;
+module.exports.clearRequestContext = clearRequestContext;

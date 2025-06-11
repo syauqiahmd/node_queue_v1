@@ -23,6 +23,13 @@ module.exports = {
   Unauthorized: (message = 'Unauthorized') =>
     new BusinessError({ code: 'UNAUTHORIZED', message, statusCode: 401 }),
 
+  ExpiredSession: () =>
+    new BusinessError({
+      code: 'UNAUTHORIZED',
+      message: 'Session expired or invalid',
+      statusCode: 401,
+    }),
+
   unCalledQueue: () =>
     new BusinessError({ code: 'UNAUTHORIZED', message: 'Queue not yet called', statusCode: 401 }),
 };

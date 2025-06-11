@@ -9,6 +9,7 @@ const organizationSchema = require('../validations/organization.schema');
  * GET /organizations
  * @summary Get list of organizations
  * @tags Organization
+ * @security BearerAuth
  * @param {string} name.query.optional - Filter by name or acronym
  * @param {string} fullName.query.optional - Filter by full name organization
  * @param {boolean} isActive.query.optional - Filter by active status
@@ -21,6 +22,7 @@ router.get('/', validate(organizationSchema.getOrganizationSchema, 'query'), con
  * GET /organizations/{organizationId}
  * @summary Get organization by ID
  * @tags Organization
+ * @security BearerAuth
  * @param {string} organizationId.path.required - Organization ID using UUID format
  */
 router.get(
@@ -33,6 +35,7 @@ router.get(
  * POST /organizations
  * @summary Create organization data
  * @tags Organization
+ * @security BearerAuth
  * @param {object} request.body.required - Organization data
  * @example request - example payload
  * {
@@ -46,6 +49,7 @@ router.post('/', validate(organizationSchema.createOrganizationSchema), controll
  * PUT /organizations/{organizationId}
  * @summary Update organization by ID
  * @tags Organization
+ * @security BearerAuth
  * @param {string} organizationId.path.required - Organization ID using UUID format
  * @param {object} request.body.required - Organization data
  * @example request - example payload
@@ -66,6 +70,7 @@ router.put(
  * DELETE /organizations/{organizationId}
  * @summary Delete organization by ID
  * @tags Organization
+ * @security BearerAuth
  * @param {string} organizationId.path.required - Organization ID using UUID format
  */
 router.delete(

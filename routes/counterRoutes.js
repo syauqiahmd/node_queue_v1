@@ -9,6 +9,7 @@ const counterSchema = require('../validations/counter.schema');
  * GET /counters
  * @summary Get list of counters
  * @tags Counter
+ * @security BearerAuth
  * @param {string} counterNumber.query.optional - Filter by counter number
  * @param {string} serviceName.query.optional - Filter by service name
  * @param {string} organizationName.query.optional - Filter by name organization
@@ -22,6 +23,7 @@ router.get('/', validate(counterSchema.getCounterSchema, 'query'), controller.ge
  * GET /counters/{counterId}
  * @summary Get counter by ID
  * @tags Counter
+ * @security BearerAuth
  * @param {string} counterId.path.required - Service ID using UUID format
  */
 router.get('/:counterId', validate(counterSchema.idCounterSchema, 'params'), controller.getById);
@@ -30,6 +32,7 @@ router.get('/:counterId', validate(counterSchema.idCounterSchema, 'params'), con
  * POST /counters
  * @summary Create service data
  * @tags Counter
+ * @security BearerAuth
  * @param {object} request.body.required - Service data
  * @example request - example payload
  * {
@@ -43,6 +46,7 @@ router.post('/', validate(counterSchema.createCounterSchema), controller.create)
  * PUT /counters/{counterId}
  * @summary Update counter by ID
  * @tags Counter
+ * @security BearerAuth
  * @param {string} counterId.path.required - Service ID using UUID format
  * @param {object} request.body.required - Service data
  * @example request - example payload
@@ -63,6 +67,7 @@ router.put(
  * DELETE /counters/{counterId}
  * @summary Delete counter by ID
  * @tags Counter
+ * @security BearerAuth
  * @param {string} counterId.path.required - Service ID using UUID format
  */
 router.delete('/:counterId', validate(counterSchema.idCounterSchema, 'params'), controller.remove);
