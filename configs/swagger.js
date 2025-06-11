@@ -1,10 +1,17 @@
 const port = process.env.PORT || 8000;
 const host = process.env.PRODUCTION_HOST || 'https://your-production-domain.com';
-const swaggerOptions = {
+
+module.exports = {
   info: {
     version: '1.0.0',
     title: 'API Docs',
     description: 'Swagger auto-generated docs using JSDoc',
+  },
+  security: {
+    BearerAuth: {
+      type: 'http',
+      scheme: 'bearer',
+    },
   },
   servers: [
     {
@@ -17,13 +24,11 @@ const swaggerOptions = {
     },
   ],
   baseDir: __dirname,
-  filesPattern: '../routes/**/*.js', // adjust based on your folder structure
+  filesPattern: '../routes/**/*.js',
   swaggerUIPath: '/docs',
-  apiDocsPath: '/api-docs',
   exposeSwaggerUI: true,
   exposeApiDocs: true,
+  apiDocsPath: '/api-docs',
   notRequiredAsNullable: false,
-  basePath: '/api',
+  basePath: '/api/v1',
 };
-
-module.exports = swaggerOptions;
