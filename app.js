@@ -16,6 +16,8 @@ const { checkDbConnection } = require('./configs/prismaClient');
 const requestIdMiddleware = require('./middlewares/requestId');
 const { initSocket } = require('./configs/socket');
 const redisClient = require('./configs/redisClient');
+const authorization = require('./middlewares/auth');
+const loggerContext = require('./middlewares/loggerContext');
 
 // Routes list
 const organizationRoutes = require('./routes/organizationRoutes');
@@ -42,6 +44,9 @@ checkDbConnection();
     logger.error('[REDIS] Failed to connect to Redis', { context: 'Redis Client', error });
   }
 })();
+
+app.use(loggerContext);
+
 app.get('/test', (req, res) => {
   return successResponse(res, { message: 'Ready to serve' });
 });
@@ -49,6 +54,7 @@ app.get('/test', (req, res) => {
 // public routes
 app.use('/api/v1/public', ticketRoutes);
 
+app.use(authorization);
 // Register routes
 app.use('/api/v1/organizations', organizationRoutes);
 app.use('/api/v1/services', serviceRoutes);
