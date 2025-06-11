@@ -9,6 +9,7 @@ const serviceSchema = require('../validations/service.schema');
  * GET /services
  * @summary Get list of services
  * @tags Service
+ * @security BearerAuth
  * @param {string} name.query.optional - Filter by service name
  * @param {string} prefix.query.optional - Filter by service prefix
  * @param {string} organizationName.query.optional - Filter by name organization
@@ -22,6 +23,7 @@ router.get('/', validate(serviceSchema.getServiceSchema, 'query'), controller.ge
  * GET /services/{serviceId}
  * @summary Get services by ID
  * @tags Service
+ * @security BearerAuth
  * @param {string} serviceId.path.required - Service ID using UUID format
  */
 router.get('/:serviceId', validate(serviceSchema.idServiceSchema, 'params'), controller.getById);
@@ -30,6 +32,7 @@ router.get('/:serviceId', validate(serviceSchema.idServiceSchema, 'params'), con
  * POST /services
  * @summary Create service data
  * @tags Service
+ * @security BearerAuth
  * @param {object} request.body.required - Service data
  * @example request - example payload
  * {
@@ -44,6 +47,7 @@ router.post('/', validate(serviceSchema.createServiceSchema), controller.create)
  * PUT /services/{serviceId}
  * @summary Update services by ID
  * @tags Service
+ * @security BearerAuth
  * @param {string} serviceId.path.required - Service ID using UUID format
  * @param {object} request.body.required - Service data
  * @example request - example payload
@@ -65,6 +69,7 @@ router.put(
  * DELETE /services/{serviceId}
  * @summary Delete services by ID
  * @tags Service
+ * @security BearerAuth
  * @param {string} serviceId.path.required - Service ID using UUID format
  */
 router.delete('/:serviceId', validate(serviceSchema.idServiceSchema, 'params'), controller.remove);

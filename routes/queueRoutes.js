@@ -10,6 +10,7 @@ const queueSchema = require('../validations/queue.schema');
  * POST /queues/call
  * @summary Call next queue by serviceId
  * @tags Queue
+ * @security BearerAuth
  * @param {object} request.body.required - call to counter data
  * @example request - example payload
  * {
@@ -23,6 +24,7 @@ router.post('/call', validate(queueSchema.callQueueSchema), controller.callNextQ
  * POST /queues/action
  * @summary Recall or resolve queue by queueId
  * @tags Queue
+ * @security BearerAuth
  * @param {object} request.body.required - call to counter data
  * @example request - example payload
  * {
@@ -37,6 +39,7 @@ router.post('/action', validate(queueSchema.actionQueueSchema), controller.actio
  * GET /queues/{serviceId}
  * @summary Get queue list by serviceId
  * @tags Queue
+ * @security BearerAuth
  * @param {string} serviceId.path.required - Service ID using UUID format
  * @param {query} status.query.optional get status 'in-progress' or 'completed'
  * @param {string} counterId.query.optional get queue by counterId
@@ -52,6 +55,7 @@ router.get(
  * GET /queues/{serviceId}/summary
  * @summary Get total queue by serviceId
  * @tags Queue
+ * @security BearerAuth
  * @param {string} serviceId.path.required - Service ID using UUID format
  * @param {query} status.query.optional get status 'in-progress' or 'completed'
  */

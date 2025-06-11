@@ -10,6 +10,7 @@ const userSchema = require('../validations/user.schema');
  * GET /users
  * @summary Get list of users
  * @tags User
+ * @security BearerAuth
  * @param {string} userName.query.optional - Filter by userName
  * @param {string} fullName.query.optional - Filter by full name
  * @param {boolean} role.query.optional - Filter by role
@@ -24,6 +25,7 @@ router.get('/', validate(userSchema.getUserSchema, 'query'), userController.getA
  * GET /users/{userId}
  * @summary Get user by ID
  * @tags User
+ * @security BearerAuth
  * @param {string} userId.path.required - User ID using UUID format
  */
 router.get('/:userId', validate(userSchema.idUserSchema, 'params'), userController.getById);
@@ -32,6 +34,7 @@ router.get('/:userId', validate(userSchema.idUserSchema, 'params'), userControll
  * POST /users
  * @summary Create user data
  * @tags User
+ * @security BearerAuth
  * @param {object} request.body.required - user data
  * @example request - example payload
  * {
@@ -48,6 +51,7 @@ router.post('/', validate(userSchema.createUserSchema), userController.create);
  * PUT /users/{userId}
  * @summary Update user by ID
  * @tags User
+ * @security BearerAuth
  * @param {string} userId.path.required - User ID using UUID format
  * @param {object} request.body.required - User data
  * @example request - example payload
@@ -71,9 +75,17 @@ router.put(
  * DELETE /users/{userId}
  * @summary Delete user by ID
  * @tags User
+ * @security BearerAuth
  * @param {string} userId.path.required - User ID using UUID format
  */
 router.delete('/:userId', validate(userSchema.idUserSchema, 'params'), userController.remove);
+
+/**
+ * POST /users/logout
+ * @summary Logout user by ID
+ * @tags #Authorization
+ * @security BearerAuth
+ */
 
 router.post('/logout', authController.logout);
 

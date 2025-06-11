@@ -11,7 +11,7 @@ const generalSchema = require('../validations/general.schema');
 /**
  * POST /public/login
  * @summary Login user
- * @tags Public
+ * @tags #Authorization
  * @param {object} request.body.required - ticket to serviceId data
  * @example request - example payload
  * {
