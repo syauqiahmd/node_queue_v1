@@ -40,6 +40,19 @@ const login = async (req, res, next) => {
   }
 };
 
+const logout = async (req, res, next) => {
+  try {
+    const token = req.token;
+    if (token) {
+      await redisClient.del(`auth:token:${token}`);
+    }
+    return successResponse(req, { message: 'logout success' });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   login,
+  logout,
 };

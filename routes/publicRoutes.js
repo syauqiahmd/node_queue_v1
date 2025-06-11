@@ -15,8 +15,8 @@ const generalSchema = require('../validations/general.schema');
  * @param {object} request.body.required - ticket to serviceId data
  * @example request - example payload
  * {
- *   "username": "admin",
- *   "pass": "password123"
+ *   "userName": "test",
+ *   "password": "password123"
  * }
  */
 router.post('/login', authController.login);
