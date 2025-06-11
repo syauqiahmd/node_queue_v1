@@ -2,10 +2,24 @@ const express = require('express');
 const router = express.Router();
 const ticketController = require('../controllers/ticketController');
 const queueController = require('../controllers/queueController');
+const authController = require('../controllers/authController');
 
 const validate = require('../middlewares/validate');
 const serviceSchema = require('../validations/service.schema');
 const generalSchema = require('../validations/general.schema');
+
+/**
+ * POST /public/login
+ * @summary Login user
+ * @tags Public
+ * @param {object} request.body.required - ticket to serviceId data
+ * @example request - example payload
+ * {
+ *   "username": "admin",
+ *   "pass": "password123"
+ * }
+ */
+router.post('/login', authController.login);
 
 /**
  * POST /public/tickets
