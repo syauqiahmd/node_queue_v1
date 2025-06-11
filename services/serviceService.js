@@ -1,18 +1,28 @@
 const { prisma } = require('../configs/prismaClient');
 
-exports.getAll = async (payload) => {
+exports.getAll = async (payload, pagination = true) => {
   const where = {
     name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
     prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
     isActive: payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
   };
 
+  let paginationPayload = {};
+  if (pagination) {
+    paginationPayload = {
+      skip: (payload.page - 1) * payload.pageSize || 0,
+      take: payload.pageSize || 10,
+    };
+  }
+
   const [data, count] = await Promise.all([
     prisma.service.findMany({
       where,
-      skip: (payload.page - 1) * payload.pageSize,
-      take: payload.pageSize,
+      ...paginationPayload,
       orderBy: { createdAt: 'desc' },
+      include: {
+        organization: true,
+      },
     }),
     prisma.service.count({ where }),
   ]);

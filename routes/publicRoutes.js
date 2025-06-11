@@ -3,6 +3,7 @@ const router = express.Router();
 const ticketController = require('../controllers/ticketController');
 const queueController = require('../controllers/queueController');
 const authController = require('../controllers/authController');
+const serviceController = require('../controllers/serviceController');
 
 const validate = require('../middlewares/validate');
 const serviceSchema = require('../validations/service.schema');
@@ -32,6 +33,13 @@ router.post('/login', authController.login);
  * }
  */
 router.post('/tickets', validate(serviceSchema.idServiceSchema), ticketController.create);
+
+/**
+ * GET /public/services
+ * @summary Get services list
+ * @tags Public
+ */
+router.get('/services', serviceController.publicServiceList);
 
 /**
  * GET /public/queues
