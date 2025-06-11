@@ -15,6 +15,7 @@ const logger = require('./utils/logger');
 const { checkDbConnection } = require('./configs/prismaClient');
 const requestIdMiddleware = require('./middlewares/requestId');
 const { initSocket } = require('./configs/socket');
+const redisClient = require('./configs/redisClient');
 
 // Routes list
 const organizationRoutes = require('./routes/organizationRoutes');
@@ -33,6 +34,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check
 checkDbConnection();
+(async () => {
+  try {
+    await redisClient.connect();
+    logger.info('[REDIS] Redis client connected successfully', { context: 'Redis Client' });
+  } catch (error) {
+    logger.error('[REDIS] Failed to connect to Redis', { context: 'Redis Client', error });
+  }
+})();
 app.get('/test', (req, res) => {
   return successResponse(res, { message: 'Ready to serve' });
 });
@@ -55,5 +64,5 @@ const server = http.createServer(app);
 initSocket(server);
 
 server.listen(port, () => {
-  logger.info(`Success to serve at ${port}`, { context: 'Initial Service', port });
+  logger.info(`[APP] Success to serve at ${port}`, { context: 'Initial Service', port });
 });
