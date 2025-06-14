@@ -59,10 +59,32 @@ const remove = async (req, res, next) => {
   }
 };
 
+const publicServiceList = async (req, res, next) => {
+  try {
+    const { totalRecord, data } = await serviceService.getAll({ isActive: 'true' }, false);
+    const response = data?.map((item) => {
+      return {
+        id: item.id,
+        name: item.name,
+        prefix: item.prefix,
+        organization: {
+          id: item.organization.id,
+          name: item.organization.name,
+          fullName: item.organization.fullName,
+        },
+      };
+    });
+    return successResponse(res, { totalRecord, data: response });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getAll,
   getById,
   create,
   update,
   remove,
+  publicServiceList,
 };

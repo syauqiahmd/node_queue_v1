@@ -3,6 +3,7 @@ const router = express.Router();
 const ticketController = require('../controllers/ticketController');
 const queueController = require('../controllers/queueController');
 const authController = require('../controllers/authController');
+const serviceController = require('../controllers/serviceController');
 
 const validate = require('../middlewares/validate');
 const serviceSchema = require('../validations/service.schema');
@@ -24,7 +25,7 @@ router.post('/login', authController.login);
 /**
  * POST /public/tickets
  * @summary Create ticket data
- * @tags Public
+ * @tags #Public
  * @param {object} request.body.required - ticket to serviceId data
  * @example request - example payload
  * {
@@ -34,9 +35,20 @@ router.post('/login', authController.login);
 router.post('/tickets', validate(serviceSchema.idServiceSchema), ticketController.create);
 
 /**
+ * GET /public/services
+ * @summary Get services list
+ * @tags #Public
+ */
+router.get(
+  '/services',
+  validate(generalSchema.emptySchema, 'query'),
+  serviceController.publicServiceList
+);
+
+/**
  * GET /public/queues
  * @summary Get current calling queue
- * @tags Public
+ * @tags #Public
  */
 router.get(
   '/queues',
