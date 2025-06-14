@@ -8,6 +8,7 @@ const serviceController = require('../controllers/serviceController');
 const validate = require('../middlewares/validate');
 const serviceSchema = require('../validations/service.schema');
 const generalSchema = require('../validations/general.schema');
+const queueSchema = require('../validations/queue.schema');
 
 /**
  * POST /public/login
@@ -54,6 +55,18 @@ router.get(
   '/queues',
   validate(generalSchema.emptySchema, 'query'),
   queueController.getCallingQueue
+);
+
+/**
+ * GET /public/call-queue/{queueId}
+ * @summary get queue calling sound
+ * @tags #Public
+ * @param {string} queueId.path.required - User ID using UUID format
+ */
+router.get(
+  '/call-queue/:queueId',
+  validate(queueSchema.idQueueSchema, 'params'),
+  queueController.generateQueueCallingSound
 );
 
 module.exports = router;

@@ -150,3 +150,14 @@ exports.getCallingQueue = async () => {
     take: 4,
   });
 };
+
+exports.queueDetailById = async (queueId) => {
+  return prisma.ticket.findUnique({
+    where: {
+      id: queueId,
+    },
+    include: {
+      latestAssigneeCounter: true,
+    },
+  });
+};
