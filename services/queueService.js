@@ -78,6 +78,13 @@ exports.callNextQueue = async (payload) => {
       isCall: true,
       latestAssigneeCounterId: counterId,
     },
+    include: {
+      service: {
+        include: {
+          organization: true,
+        },
+      },
+    },
   });
 
   return updatedTicket;
@@ -94,6 +101,13 @@ exports.getCurrentQueueDetailById = async (id) => {
         lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
       },
     },
+    include: {
+      service: {
+        include: {
+          organization: true,
+        },
+      },
+    },
   });
 };
 
@@ -101,6 +115,13 @@ exports.updateQueueById = async (id, payload) => {
   return await prisma.ticket.update({
     where: { id },
     data: payload,
+    include: {
+      service: {
+        include: {
+          organization: true,
+        },
+      },
+    },
   });
 };
 

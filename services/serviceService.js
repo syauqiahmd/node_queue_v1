@@ -31,7 +31,12 @@ exports.getAll = async (payload, pagination = true) => {
 };
 
 exports.getById = async (id) => {
-  return prisma.service.findUnique({ where: { id } });
+  return prisma.service.findUnique({
+    where: { id },
+    include: {
+      organization: true,
+    },
+  });
 };
 
 exports.create = async (data) => {
