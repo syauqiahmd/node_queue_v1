@@ -70,6 +70,7 @@ const publicServiceList = async (req, res, next) => {
         organization: {
           id: item.organization.id,
           name: item.organization.name,
+          fullName: item.organization.fullName,
         },
       };
     });
