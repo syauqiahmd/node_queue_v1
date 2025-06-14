@@ -25,7 +25,7 @@ router.post('/login', authController.login);
 /**
  * POST /public/tickets
  * @summary Create ticket data
- * @tags Public
+ * @tags #Public
  * @param {object} request.body.required - ticket to serviceId data
  * @example request - example payload
  * {
@@ -37,14 +37,18 @@ router.post('/tickets', validate(serviceSchema.idServiceSchema), ticketControlle
 /**
  * GET /public/services
  * @summary Get services list
- * @tags Public
+ * @tags #Public
  */
-router.get('/services', serviceController.publicServiceList);
+router.get(
+  '/services',
+  validate(generalSchema.emptySchema, 'query'),
+  serviceController.publicServiceList
+);
 
 /**
  * GET /public/queues
  * @summary Get current calling queue
- * @tags Public
+ * @tags #Public
  */
 router.get(
   '/queues',
