@@ -3,8 +3,10 @@ node_modules
 .env
 .vscode
 /generated/prisma
+src/infra/db/generated/
 # Prisma generated client
 /node_modules/
 logs/
+tmp_utils/
 
 credentials.json

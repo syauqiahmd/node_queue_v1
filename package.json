@@ -2,12 +2,12 @@
   "name": "node_queue",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "src/server.cjs",
   "scripts": {
     "test": "jest",
-    "dev": "nodemon app.js",
-    "start": "node app.js",
-    "generate": "prisma generate",
+    "dev": "nodemon src/server.cjs",
+    "start": "node src/server.cjs",
+    "generate": "prisma generate --schema src/infra/db/prisma/schema.prisma",
     "lint": "npx eslint .",
     "lint-fix": "npx eslint . --fix"
   },
@@ -17,6 +17,7 @@
   "dependencies": {
     "@google-cloud/text-to-speech": "^6.1.0",
     "@prisma/client": "^6.9.0",
+    "awilix": "^12.0.5",
     "bcrypt": "^6.0.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
