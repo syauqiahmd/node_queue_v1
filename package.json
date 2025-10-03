@@ -2,11 +2,11 @@
   "name": "node_queue",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.cjs",
+  "main": "src/server.js",
   "scripts": {
     "test": "jest",
-    "dev": "nodemon src/server.cjs",
-    "start": "node src/server.cjs",
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
     "generate": "prisma generate --schema src/infra/db/prisma/schema.prisma",
     "lint": "npx eslint .",
     "lint-fix": "npx eslint . --fix"
