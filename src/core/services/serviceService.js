@@ -10,7 +10,8 @@ class ServiceService extends IServiceService {
     const where = {
       name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
       prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
-      isActive: payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
+      isActive:
+        payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
     };
 
     let paginationPayload = {};

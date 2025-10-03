@@ -33,11 +33,14 @@ class UserController {
 
   async create(req, res, next) {
     try {
-      const { organizationId = '', password, ...rest } = req.body;
+      const { userName, fullName, password, role, organizationId } = req.body;
       const payload = {
         user: {
-          ...rest,
-          password: await this.authUtils.hashPassword(password), // Ensure password is included in the payload
+          userName,
+          fullName,
+          // password: await this.authUtils.hashPassword(password), // Ensure password is included in the payload
+          password,
+          role,
         },
         organization: {
           id: organizationId,
@@ -58,7 +61,7 @@ class UserController {
       const payload = { ...rest };
 
       if (password) {
-        payload.password = await this.authUtils.hashPassword(password);
+        // payload.password = await this.authUtils.hashPassword(password);
       }
 
       const data = await this.userService.update(req.params.userId, payload);

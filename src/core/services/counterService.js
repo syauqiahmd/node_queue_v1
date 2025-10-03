@@ -11,7 +11,8 @@ class CounterService extends ICounterService {
       counterNumber: payload.counterNumber
         ? { contains: payload.counterNumber, mode: 'insensitive' }
         : undefined,
-      isActive: payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
+      isActive:
+        payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
     };
 
     const [data, count] = await Promise.all([

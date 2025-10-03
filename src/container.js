@@ -32,7 +32,7 @@ container.loadModules(
     // 'api/controllers/*.js', // Removed this line
     'api/middlewares/*.js',
     'infra/utils/*.js',
-    'api/utils/*.js',
+    // 'api/utils/*.js', // Removed this line
     'infra/db/dbConnectionChecker.js', // Register the db connection checker
     'core/dto/*.js', // Register DTOs
     'core/interfaces/*.js', // Register interfaces
@@ -70,6 +70,9 @@ container.register({
   // Register authMiddleware explicitly
   authMiddleware: asClass(require('./api/middlewares/auth')).singleton(),
 
+  // Register authUtils explicitly
+  authUtils: asValue(require('./api/utils/authUtils')),
+
   // Register Controllers explicitly
   authController: asClass(require('./api/controllers/authController')).singleton(),
   counterController: asClass(require('./api/controllers/counterController')).singleton(),
@@ -102,7 +105,7 @@ container.register({
 
   // Register UserService and its proxy
   userServiceReal: asClass(require('./core/services/UserService')).singleton(),
-  userService: asClass(require('./core/services/UserService')).singleton(),
+  userService: asClass(require('./core/services/UserServiceProxy')).singleton(),
 
   // Register TicketService (no proxy for transactional data)
   ticketService: asClass(require('./core/services/TicketService')).singleton(),

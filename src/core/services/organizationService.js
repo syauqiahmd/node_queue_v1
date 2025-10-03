@@ -10,7 +10,8 @@ class OrganizationService extends IOrganizationService {
     const where = {
       name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
       fullName: payload.fullName ? { contains: payload.fullName, mode: 'insensitive' } : undefined,
-      isActive: payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
+      isActive:
+        payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
     };
 
     const [data, count] = await Promise.all([

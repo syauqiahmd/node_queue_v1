@@ -1,5 +1,4 @@
 const express = require('express');
-const http = require('http');
 const expressJSDocSwagger = require('express-jsdoc-swagger');
 
 const createApp = (container) => {
@@ -9,7 +8,6 @@ const createApp = (container) => {
   const rateLimiter = container.resolve('rateLimiter').methodBasedLimiter; // Resolve the method
   const requestIdMiddleware = container.resolve('requestId').requestIdMiddleware; // Resolve the method
   const loggerContext = container.resolve('loggerContext').loggerContext; // Resolve the method
-  const authMiddleware = container.resolve('authMiddleware').authenticateToken; // Resolve the method
   const mainRouter = container.resolve('mainRouter');
 
   expressJSDocSwagger(app)(swaggerOptions);
