@@ -6,3 +6,5 @@ node_modules
 # Prisma generated client
 /node_modules/
 logs/
+
+credentials.json

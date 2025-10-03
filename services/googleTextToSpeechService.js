@@ -6,7 +6,7 @@ const { writeFile } = require('node:fs/promises');
 
 // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable
 // process.env.GOOGLE_APPLICATION_CREDENTIALS = './credentials.json';
-const credentials = require('./credentials.json');
+const credentials = require('../credentials.json');
 // Creates a client
 const client = new textToSpeech.TextToSpeechClient({
   credentials: {
