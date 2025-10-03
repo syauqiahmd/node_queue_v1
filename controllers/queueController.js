@@ -2,6 +2,7 @@ const queueService = require('../services/queueService');
 const businessException = require('../utils/businessException');
 const { successResponse } = require('../utils/response');
 const queueResponse = require('../responses/queueResponse');
+const googleTextToSpeechService = require('../services/googleTextToSpeechService');
 
 const getQueueListByServiceId = async (req, res, next) => {
   try {
@@ -82,10 +83,25 @@ const getCallingQueue = async (req, res, next) => {
   }
 };
 
+const generateQueueCallingSound = async (req, res, next) => {
+  try {
+    const { queueId } = req.params;
+    const data = await queueService.queueDetailById(queueId);
+
+    const callingText = `Nomor antrian: ${data.prefix} - ${data.queueNumber}; silahkan menuju, ke loket nomor, ${data.latestAssigneeCounter.counterNumber}`;
+    const soundData = await googleTextToSpeechService.generateSound(callingText);
+
+    return successResponse(res, { data, soundData });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getQueueListByServiceId,
   getTotalQueueByServiceId,
   actionQueueById,
   callNextQueue,
   getCallingQueue,
+  generateQueueCallingSound,
 };
