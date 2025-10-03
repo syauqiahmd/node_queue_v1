@@ -39,11 +39,7 @@ module.exports = (err, req, res, _next) => {
     _next();
   }
 
-  logger.error('ErrorHandler:', {
-    message: err.message,
-    stack: err.stack,
-    code: err.code,
-  });
+  logger.error('ErrorHandler:', { err });
 
   // Prisma known errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {

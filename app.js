@@ -15,7 +15,7 @@ const logger = require('./utils/logger');
 const { checkDbConnection } = require('./configs/prismaClient');
 const requestIdMiddleware = require('./middlewares/requestId');
 const { initSocket } = require('./configs/socket');
-const redisClient = require('./configs/redisClient');
+const { initRedis } = require('./configs/redisClient');
 const authorization = require('./middlewares/auth');
 const loggerContext = require('./middlewares/loggerContext');
 
@@ -36,14 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check
 checkDbConnection();
-(async () => {
-  try {
-    await redisClient.connect();
-    logger.info('[REDIS] Redis client connected successfully', { context: 'Redis Client' });
-  } catch (error) {
-    logger.error('[REDIS] Failed to connect to Redis', { context: 'Redis Client', error });
-  }
-})();
+initRedis();
 
 app.use(loggerContext);
 

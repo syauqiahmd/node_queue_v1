@@ -13,4 +13,13 @@ redis.on('error', (err) => {
   logger.error('[REDIS] Redis client error:', { context: 'Redis Client', error: err });
 });
 
-module.exports = redis;
+const initRedis = async () => {
+  try {
+    await redis.connect();
+    logger.info('[REDIS] Redis client connected successfully', { context: 'Redis Client' });
+  } catch (error) {
+    logger.error('[REDIS] Failed to connect to Redis', { context: 'Redis Client', error });
+  }
+};
+
+module.exports = { redis, initRedis };
