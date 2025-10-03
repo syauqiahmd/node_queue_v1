@@ -1,8 +1,9 @@
+const bcrypt = require('bcrypt');
 const userService = require('../services/userService');
 const { successResponse } = require('../utils/response');
 const businessException = require('../utils/businessException');
 const { generateToken } = require('../utils/jwt');
-const redisClient = require('../configs/redisClient');
+const { redis: redisClient } = require('../configs/redisClient');
 
 const login = async (req, res, next) => {
   try {
@@ -12,8 +13,7 @@ const login = async (req, res, next) => {
     if (!data || !data.isActive) {
       throw businessException.Unauthorized('Invalid credentials');
     }
-    // const isMatch = await bcrypt.compare(password, user.password);
-    const isMatch = password === data.password;
+    const isMatch = await bcrypt.compare(password, data.password);
     if (!isMatch) {
       throw businessException.Unauthorized('Invalid credentials');
     }

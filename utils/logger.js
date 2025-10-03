@@ -1,33 +1,18 @@
 const winston = require('winston');
 require('winston-daily-rotate-file');
 const path = require('path');
-const { getTransactionId } = require('../utils/asyncContext');
-
-let requestContext = {};
-
-const setRequestContext = (req) => {
-  requestContext = {
-    path: req.originalUrl,
-    method: req.method,
-    ip: req.ip,
-    userAgent: req.headers['user-agent'],
-    userId: req.user?.id,
-  };
-};
-
-const clearRequestContext = () => {
-  requestContext = {};
-};
+const { asyncLocalStorage } = require('../utils/asyncContext');
 
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.errors({ stack: true }),
   winston.format((info) => {
-    const transactionId = getTransactionId && getTransactionId();
-    if (transactionId) {
-      info.transactionId = transactionId;
+    const store = asyncLocalStorage.getStore();
+    if (store) {
+      info.transactionId = store.get('transactionId');
+      info.requestContext = store.get('requestContext');
     }
-    return { ...info, ...requestContext };
+    return info;
   })(),
   winston.format.json()
 );
@@ -58,10 +43,18 @@ if (process.env.NODE_ENV !== 'production') {
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.printf(({ timestamp, level, message, stack }) =>
-          stack
-            ? `${timestamp} ${level}: ${message}\n${stack}`
-            : `${timestamp} ${level}: ${message}`
+        winston.format.printf(
+          ({ timestamp, level, message, stack, transactionId, requestContext }) => {
+            let log = `${timestamp} ${level}: `;
+            if (transactionId) {
+              log += `[${transactionId}] `;
+            }
+            if (requestContext) {
+              log += `[${requestContext.method} ${requestContext.path}] `;
+            }
+            log += stack || message;
+            return log;
+          }
         )
       ),
     })
@@ -69,5 +62,3 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 module.exports = logger;
-module.exports.setRequestContext = setRequestContext;
-module.exports.clearRequestContext = clearRequestContext;

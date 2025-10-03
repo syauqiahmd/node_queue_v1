@@ -52,7 +52,14 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const data = await userService.update(req.params.userId, req.body);
+    const { password, ...rest } = req.body;
+    const payload = { ...rest };
+
+    if (password) {
+      payload.password = await hashPassword(password);
+    }
+
+    const data = await userService.update(req.params.userId, payload);
     return successResponse(res, data, 'Updated');
   } catch (err) {
     next(err);

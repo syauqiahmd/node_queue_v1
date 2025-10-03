@@ -1,12 +1,17 @@
-const { setRequestContext, clearRequestContext } = require('../utils/logger');
+const { asyncLocalStorage } = require('../utils/asyncContext');
 
 const loggerContext = (req, res, next) => {
-  setRequestContext(req);
-
-  res.on('finish', () => {
-    clearRequestContext(); // clean up after response
-  });
-
+  const store = asyncLocalStorage.getStore();
+  if (store) {
+    const requestContext = {
+      path: req.originalUrl,
+      method: req.method,
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+      userId: req.user?.id,
+    };
+    store.set('requestContext', requestContext);
+  }
   next();
 };
 
