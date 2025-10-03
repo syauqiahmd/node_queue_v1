@@ -22,9 +22,18 @@ describe('QueueController', () => {
       generateSound: jest.fn(),
     };
     businessException = {
-      NotFound: jest.fn((item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })),
+      NotFound: jest.fn(
+        (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
+      ),
       BadRequest: jest.fn((message) => new BusinessError({ message, statusCode: 400 })),
-      unCalledQueue: jest.fn(() => new BusinessError({ code: 'UNAUTHORIZED', message: 'Queue not yet called', statusCode: 401 })),
+      unCalledQueue: jest.fn(
+        () =>
+          new BusinessError({
+            code: 'UNAUTHORIZED',
+            message: 'Queue not yet called',
+            statusCode: 401,
+          })
+      ),
     };
     queueResponse = {
       monitorCurrentQueue: jest.fn(),
@@ -55,10 +64,10 @@ describe('QueueController', () => {
 
       await queueController.getQueueListByServiceId(mockReq, mockRes, mockNext);
 
-      expect(queueService.getQueueListByServiceId).toHaveBeenCalledWith(
-        'service123',
-        { counterId: 'counter123', status: 'in-progress' }
-      );
+      expect(queueService.getQueueListByServiceId).toHaveBeenCalledWith('service123', {
+        counterId: 'counter123',
+        status: 'in-progress',
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockQueues });
       expect(mockNext).not.toHaveBeenCalled();
@@ -90,7 +99,10 @@ describe('QueueController', () => {
 
       await queueController.getTotalQueueByServiceId(mockReq, mockRes, mockNext);
 
-      expect(queueService.getTotalQueueByServiceId).toHaveBeenCalledWith('service123', 'in-progress');
+      expect(queueService.getTotalQueueByServiceId).toHaveBeenCalledWith(
+        'service123',
+        'in-progress'
+      );
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: { totalRecords: 5 } });
       expect(mockNext).not.toHaveBeenCalled();
@@ -137,11 +149,15 @@ describe('QueueController', () => {
       queueService.getCurrentQueueDetailById.mockResolvedValue(mockQueue);
       queueService.updateQueueById.mockResolvedValue(updatedQueue);
 
-      const reqWithCounterId = { body: { action: 'update', queueId: 'queue123', counterId: 'counter123' } };
+      const reqWithCounterId = {
+        body: { action: 'update', queueId: 'queue123', counterId: 'counter123' },
+      };
       await queueController.actionQueueById(reqWithCounterId, mockRes, mockNext);
 
       expect(queueService.getCurrentQueueDetailById).toHaveBeenCalledWith('queue123');
-      expect(queueService.updateQueueById).toHaveBeenCalledWith('queue123', { latestAssigneeCounterId: 'counter123' });
+      expect(queueService.updateQueueById).toHaveBeenCalledWith('queue123', {
+        latestAssigneeCounterId: 'counter123',
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: updatedQueue });
       expect(mockNext).not.toHaveBeenCalled();
@@ -194,7 +210,10 @@ describe('QueueController', () => {
 
       await queueController.callNextQueue(mockReq, mockRes, mockNext);
 
-      expect(queueService.callNextQueue).toHaveBeenCalledWith({ serviceId: 'service123', counterId: 'counter123' });
+      expect(queueService.callNextQueue).toHaveBeenCalledWith({
+        serviceId: 'service123',
+        counterId: 'counter123',
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockCalledQueue });
       expect(mockNext).not.toHaveBeenCalled();
@@ -270,7 +289,10 @@ describe('QueueController', () => {
         'Nomor antrian: A - 101; silahkan menuju, ke loket nomor, 5'
       );
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: { data: mockQueueDetail, soundData: mockSoundData } });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: { data: mockQueueDetail, soundData: mockSoundData },
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -296,7 +318,9 @@ describe('QueueController', () => {
       await queueController.generateQueueCallingSound(mockReq, mockRes, mockNext);
 
       expect(queueService.queueDetailById).toHaveBeenCalledWith('queue123');
-      expect(businessException.BadRequest).toHaveBeenCalledWith('Queue has not been assigned to a counter');
+      expect(businessException.BadRequest).toHaveBeenCalledWith(
+        'Queue has not been assigned to a counter'
+      );
       expect(mockNext).toHaveBeenCalledWith(expect.any(BusinessError));
     });
 

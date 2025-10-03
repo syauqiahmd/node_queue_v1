@@ -15,7 +15,9 @@ describe('UserController', () => {
       remove: jest.fn(),
     };
     businessException = {
-      NotFound: jest.fn((item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })),
+      NotFound: jest.fn(
+        (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
+      ),
     };
 
     userController = new UserController({
@@ -110,7 +112,13 @@ describe('UserController', () => {
 
   describe('create', () => {
     const mockReq = {
-      body: { userName: 'newUser', fullName: 'New User', password: 'password', role: 'USER', organizationId: 'org123' },
+      body: {
+        userName: 'newUser',
+        fullName: 'New User',
+        password: 'password',
+        role: 'USER',
+        organizationId: 'org123',
+      },
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
@@ -138,7 +146,11 @@ describe('UserController', () => {
         updatedBy: 'admin',
       });
       expect(mockRes.status).toHaveBeenCalledWith(201);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: newUser, message: 'Created' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: newUser,
+        message: 'Created',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -171,7 +183,11 @@ describe('UserController', () => {
 
       expect(userService.update).toHaveBeenCalledWith('user123', { userName: 'updatedUser' });
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: updatedUser, message: 'Updated' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: updatedUser,
+        message: 'Updated',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -203,7 +219,11 @@ describe('UserController', () => {
 
       expect(userService.remove).toHaveBeenCalledWith('user123');
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: removedUser, message: 'Deleted' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: removedUser,
+        message: 'Deleted',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 

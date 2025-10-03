@@ -15,7 +15,9 @@ describe('OrganizationController', () => {
       remove: jest.fn(),
     };
     businessException = {
-      NotFound: jest.fn((item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })),
+      NotFound: jest.fn(
+        (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
+      ),
     };
 
     organizationController = new OrganizationController({
@@ -130,7 +132,11 @@ describe('OrganizationController', () => {
         createdBy: 'admin',
       });
       expect(mockRes.status).toHaveBeenCalledWith(201);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: newOrganization, message: 'Created' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: newOrganization,
+        message: 'Created',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -163,7 +169,11 @@ describe('OrganizationController', () => {
 
       expect(organizationService.update).toHaveBeenCalledWith('org123', { name: 'Updated Org' });
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: updatedOrganization, message: 'Updated' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: updatedOrganization,
+        message: 'Updated',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -195,7 +205,11 @@ describe('OrganizationController', () => {
 
       expect(organizationService.remove).toHaveBeenCalledWith('org123');
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: removedOrganization, message: 'Deleted' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: removedOrganization,
+        message: 'Deleted',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 

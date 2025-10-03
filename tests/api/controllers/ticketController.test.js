@@ -12,7 +12,9 @@ describe('TicketController', () => {
       generateQueueNumberAndCreateTicket: jest.fn(),
     };
     businessException = {
-      NotFound: jest.fn((item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })),
+      NotFound: jest.fn(
+        (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
+      ),
     };
     broadcastService = {
       createTicketEvent: jest.fn(),
@@ -52,7 +54,10 @@ describe('TicketController', () => {
         },
       };
       const totalWaitingQueue = { totalRecords: 5 };
-      ticketService.generateQueueNumberAndCreateTicket.mockResolvedValue({ newTicket, totalWaitingQueue });
+      ticketService.generateQueueNumberAndCreateTicket.mockResolvedValue({
+        newTicket,
+        totalWaitingQueue,
+      });
 
       await ticketController.create(mockReq, mockRes, mockNext);
 

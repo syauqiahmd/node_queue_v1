@@ -15,7 +15,9 @@ describe('CounterController', () => {
       remove: jest.fn(),
     };
     businessException = {
-      NotFound: jest.fn((item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })),
+      NotFound: jest.fn(
+        (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
+      ),
     };
 
     counterController = new CounterController({
@@ -130,7 +132,11 @@ describe('CounterController', () => {
         createdBy: 'admin',
       });
       expect(mockRes.status).toHaveBeenCalledWith(201);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: newCounter, message: 'Created' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: newCounter,
+        message: 'Created',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -163,7 +169,11 @@ describe('CounterController', () => {
 
       expect(counterService.update).toHaveBeenCalledWith('counter123', { name: 'Updated Counter' });
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: updatedCounter, message: 'Updated' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: updatedCounter,
+        message: 'Updated',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -195,7 +205,11 @@ describe('CounterController', () => {
 
       expect(counterService.remove).toHaveBeenCalledWith('counter123');
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: removedCounter, message: 'Deleted' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: removedCounter,
+        message: 'Deleted',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 

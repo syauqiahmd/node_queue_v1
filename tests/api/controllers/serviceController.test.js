@@ -15,7 +15,9 @@ describe('ServiceController', () => {
       remove: jest.fn(),
     };
     businessException = {
-      NotFound: jest.fn((item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })),
+      NotFound: jest.fn(
+        (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
+      ),
     };
 
     serviceController = new ServiceController({
@@ -182,7 +184,11 @@ describe('ServiceController', () => {
         createdBy: 'admin',
       });
       expect(mockRes.status).toHaveBeenCalledWith(201);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: newService, message: 'Created' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: newService,
+        message: 'Created',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -215,7 +221,11 @@ describe('ServiceController', () => {
 
       expect(serviceService.update).toHaveBeenCalledWith('service123', { name: 'Updated Service' });
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: updatedService, message: 'Updated' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: updatedService,
+        message: 'Updated',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -247,7 +257,11 @@ describe('ServiceController', () => {
 
       expect(serviceService.remove).toHaveBeenCalledWith('service123');
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: removedService, message: 'Deleted' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: removedService,
+        message: 'Deleted',
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
