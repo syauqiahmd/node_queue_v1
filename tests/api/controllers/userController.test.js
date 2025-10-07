@@ -5,6 +5,8 @@ describe('UserController', () => {
   let userController;
   let userService;
   let businessException;
+  let authUtils;
+  let identityHelper;
 
   beforeEach(() => {
     userService = {
@@ -14,15 +16,19 @@ describe('UserController', () => {
       update: jest.fn(),
       remove: jest.fn(),
     };
-    businessException = {
-      NotFound: jest.fn(
-        (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
-      ),
+    businessException = require('@src/infra/utils/businessException');
+    authUtils = {
+      hashPassword: jest.fn((password) => `hashed_${password}`),
+    };
+    identityHelper = {
+      getCurrentUserId: jest.fn().mockReturnValue('admin'),
     };
 
     userController = new UserController({
       userService,
       businessException,
+      authUtils,
+      identityHelper,
     });
   });
 
@@ -96,7 +102,6 @@ describe('UserController', () => {
       await userController.getById(mockReq, mockRes, mockNext);
 
       expect(userService.getById).toHaveBeenCalledWith('user123');
-      expect(businessException.NotFound).toHaveBeenCalledWith('User');
       expect(mockNext).toHaveBeenCalledWith(expect.any(BusinessError));
     });
 
@@ -181,7 +186,10 @@ describe('UserController', () => {
 
       await userController.update(mockReq, mockRes, mockNext);
 
-      expect(userService.update).toHaveBeenCalledWith('user123', { userName: 'updatedUser' });
+      expect(userService.update).toHaveBeenCalledWith('user123', {
+        userName: 'updatedUser',
+        updatedBy: 'admin',
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
