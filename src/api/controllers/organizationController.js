@@ -1,7 +1,11 @@
 class OrganizationController {
-  constructor({ organizationService, businessException }) {
+  /**
+   * @param {{ organizationService: IOrganizationService, businessException: any, identityHelper: any }}
+   */
+  constructor({ organizationService, businessException, identityHelper }) {
     this.organizationService = organizationService;
     this.businessException = businessException;
+    this.identityHelper = identityHelper;
   }
 
   async getAll(req, res, next) {
@@ -11,6 +15,17 @@ class OrganizationController {
         ...filters,
         page: parseInt(page, 10),
         pageSize: parseInt(pageSize, 10),
+      });
+      return res.status(200).json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getPublicList(req, res, next) {
+    try {
+      const data = await this.organizationService.getAllWithService({
+        isActive: 'true',
       });
       return res.status(200).json({ success: true, data });
     } catch (err) {
@@ -34,7 +49,7 @@ class OrganizationController {
     try {
       const payload = {
         ...req.body,
-        createdBy: 'admin', // todo replace wih actual user id
+        createdBy: this.identityHelper.getCurrentUserId(),
       };
       const data = await this.organizationService.create(payload);
       return res.status(201).json({ success: true, data, message: 'Created' });
@@ -45,7 +60,11 @@ class OrganizationController {
 
   async update(req, res, next) {
     try {
-      const data = await this.organizationService.update(req.params.organizationId, req.body);
+      const payload = {
+        ...req.body,
+        updatedBy: this.identityHelper.getCurrentUserId(),
+      };
+      const data = await this.organizationService.update(req.params.organizationId, payload);
       return res.status(200).json({ success: true, data, message: 'Updated' });
     } catch (err) {
       next(err);

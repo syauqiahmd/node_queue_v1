@@ -64,14 +64,17 @@ container.register({
   asyncContext: asValue(asyncContext), // Register asyncContext
   rateLimiter: asClass(require('./api/middlewares/rateLimiter')).singleton(), // Register RateLimiterMiddleware
   requestId: asClass(require('./api/middlewares/requestId')).singleton(), // Register RequestIdMiddleware
+  asyncContextRunner: asClass(require('./api/middlewares/asyncContextRunner')).singleton(), // Register AsyncContextRunnerMiddleware
   errorHandler: asClass(require('./api/middlewares/errorHandler')).singleton(), // Register ErrorHandlerMiddleware
   responseFormatter: asClass(require('./api/utils/response.formatter')).singleton(), // Register ResponseFormatter
 
-  // Register authMiddleware explicitly
   authMiddleware: asClass(require('./api/middlewares/auth')).singleton(),
 
   // Register authUtils explicitly
   authUtils: asClass(require('./api/utils/authUtils')).singleton(),
+
+  // Register IdentityHelper
+  identityHelper: asClass(require('./api/utils/identityHelper')).singleton(),
 
   // Register Controllers explicitly
   authController: asClass(require('./api/controllers/authController')).singleton(),

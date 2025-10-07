@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const asyncContext = require('../../infra/utils/asyncContext');
 
 class RequestIdMiddleware {
   constructor({ asyncContext }) {
@@ -24,6 +25,10 @@ class RequestIdMiddleware {
 
     // Use asyncLocalStorage for logging scope
     this.asyncLocalStorage.run(new Map([['transactionId', transactionId]]), () => {
+      // Set user in async context if available
+      if (req.user) {
+        asyncContext.setUser(req.user);
+      }
       next();
     });
   };

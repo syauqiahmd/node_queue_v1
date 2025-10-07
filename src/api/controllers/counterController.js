@@ -1,7 +1,11 @@
 class CounterController {
-  constructor({ counterService, businessException }) {
+  /**
+   * @param {{ counterService: ICounterService, businessException: any, identityHelper: any }}
+   */
+  constructor({ counterService, businessException, identityHelper }) {
     this.counterService = counterService;
     this.businessException = businessException;
+    this.identityHelper = identityHelper;
   }
 
   async getAll(req, res, next) {
@@ -34,7 +38,7 @@ class CounterController {
     try {
       const payload = {
         ...req.body,
-        createdBy: 'admin', // todo replace wih actual user id
+        createdBy: this.identityHelper.getCurrentUserId(),
       };
       const data = await this.counterService.create(payload);
       return res.status(201).json({ success: true, data, message: 'Created' });
@@ -45,7 +49,11 @@ class CounterController {
 
   async update(req, res, next) {
     try {
-      const data = await this.counterService.update(req.params.counterId, req.body);
+      const payload = {
+        ...req.body,
+        updatedBy: this.identityHelper.getCurrentUserId(),
+      };
+      const data = await this.counterService.update(req.params.counterId, payload);
       return res.status(200).json({ success: true, data, message: 'Updated' });
     } catch (err) {
       next(err);

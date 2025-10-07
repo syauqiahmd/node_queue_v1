@@ -32,6 +32,11 @@ module.exports = ({
     serviceController.publicServiceList.bind(serviceController)
   );
   router.get(
+    '/public/organizations',
+    validateMiddleware.validate(generalSchema.emptySchema, 'query'),
+    organizationController.getPublicList.bind(organizationController)
+  );
+  router.get(
     '/public/queues',
     validateMiddleware.validate(generalSchema.emptySchema, 'query'),
     queueController.getCallingQueue.bind(queueController)

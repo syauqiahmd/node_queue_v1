@@ -1,7 +1,11 @@
 class ServiceController {
-  constructor({ serviceService, businessException }) {
+  /**
+   * @param {{ serviceService: IServiceService, businessException: any, identityHelper: any }}
+   */
+  constructor({ serviceService, businessException, identityHelper }) {
     this.serviceService = serviceService;
     this.businessException = businessException;
+    this.identityHelper = identityHelper;
   }
 
   async getAll(req, res, next) {
@@ -34,7 +38,7 @@ class ServiceController {
     try {
       const payload = {
         ...req.body,
-        createdBy: 'admin', // todo replace wih actual user id
+        createdBy: this.identityHelper.getCurrentUserId(),
       };
       const data = await this.serviceService.create(payload);
       return res.status(201).json({ success: true, data, message: 'Created' });
@@ -45,7 +49,11 @@ class ServiceController {
 
   async update(req, res, next) {
     try {
-      const data = await this.serviceService.update(req.params.serviceId, req.body);
+      const payload = {
+        ...req.body,
+        updatedBy: this.identityHelper.getCurrentUserId(),
+      };
+      const data = await this.serviceService.update(req.params.serviceId, payload);
       return res.status(200).json({ success: true, data, message: 'Updated' });
     } catch (err) {
       next(err);

@@ -1,8 +1,12 @@
 class UserController {
-  constructor({ userService, businessException, authUtils }) {
+  /**
+   * @param {{ userService: IUserService, businessException: any, authUtils: any, identityHelper: any }}
+   */
+  constructor({ userService, businessException, authUtils, identityHelper }) {
     this.userService = userService;
     this.businessException = businessException;
     this.authUtils = authUtils;
+    this.identityHelper = identityHelper;
   }
 
   async getAll(req, res, next) {
@@ -45,8 +49,8 @@ class UserController {
         organization: {
           id: organizationId,
         },
-        createdBy: 'admin', // todo replace wih actual user id
-        updatedBy: 'admin', // todo replace wih actual user id
+        createdBy: this.identityHelper.getCurrentUserId(),
+        updatedBy: this.identityHelper.getCurrentUserId(),
       };
       const data = await this.userService.create(payload);
       return res.status(201).json({ success: true, data, message: 'Created' });
@@ -58,7 +62,7 @@ class UserController {
   async update(req, res, next) {
     try {
       const { password, ...rest } = req.body;
-      const payload = { ...rest };
+      const payload = { ...rest, updatedBy: this.identityHelper.getCurrentUserId() };
 
       if (password) {
         // payload.password = await this.authUtils.hashPassword(password);
