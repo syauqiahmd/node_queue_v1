@@ -3,17 +3,8 @@ const { writeFile } = require('node:fs/promises');
 
 class GoogleTextToSpeechService {
   constructor() {
-    // Assuming credentials.json is loaded elsewhere or passed as config
-    // For now, I'll keep the direct require for simplicity, but ideally this would be injected
-    const credentials = require('../../infra/configs/credentials.json'); // Path changed
-
-    this.client = new textToSpeech.TextToSpeechClient({
-      credentials: {
-        client_email: credentials.client_email,
-        private_key: credentials.private_key,
-      },
-      projectId: credentials.project_id,
-    });
+    // The client will automatically use the credentials from the GOOGLE_APPLICATION_CREDENTIALS environment variable
+    this.client = new textToSpeech.TextToSpeechClient();
   }
 
   async generateSound(text = '') {

@@ -24,7 +24,7 @@ module.exports = {
     },
   ],
   baseDir: __dirname,
-  filesPattern: '../routes/**/*.js',
+  filesPattern: './routes/**/*.js',
   swaggerUIPath: '/docs',
   exposeSwaggerUI: true,
   exposeApiDocs: true,

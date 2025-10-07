@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken');
 class AuthUtils {
   constructor() {
     this.SECRET = process.env.JWT_SECRET;
-    this.EXPIRES_IN = '6h';
-    this.SALT_ROUNDS = 12;
+    this.EXPIRES_IN = process.env.JWT_EXPIRES_IN || '6h';
+    this.SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10) || 12;
   }
 
   hashPassword(plainPassword) {

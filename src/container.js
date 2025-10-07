@@ -71,7 +71,7 @@ container.register({
   authMiddleware: asClass(require('./api/middlewares/auth')).singleton(),
 
   // Register authUtils explicitly
-  authUtils: asValue(require('./api/utils/authUtils')),
+  authUtils: asClass(require('./api/utils/authUtils')).singleton(),
 
   // Register Controllers explicitly
   authController: asClass(require('./api/controllers/authController')).singleton(),
