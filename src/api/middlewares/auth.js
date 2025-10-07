@@ -1,8 +1,9 @@
 class AuthMiddleware {
-  constructor({ redisClient, businessException, authUtils }) {
+  constructor({ redisClient, businessException, authUtils, asyncContext }) {
     this.redisClient = redisClient;
     this.businessException = businessException;
     this.authUtils = authUtils;
+    this.asyncContext = asyncContext;
   }
 
   authenticateToken = async (req, res, next) => {
@@ -21,7 +22,8 @@ class AuthMiddleware {
       }
 
       req.user = JSON.parse(cachedUser);
-      req.user.id = decoded.id; // Ensure user id from token is used
+      req.user.id = decoded.userId; // Ensure user id from token is used
+      this.asyncContext.setUser(req.user);
       req.token = token;
       next();
     } catch (err) {
