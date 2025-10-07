@@ -39,9 +39,43 @@ class OrganizationServiceProxy {
     return data;
   }
 
+  async getPublicList() {
+    const cacheKey = `${this.cacheKeyPrefix}publicList`;
+    const cachedData = await this.redisClient.get(cacheKey);
+
+    if (cachedData) {
+      this.logger.info(`Cache hit for ${cacheKey}`);
+      return JSON.parse(cachedData);
+    }
+
+    this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
+    const data = await this.organizationService.getPublicList();
+    if (data) {
+      await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+    }
+    return data;
+  }
+
+  async getAllWithService(payload) {
+    const cacheKey = `${this.cacheKeyPrefix}allWithService:${JSON.stringify(payload)}`;
+    const cachedData = await this.redisClient.get(cacheKey);
+
+    if (cachedData) {
+      this.logger.info(`Cache hit for ${cacheKey}`);
+      return JSON.parse(cachedData);
+    }
+
+    this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
+    const data = await this.organizationService.getAllWithService(payload);
+    await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+    return data;
+  }
+
   async create(data) {
     // Invalidate cache for all organizations
     await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
+    await this.redisClient.del(`${this.cacheKeyPrefix}publicList`);
+    await this.redisClient.del(`${this.cacheKeyPrefix}allWithService:*`);
     return this.organizationService.create(data);
   }
 
@@ -49,6 +83,8 @@ class OrganizationServiceProxy {
     // Invalidate cache for specific organization and all organizations
     await this.redisClient.del(`${this.cacheKeyPrefix}id:${id}`);
     await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
+    await this.redisClient.del(`${this.cacheKeyPrefix}publicList`);
+    await this.redisClient.del(`${this.cacheKeyPrefix}allWithService:*`);
     return this.organizationService.update(id, data);
   }
 
@@ -56,6 +92,8 @@ class OrganizationServiceProxy {
     // Invalidate cache for specific organization and all organizations
     await this.redisClient.del(`${this.cacheKeyPrefix}id:${id}`);
     await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
+    await this.redisClient.del(`${this.cacheKeyPrefix}publicList`);
+    await this.redisClient.del(`${this.cacheKeyPrefix}allWithService:*`);
     return this.organizationService.remove(id);
   }
 }

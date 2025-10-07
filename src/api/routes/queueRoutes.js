@@ -17,6 +17,16 @@ const queueSchema = require('../validations/queue.schema');
  *   "serviceId": "123123-1234-1234-1234-123456789012",
  *   "counterId": "123123-1234-1234-1234-123456789012"
  * }
+ * @returns {object} 200 - Success response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "ticketNumber": "A001", "status": "calling" }
+ * }
  */
 router.post('/call', validate(queueSchema.callQueueSchema), controller.callNextQueue);
 
@@ -32,6 +42,16 @@ router.post('/call', validate(queueSchema.callQueueSchema), controller.callNextQ
  *   "queueId": "123123-1234-1234-1234-123456789012",
  *   "counterId": "123123-1234-1234-1234-123456789012"
  * }
+ * @returns {object} 200 - Success response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "ticketNumber": "A001", "status": "recalled" }
+ * }
  */
 router.post('/action', validate(queueSchema.actionQueueSchema), controller.actionQueueById);
 
@@ -43,6 +63,23 @@ router.post('/action', validate(queueSchema.actionQueueSchema), controller.actio
  * @param {string} serviceId.path.required - Service ID using UUID format
  * @param {query} status.query.optional get status 'in-progress' or 'completed'
  * @param {string} counterId.query.optional get queue by counterId
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": [
+ *     {
+ *       "id": "uuid",
+ *       "ticketNumber": "A001",
+ *       "status": "in-progress",
+ *       "serviceId": "uuid",
+ *       "counterId": "uuid"
+ *     }
+ *   ]
+ * }
  */
 router.get(
   '/:serviceId',
@@ -58,6 +95,19 @@ router.get(
  * @security BearerAuth
  * @param {string} serviceId.path.required - Service ID using UUID format
  * @param {query} status.query.optional get status 'in-progress' or 'completed'
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "total": 10,
+ *     "inProgress": 5,
+ *     "completed": 5
+ *   }
+ * }
  */
 router.get(
   '/:serviceId/summary',

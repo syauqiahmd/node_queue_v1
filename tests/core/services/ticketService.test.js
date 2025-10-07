@@ -118,7 +118,7 @@ describe('TicketService', () => {
     it('should handle transaction errors', async () => {
       const mockError = new Error('Transaction failed');
       prismaClient.service.findUnique.mockResolvedValue({ id: mockServiceId, prefix: 'A' });
-      prismaClient.$transaction.mockImplementation(async (callback) => {
+      prismaClient.$transaction.mockImplementation(async () => {
         throw mockError;
       });
 

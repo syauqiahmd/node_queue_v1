@@ -1,8 +1,8 @@
-const IServiceService = require('../interfaces/IServiceService');
-
-class ServiceService extends IServiceService {
+/**
+ * @implements {IServiceService}
+ */
+class ServiceService {
   constructor({ prismaClient }) {
-    super();
     this.prisma = prismaClient;
   }
 

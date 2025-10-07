@@ -5,6 +5,7 @@ describe('OrganizationController', () => {
   let organizationController;
   let organizationService;
   let businessException;
+  let identityHelper;
 
   beforeEach(() => {
     organizationService = {
@@ -13,16 +14,21 @@ describe('OrganizationController', () => {
       create: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
+      getAllWithService: jest.fn(),
     };
     businessException = {
       NotFound: jest.fn(
         (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
       ),
     };
+    identityHelper = {
+      getCurrentUserId: jest.fn().mockReturnValue('admin'),
+    };
 
     organizationController = new OrganizationController({
       organizationService,
       businessException,
+      identityHelper,
     });
   });
 
@@ -167,7 +173,10 @@ describe('OrganizationController', () => {
 
       await organizationController.update(mockReq, mockRes, mockNext);
 
-      expect(organizationService.update).toHaveBeenCalledWith('org123', { name: 'Updated Org' });
+      expect(organizationService.update).toHaveBeenCalledWith('org123', {
+        name: 'Updated Org',
+        updatedBy: 'admin',
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,

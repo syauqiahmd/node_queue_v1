@@ -5,6 +5,7 @@ describe('ServiceController', () => {
   let serviceController;
   let serviceService;
   let businessException;
+  let identityHelper;
 
   beforeEach(() => {
     serviceService = {
@@ -19,10 +20,14 @@ describe('ServiceController', () => {
         (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
       ),
     };
+    identityHelper = {
+      getCurrentUserId: jest.fn().mockReturnValue('admin'),
+    };
 
     serviceController = new ServiceController({
       serviceService,
       businessException,
+      identityHelper,
     });
   });
 
@@ -219,7 +224,10 @@ describe('ServiceController', () => {
 
       await serviceController.update(mockReq, mockRes, mockNext);
 
-      expect(serviceService.update).toHaveBeenCalledWith('service123', { name: 'Updated Service' });
+      expect(serviceService.update).toHaveBeenCalledWith('service123', {
+        name: 'Updated Service',
+        updatedBy: 'admin',
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,

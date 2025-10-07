@@ -1,8 +1,8 @@
-const ICounterService = require('../interfaces/ICounterService');
-
-class CounterService extends ICounterService {
+/**
+ * @implements {ICounterService}
+ */
+class CounterService {
   constructor({ prismaClient }) {
-    super();
     this.prisma = prismaClient;
   }
 

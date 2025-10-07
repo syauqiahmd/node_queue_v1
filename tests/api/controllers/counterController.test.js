@@ -5,6 +5,7 @@ describe('CounterController', () => {
   let counterController;
   let counterService;
   let businessException;
+  let identityHelper;
 
   beforeEach(() => {
     counterService = {
@@ -19,10 +20,14 @@ describe('CounterController', () => {
         (item) => new BusinessError({ message: `${item} not found`, statusCode: 404 })
       ),
     };
+    identityHelper = {
+      getCurrentUserId: jest.fn().mockReturnValue('admin'),
+    };
 
     counterController = new CounterController({
       counterService,
       businessException,
+      identityHelper,
     });
   });
 
@@ -167,7 +172,10 @@ describe('CounterController', () => {
 
       await counterController.update(mockReq, mockRes, mockNext);
 
-      expect(counterService.update).toHaveBeenCalledWith('counter123', { name: 'Updated Counter' });
+      expect(counterService.update).toHaveBeenCalledWith('counter123', {
+        name: 'Updated Counter',
+        updatedBy: 'admin',
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
