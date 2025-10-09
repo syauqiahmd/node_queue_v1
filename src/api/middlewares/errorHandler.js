@@ -2,7 +2,8 @@ const { BusinessError } = require('../../infra/utils/businessException');
 const { Prisma } = require('../../infra/db/generated/prisma/client');
 
 class ErrorHandlerMiddleware {
-  constructor({ logger, responseFormatter, prismaClient }) { // Inject prismaClient
+  constructor({ logger, responseFormatter, prismaClient }) {
+    // Inject prismaClient
     this.logger = logger;
     this.responseFormatter = responseFormatter;
     this.prisma = prismaClient; // Assign prismaClient to this.prisma
@@ -38,9 +39,6 @@ class ErrorHandlerMiddleware {
   }
 
   errorHandler = (err, req, res, _next) => {
-    console.log('🚀 ---------------------------------------🚀');
-    console.log('🚀 ~ ErrorHandlerMiddleware ~ err:', err);
-    console.log('🚀 ---------------------------------------🚀');
     if (!err) {
       _next();
     }
@@ -56,13 +54,11 @@ class ErrorHandlerMiddleware {
     // Use this.prisma.Prisma instead of Prisma directly
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       ({ code, message, statusCode } = this.generatePrismaErrorMessage(err));
-    }
-    else if (err instanceof Prisma.PrismaClientValidationError) {
+    } else if (err instanceof Prisma.PrismaClientValidationError) {
       code = 'VALIDATION_ERROR';
       message = err.message.split('\n').pop().trim();
       statusCode = 400;
-    }
-    else if (err.name === 'ValidationError') {
+    } else if (err.name === 'ValidationError') {
       // Joi or custom validation
       code = 'VALIDATION_ERROR';
       message = err.message;
@@ -71,8 +67,7 @@ class ErrorHandlerMiddleware {
         field: d.path.join('.'),
         message: d.message,
       }));
-    }
-    else if (err instanceof BusinessError) {
+    } else if (err instanceof BusinessError) {
       // Custom business exception
       code = err.code || 'BUSINESS_ERROR';
       message = err.message || 'Business logic error';

@@ -16,6 +16,16 @@ const serviceSchema = require('../validations/service.schema');
  * @param {boolean} isActive.query.optional - Filter by active status
  * @param {number} page.query.optional - Page number for pagination - default: 1
  * @param {number} pageSize.query.optional - Number of items per page - default: 10
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": [
+ *     { "id": "uuid", "name": "test", "prefix": "XX", "organizationId": "uuid", "isActive": true }
+ *   ]
+ * }
  */
 router.get('/', validate(serviceSchema.getServiceSchema, 'query'), controller.getAll);
 
@@ -25,6 +35,15 @@ router.get('/', validate(serviceSchema.getServiceSchema, 'query'), controller.ge
  * @tags Service
  * @security BearerAuth
  * @param {string} serviceId.path.required - Service ID using UUID format
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "name": "test", "prefix": "XX", "organizationId": "uuid", "isActive": true }
+ * }
  */
 router.get('/:serviceId', validate(serviceSchema.idServiceSchema, 'params'), controller.getById);
 
@@ -39,6 +58,16 @@ router.get('/:serviceId', validate(serviceSchema.idServiceSchema, 'params'), con
  *   "name": "test",
  *   "prefix": "XX",
  *   "organizationId": "123123-1234-1234-1234-123456789012"
+ * }
+ * @returns {object} 201 - Created response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 201 - Example created response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "name": "test", "prefix": "XX", "organizationId": "uuid" },
+ *   "message": "Created"
  * }
  */
 router.post('/', validate(serviceSchema.createServiceSchema), controller.create);
@@ -57,6 +86,17 @@ router.post('/', validate(serviceSchema.createServiceSchema), controller.create)
  *   "organizationId": "123123-1234-1234-1234-123456789012",
  *   "isActive": true
  * }
+ * @returns {object} 200 - Success response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "name": "test", "prefix": "XX", "organizationId": "uuid", "isActive": true },
+ *   "message": "Updated"
+ * }
  */
 router.put(
   '/:serviceId',
@@ -71,6 +111,16 @@ router.put(
  * @tags Service
  * @security BearerAuth
  * @param {string} serviceId.path.required - Service ID using UUID format
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid" },
+ *   "message": "Deleted"
+ * }
  */
 router.delete('/:serviceId', validate(serviceSchema.idServiceSchema, 'params'), controller.remove);
 

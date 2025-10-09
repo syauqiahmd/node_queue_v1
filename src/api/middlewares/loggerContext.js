@@ -11,7 +11,6 @@ class LoggerContextMiddleware {
         method: req.method,
         ip: req.ip,
         userAgent: req.headers['user-agent'],
-        userId: req.user?.id,
       };
       store.set('requestContext', requestContext);
     }

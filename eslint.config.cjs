@@ -11,7 +11,7 @@ module.exports = defineConfig([
   {
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: {
-      ecmaVersion: 2021,
+      ecmaVersion: 'latest',
       sourceType: 'commonjs',
       globals: {
         ...globals.node,
@@ -43,13 +43,33 @@ module.exports = defineConfig([
 
       // Formatting-related
       'max-len': 'off',
-      'comma-dangle': 'off',
+      // 'comma-dangle': ['error', 'always-multiline'], // Handled by Prettier
       quotes: ['error', 'single', { avoidEscape: true }],
       semi: ['error', 'always'],
       indent: 'off',
 
       complexity: ['warn', { max: 15 }],
+
+      // Prettier integration
       'prettier/prettier': ['error'],
+    },
+  },
+  {
+    files: ['**/*.test.js'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+    rules: {
+      // Allow describe, it, expect, etc. in test files
+      'no-undef': 'off',
+    },
+  },
+  {
+    files: ['src/core/interfaces/*.js'],
+    rules: {
+      'no-unused-vars': 'off',
     },
   },
 ]);

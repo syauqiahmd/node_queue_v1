@@ -1,8 +1,8 @@
-const IOrganizationService = require('../interfaces/IOrganizationService');
-
-class OrganizationService extends IOrganizationService {
+/**
+ * @implements {IOrganizationService}
+ */
+class OrganizationService {
   constructor({ prismaClient }) {
-    super();
     this.prisma = prismaClient;
   }
 
@@ -10,7 +10,8 @@ class OrganizationService extends IOrganizationService {
     const where = {
       name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
       fullName: payload.fullName ? { contains: payload.fullName, mode: 'insensitive' } : undefined,
-      isActive: payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
+      isActive:
+        payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
     };
 
     const [data, count] = await Promise.all([
@@ -43,6 +44,33 @@ class OrganizationService extends IOrganizationService {
 
   async remove(id) {
     return this.prisma.organization.delete({ where: { id } });
+  }
+
+  async getAllWithService(payload) {
+    const { OrganizationResponse } = require('../dto/organizationResponse');
+    const where = {
+      isActive:
+        payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
+    };
+    const organizations = await this.prisma.organization.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        fullName: true,
+        services: {
+          where,
+          select: {
+            id: true,
+            name: true,
+            prefix: true,
+          },
+        },
+      },
+      orderBy: { name: 'desc' },
+    });
+
+    return organizations.map((organization) => new OrganizationResponse(organization));
   }
 }
 

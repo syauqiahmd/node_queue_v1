@@ -16,17 +16,25 @@ module.exports = ({
   serviceSchema,
   userSchema,
   authMiddleware,
-  responseFormatter, // Inject responseFormatter
 }) => {
   const router = Router();
 
   // Public routes
   router.post('/public/login', authController.login.bind(authController));
-  router.post('/public/tickets', validateMiddleware.validate(serviceSchema.idServiceSchema), ticketController.create.bind(ticketController));
+  router.post(
+    '/public/tickets',
+    validateMiddleware.validate(serviceSchema.idServiceSchema),
+    ticketController.create.bind(ticketController)
+  );
   router.get(
     '/public/services',
     validateMiddleware.validate(generalSchema.emptySchema, 'query'),
     serviceController.publicServiceList.bind(serviceController)
+  );
+  router.get(
+    '/public/organizations',
+    validateMiddleware.validate(generalSchema.emptySchema, 'query'),
+    organizationController.getPublicList.bind(organizationController)
   );
   router.get(
     '/public/queues',
@@ -43,13 +51,21 @@ module.exports = ({
   router.use(authMiddleware.authenticateToken);
 
   // Counter routes
-  router.get('/counters', validateMiddleware.validate(counterSchema.getCounterSchema, 'query'), counterController.getAll.bind(counterController));
+  router.get(
+    '/counters',
+    validateMiddleware.validate(counterSchema.getCounterSchema, 'query'),
+    counterController.getAll.bind(counterController)
+  );
   router.get(
     '/counters/:counterId',
     validateMiddleware.validate(counterSchema.idCounterSchema, 'params'),
     counterController.getById.bind(counterController)
   );
-  router.post('/counters', validateMiddleware.validate(counterSchema.createCounterSchema), counterController.create.bind(counterController));
+  router.post(
+    '/counters',
+    validateMiddleware.validate(counterSchema.createCounterSchema),
+    counterController.create.bind(counterController)
+  );
   router.put(
     '/counters/:counterId',
     validateMiddleware.validate(counterSchema.idCounterSchema, 'params'),
@@ -91,8 +107,16 @@ module.exports = ({
   );
 
   // Queue routes
-  router.post('/queues/call', validateMiddleware.validate(queueSchema.callQueueSchema), queueController.callNextQueue.bind(queueController));
-  router.post('/queues/action', validateMiddleware.validate(queueSchema.actionQueueSchema), queueController.actionQueueById.bind(queueController));
+  router.post(
+    '/queues/call',
+    validateMiddleware.validate(queueSchema.callQueueSchema),
+    queueController.callNextQueue.bind(queueController)
+  );
+  router.post(
+    '/queues/action',
+    validateMiddleware.validate(queueSchema.actionQueueSchema),
+    queueController.actionQueueById.bind(queueController)
+  );
   router.get(
     '/queues/:serviceId',
     validateMiddleware.validate(serviceSchema.idServiceSchema, 'params'),
@@ -107,13 +131,21 @@ module.exports = ({
   );
 
   // Service routes
-  router.get('/services', validateMiddleware.validate(serviceSchema.getServiceSchema, 'query'), serviceController.getAll.bind(serviceController));
+  router.get(
+    '/services',
+    validateMiddleware.validate(serviceSchema.getServiceSchema, 'query'),
+    serviceController.getAll.bind(serviceController)
+  );
   router.get(
     '/services/:serviceId',
     validateMiddleware.validate(serviceSchema.idServiceSchema, 'params'),
     serviceController.getById.bind(serviceController)
   );
-  router.post('/services', validateMiddleware.validate(serviceSchema.createServiceSchema), serviceController.create.bind(serviceController));
+  router.post(
+    '/services',
+    validateMiddleware.validate(serviceSchema.createServiceSchema),
+    serviceController.create.bind(serviceController)
+  );
   router.put(
     '/services/:serviceId',
     validateMiddleware.validate(serviceSchema.idServiceSchema, 'params'),
@@ -127,16 +159,32 @@ module.exports = ({
   );
 
   // User routes
-  router.get('/users', validateMiddleware.validate(userSchema.getUserSchema, 'query'), userController.getAll.bind(userController));
-  router.get('/users/:userId', validateMiddleware.validate(userSchema.idUserSchema, 'params'), userController.getById.bind(userController));
-  router.post('/users', validateMiddleware.validate(userSchema.createUserSchema), userController.create.bind(userController));
+  router.get(
+    '/users',
+    validateMiddleware.validate(userSchema.getUserSchema, 'query'),
+    userController.getAll.bind(userController)
+  );
+  router.get(
+    '/users/:userId',
+    validateMiddleware.validate(userSchema.idUserSchema, 'params'),
+    userController.getById.bind(userController)
+  );
+  router.post(
+    '/users',
+    validateMiddleware.validate(userSchema.createUserSchema),
+    userController.create.bind(userController)
+  );
   router.put(
     '/users/:userId',
     validateMiddleware.validate(userSchema.idUserSchema, 'params'),
     validateMiddleware.validate(userSchema.updateUserSchema),
     userController.update.bind(userController)
   );
-  router.delete('/users/:userId', validateMiddleware.validate(userSchema.idUserSchema, 'params'), userController.remove.bind(userController));
+  router.delete(
+    '/users/:userId',
+    validateMiddleware.validate(userSchema.idUserSchema, 'params'),
+    userController.remove.bind(userController)
+  );
   router.post('/users/logout', authController.logout.bind(authController));
 
   return router;

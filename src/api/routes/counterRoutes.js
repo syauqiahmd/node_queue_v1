@@ -16,6 +16,16 @@ const counterSchema = require('../validations/counter.schema');
  * @param {boolean} isActive.query.optional - Filter by active status
  * @param {number} page.query.optional - Page number for pagination - default: 1
  * @param {number} pageSize.query.optional - Number of items per page - default: 10
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": [
+ *     { "id": "uuid", "counterNumber": "001", "isActive": true, "service": { "id": "uuid", "name": "Service Name" } }
+ *   ]
+ * }
  */
 router.get('/', validate(counterSchema.getCounterSchema, 'query'), controller.getAll);
 
@@ -25,6 +35,15 @@ router.get('/', validate(counterSchema.getCounterSchema, 'query'), controller.ge
  * @tags Counter
  * @security BearerAuth
  * @param {string} counterId.path.required - Service ID using UUID format
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "counterNumber": "001", "isActive": true, "service": { "id": "uuid", "name": "Service Name" } }
+ * }
  */
 router.get('/:counterId', validate(counterSchema.idCounterSchema, 'params'), controller.getById);
 
@@ -38,6 +57,16 @@ router.get('/:counterId', validate(counterSchema.idCounterSchema, 'params'), con
  * {
  *   "counterNumber": "test",
  *   "serviceId": "123123-1234-1234-1234-123456789012"
+ * }
+ * @returns {object} 201 - Created response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 201 - Example created response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "counterNumber": "test", "serviceId": "123123-1234-1234-1234-123456789012" },
+ *   "message": "Created"
  * }
  */
 router.post('/', validate(counterSchema.createCounterSchema), controller.create);
@@ -55,6 +84,17 @@ router.post('/', validate(counterSchema.createCounterSchema), controller.create)
  *   "serviceId": "123123-1234-1234-1234-123456789012",
  *   "isActive": true
  * }
+ * @returns {object} 200 - Success response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "counterNumber": "001", "serviceId": "123123-1234-1234-1234-123456789012", "isActive": true },
+ *   "message": "Updated"
+ * }
  */
 router.put(
   '/:counterId',
@@ -69,6 +109,16 @@ router.put(
  * @tags Counter
  * @security BearerAuth
  * @param {string} counterId.path.required - Service ID using UUID format
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid" },
+ *   "message": "Deleted"
+ * }
  */
 router.delete('/:counterId', validate(counterSchema.idCounterSchema, 'params'), controller.remove);
 

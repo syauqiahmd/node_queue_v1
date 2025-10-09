@@ -18,6 +18,16 @@ const userSchema = require('../validations/user.schema');
  * @param {boolean} isActive.query.optional - Filter by active status
  * @param {number} page.query.optional - Page number for pagination - default: 1
  * @param {number} pageSize.query.optional - Number of items per page - default: 10
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": [
+ *     { "id": "uuid", "userName": "test", "fullName": "Test User", "role": "ADMIN", "isActive": true }
+ *   ]
+ * }
  */
 router.get('/', validate(userSchema.getUserSchema, 'query'), userController.getAll);
 
@@ -27,6 +37,15 @@ router.get('/', validate(userSchema.getUserSchema, 'query'), userController.getA
  * @tags User
  * @security BearerAuth
  * @param {string} userId.path.required - User ID using UUID format
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "userName": "test", "fullName": "Test User", "role": "ADMIN", "isActive": true }
+ * }
  */
 router.get('/:userId', validate(userSchema.idUserSchema, 'params'), userController.getById);
 
@@ -43,6 +62,16 @@ router.get('/:userId', validate(userSchema.idUserSchema, 'params'), userControll
  *   "role": "ADMIN",
  *   "password": "password123",
  *   "organizationId": "123e4567-e89b-12d3-a456-426614174000"
+ * }
+ * @returns {object} 201 - Created response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 201 - Example created response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "userName": "test", "fullName": "Test User", "role": "ADMIN" },
+ *   "message": "Created"
  * }
  */
 router.post('/', validate(userSchema.createUserSchema), userController.create);
@@ -63,6 +92,17 @@ router.post('/', validate(userSchema.createUserSchema), userController.create);
  *   "isActive": true,
  *   "organizationId": "123e4567-e89b-12d3-a456-426614174000"
  * }
+ * @returns {object} 200 - Success response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "userName": "test", "fullName": "Test User", "role": "ADMIN", "isActive": true },
+ *   "message": "Updated"
+ * }
  */
 router.put(
   '/:userId',
@@ -77,6 +117,16 @@ router.put(
  * @tags User
  * @security BearerAuth
  * @param {string} userId.path.required - User ID using UUID format
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid" },
+ *   "message": "Deleted"
+ * }
  */
 router.delete('/:userId', validate(userSchema.idUserSchema, 'params'), userController.remove);
 
@@ -85,6 +135,14 @@ router.delete('/:userId', validate(userSchema.idUserSchema, 'params'), userContr
  * @summary Logout user by ID
  * @tags #Authorization
  * @security BearerAuth
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "message": "logout success" }
+ * }
  */
 
 router.post('/logout', authController.logout);

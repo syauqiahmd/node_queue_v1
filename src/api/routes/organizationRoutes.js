@@ -15,6 +15,16 @@ const organizationSchema = require('../validations/organization.schema');
  * @param {boolean} isActive.query.optional - Filter by active status
  * @param {number} page.query.optional - Page number for pagination - default: 1
  * @param {number} pageSize.query.optional - Number of items per page - default: 10
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": [
+ *     { "id": "uuid", "name": "test", "fullName": "Test Organization", "isActive": true }
+ *   ]
+ * }
  */
 router.get('/', validate(organizationSchema.getOrganizationSchema, 'query'), controller.getAll);
 
@@ -24,6 +34,15 @@ router.get('/', validate(organizationSchema.getOrganizationSchema, 'query'), con
  * @tags Organization
  * @security BearerAuth
  * @param {string} organizationId.path.required - Organization ID using UUID format
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "name": "test", "fullName": "Test Organization", "isActive": true }
+ * }
  */
 router.get(
   '/:organizationId',
@@ -42,6 +61,16 @@ router.get(
  *   "name": "test",
  *   "fullName": "Test Organization"
  * }
+ * @returns {object} 201 - Created response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 201 - Example created response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "name": "test", "fullName": "Test Organization" },
+ *   "message": "Created"
+ * }
  */
 router.post('/', validate(organizationSchema.createOrganizationSchema), controller.create);
 
@@ -58,6 +87,17 @@ router.post('/', validate(organizationSchema.createOrganizationSchema), controll
  *   "fullName": "Test Organization",
  *   "isActive": true
  * }
+ * @returns {object} 200 - Success response
+ * @returns {object} 400 - Bad Request
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid", "name": "test", "fullName": "Test Organization", "isActive": true },
+ *   "message": "Updated"
+ * }
  */
 router.put(
   '/:organizationId',
@@ -72,6 +112,16 @@ router.put(
  * @tags Organization
  * @security BearerAuth
  * @param {string} organizationId.path.required - Organization ID using UUID format
+ * @returns {object} 200 - Success response
+ * @returns {object} 401 - Unauthorized
+ * @returns {object} 404 - Not Found
+ * @returns {object} 500 - Internal Server Error
+ * @example response - 200 - Example success response
+ * {
+ *   "success": true,
+ *   "data": { "id": "uuid" },
+ *   "message": "Deleted"
+ * }
  */
 router.delete(
   '/:organizationId',

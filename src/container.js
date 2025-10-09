@@ -32,7 +32,7 @@ container.loadModules(
     // 'api/controllers/*.js', // Removed this line
     'api/middlewares/*.js',
     'infra/utils/*.js',
-    'api/utils/*.js',
+    // 'api/utils/*.js', // Removed this line
     'infra/db/dbConnectionChecker.js', // Register the db connection checker
     'core/dto/*.js', // Register DTOs
     'core/interfaces/*.js', // Register interfaces
@@ -64,11 +64,17 @@ container.register({
   asyncContext: asValue(asyncContext), // Register asyncContext
   rateLimiter: asClass(require('./api/middlewares/rateLimiter')).singleton(), // Register RateLimiterMiddleware
   requestId: asClass(require('./api/middlewares/requestId')).singleton(), // Register RequestIdMiddleware
+  asyncContextRunner: asClass(require('./api/middlewares/asyncContextRunner')).singleton(), // Register AsyncContextRunnerMiddleware
   errorHandler: asClass(require('./api/middlewares/errorHandler')).singleton(), // Register ErrorHandlerMiddleware
   responseFormatter: asClass(require('./api/utils/response.formatter')).singleton(), // Register ResponseFormatter
 
-  // Register authMiddleware explicitly
   authMiddleware: asClass(require('./api/middlewares/auth')).singleton(),
+
+  // Register authUtils explicitly
+  authUtils: asClass(require('./api/utils/authUtils')).singleton(),
+
+  // Register IdentityHelper
+  identityHelper: asClass(require('./api/utils/identityHelper')).singleton(),
 
   // Register Controllers explicitly
   authController: asClass(require('./api/controllers/authController')).singleton(),
@@ -102,7 +108,7 @@ container.register({
 
   // Register UserService and its proxy
   userServiceReal: asClass(require('./core/services/UserService')).singleton(),
-  userService: asClass(require('./core/services/UserService')).singleton(),
+  userService: asClass(require('./core/services/UserServiceProxy')).singleton(),
 
   // Register TicketService (no proxy for transactional data)
   ticketService: asClass(require('./core/services/TicketService')).singleton(),

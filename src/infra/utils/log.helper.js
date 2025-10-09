@@ -53,6 +53,9 @@ class Logger {
                 }
                 if (requestContext) {
                   log += `[${requestContext.method} ${requestContext.path}] `;
+                  if (requestContext.userId) {
+                    log += `[User:${requestContext.userId}] `;
+                  }
                 }
                 log += stack || message;
                 return log;

@@ -1,5 +1,5 @@
 const request = require('supertest');
-const express = require('express');
+
 const createApp = require('../src/app');
 const container = require('../src/container');
 const { asValue, asClass } = require('awilix');

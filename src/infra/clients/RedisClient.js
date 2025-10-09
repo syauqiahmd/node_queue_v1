@@ -37,7 +37,9 @@ class RedisClient {
     try {
       if (!this.client.isOpen) {
         await this.client.connect();
-        this.logger.info('[REDIS] Redis client connected successfully', { context: 'Redis Client' });
+        this.logger.info('[REDIS] Redis client connected successfully', {
+          context: 'Redis Client',
+        });
         this.connected = true;
       } else {
         this.logger.info('[REDIS] Redis client already open', { context: 'Redis Client' });
