@@ -131,12 +131,6 @@ module.exports = ({
   );
 
   /**
-   * @typedef {object} PrioritizeTicketResponse
-   * @property {boolean} success - Indicates if the request was successful
-   * @property {object} data - The updated ticket object
-   * @property {string} message - A message indicating the result
-   */
-  /**
    * PUT /queues/{queueId}/prioritize
    * @summary Prioritize a ticket
    * @tags Queue
