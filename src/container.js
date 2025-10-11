@@ -110,6 +110,14 @@ container.register({
   userServiceReal: asClass(require('./core/services/UserService')).singleton(),
   userService: asClass(require('./core/services/UserServiceProxy')).singleton(),
 
+  // Register GoogleTextToSpeechService and its proxy
+  googleTextToSpeechServiceReal: asClass(
+    require('./core/services/googleTextToSpeechService')
+  ).singleton(),
+  googleTextToSpeechService: asClass(
+    require('./core/services/GoogleTextToSpeechServiceProxy')
+  ).singleton(),
+
   // Register TicketService (no proxy for transactional data)
   ticketService: asClass(require('./core/services/TicketService')).singleton(),
 
