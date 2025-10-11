@@ -136,7 +136,7 @@ module.exports = ({
    * @tags Queue
    * @security BearerAuth
    * @param {string} queueId.path.required - The ID of the ticket to prioritize
-   * @return {PrioritizeTicketResponse} 200 - Success response
+   * @return {object} 200 - Success response
    */
   router.put(
     '/:queueId/prioritize',
