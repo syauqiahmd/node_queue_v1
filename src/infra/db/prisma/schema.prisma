@@ -111,8 +111,10 @@ model Ticket {
   service                   Service  @relation("ServiceTicket", fields: [serviceId], references: [id])
   latestAssigneeCounter     Counter? @relation("CounterTicket", fields: [latestAssigneeCounterId], references: [id])
 
-  @@index([serviceId, queueDate])
+  
   @@unique([serviceId, queueNumber, queueDate])
+  @@index([serviceId, isCall, isPriority, createdAt])
+  @@index([isResolved, createdAt])
 }
 
 
