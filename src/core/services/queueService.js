@@ -1,7 +1,8 @@
 class QueueService {
-  constructor({ prismaClient, businessException }) {
+  constructor({ prismaClient, businessException, googleTextToSpeechService }) {
     this.prisma = prismaClient;
     this.businessException = businessException;
+    this.googleTextToSpeechService = googleTextToSpeechService;
   }
 
   applyStatusFilter(where, status) {
@@ -130,6 +131,23 @@ class QueueService {
   }
 
   async updateQueueById(id, payload) {
+    const currentTicket = await this.prisma.ticket.findUnique({
+      where: { id },
+      include: { latestAssigneeCounter: true },
+    });
+
+    if (!currentTicket) {
+      throw this.businessException.NotFound('ticket');
+    }
+
+    const oldCounter = currentTicket.latestAssigneeCounter;
+    const newCounterId = payload.latestAssigneeCounterId;
+
+    if (newCounterId && oldCounter && newCounterId !== oldCounter.id) {
+      const oldAnnouncementText = `Nomor antrian: ${currentTicket.prefix} - ${currentTicket.queueNumber}; silahkan menuju, ke loket nomor, ${oldCounter.counterNumber}`;
+      await this.googleTextToSpeechService.invalidateCache(oldAnnouncementText);
+    }
+
     return await this.prisma.ticket.update({
       where: { id },
       data: payload,
