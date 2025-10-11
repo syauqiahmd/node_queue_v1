@@ -111,6 +111,18 @@ class QueueController {
       next(err);
     }
   }
+
+  async prioritizeTicket(req, res, next) {
+    try {
+      const { queueId } = req.params;
+      const updatedTicket = await this.queueService.prioritizeTicket(queueId);
+      return res
+        .status(200)
+        .json({ success: true, data: updatedTicket, message: 'Ticket prioritized' });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = QueueController;

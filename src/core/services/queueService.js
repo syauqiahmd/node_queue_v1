@@ -56,21 +56,29 @@ class QueueService {
 
   async callNextQueue(payload) {
     const { serviceId, counterId } = payload;
-    const getLastTicket = await this.prisma.ticket.findFirst({
-      where: {
-        serviceId,
-        isCall: false,
-        createdAt: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
-          lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
-        },
-      },
-      orderBy: { createdAt: 'asc' },
-      skip: 0,
-      take: 1,
-    });
 
-    if (!getLastTicket) {
+    const findTicket = async (isPriority) => {
+      return await this.prisma.ticket.findFirst({
+        where: {
+          serviceId,
+          isCall: false,
+          isPriority,
+          createdAt: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
+            lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
+          },
+        },
+        orderBy: { createdAt: 'asc' },
+      });
+    };
+
+    let ticketToCall = await findTicket(true); // Prioritize priority tickets
+
+    if (!ticketToCall) {
+      ticketToCall = await findTicket(false); // Fallback to non-priority tickets
+    }
+
+    if (!ticketToCall) {
       throw this.businessException.NotFound('queue');
     }
 
@@ -83,7 +91,7 @@ class QueueService {
       throw this.businessException.NotFound('Counter');
     }
 
-    const { id: queueId } = getLastTicket;
+    const { id: queueId } = ticketToCall;
     const updatedTicket = await this.prisma.ticket.update({
       where: { id: queueId },
       data: {
@@ -169,6 +177,18 @@ class QueueService {
       include: {
         latestAssigneeCounter: true,
       },
+    });
+  }
+
+  async prioritizeTicket(queueId) {
+    const ticket = await this.prisma.ticket.findUnique({ where: { id: queueId } });
+    if (!ticket) {
+      throw this.businessException.NotFound('ticket');
+    }
+
+    return this.prisma.ticket.update({
+      where: { id: queueId },
+      data: { isPriority: true },
     });
   }
 }
