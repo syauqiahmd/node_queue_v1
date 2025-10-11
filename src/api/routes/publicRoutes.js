@@ -6,10 +6,15 @@ const authController = require('../controllers/authController');
 const serviceController = require('../controllers/serviceController');
 const organizationController = require('../controllers/organizationController');
 
+const RateLimiterMiddleware = require('../middlewares/rateLimiter');
+const rateLimiter = new RateLimiterMiddleware();
+
 const validate = require('../middlewares/validate');
 const serviceSchema = require('../validations/service.schema');
 const generalSchema = require('../validations/general.schema');
 const queueSchema = require('../validations/queue.schema');
+
+router.use(rateLimiter.methodBasedLimiter);
 
 /**
  * POST /public/login
