@@ -36,6 +36,22 @@ class AuthMiddleware {
       next(err);
     }
   };
+
+  RBAC = (roles = ['ADMIN', 'USER']) => {
+    return (req, res, next) => {
+      if (!req.user || !req.user.role) {
+        return next(this.businessException.Unauthorized('User role not found'));
+      }
+
+      const userRoles = Array.isArray(req.user.role) ? req.user.role : [req.user.role];
+
+      if (roles.length && !userRoles.some((role) => roles.includes(role))) {
+        return next(this.businessException.Forbidden('Insufficient permissions'));
+      }
+
+      next();
+    };
+  };
 }
 
 module.exports = AuthMiddleware;
