@@ -4,101 +4,201 @@ This is a robust and scalable queue management system built with Node.js, Expres
 
 ## Features
 
-*   **Organization Management:** Create, read, update, and delete organizations.
-*   **Service Management:** Manage services within each organization.
-*   **Counter Management:** Manage counters for each service.
-*   **User Management:** Handle user authentication and authorization.
-*   **Queue Management:** A complete queueing system with ticket generation and management.
-*   **Real-time Updates with Socket.io:** Uses Socket.io for real-time, bidirectional event-based communication to update clients instantly.
-*   **Text-to-Speech with Google Cloud:** Integrates Google Cloud Text-to-Speech to announce ticket numbers.
-*   **Caching:** Implements a proxy pattern with Redis for caching frequently accessed data.
-*   **Logging:** Comprehensive logging with Winston.
-*   **API Documentation:** Auto-generated API documentation with Swagger.
+*   **Core Queue Management**:
+    *   Create, call, recall, and resolve tickets.
+    *   Public-facing endpoints for customers to create tickets for a specific service.
+    *   Real-time queue list for display monitors.
+*   **Multi-tenancy Support**:
+    *   **Organization Management**: Full CRUD operations for managing multiple organizations.
+    *   **Service Management**: Manage distinct services (e.g., "Customer Support", "New Accounts") within each organization.
+    *   **Counter Management**: Assign counters to specific services.
+*   **Authentication & Authorization**:
+    *   JWT-based authentication for secure API access.
+    *   Role-based access control (`ADMIN`, `USER`) to protect administrative endpoints.
+*   **Real-time Experience**:
+    *   **Live Updates**: Uses **Socket.IO** to broadcast events (`new-ticket`, `call-ticket`, etc.) to all clients for a seamless, real-time UI.
+    *   **Audio Announcements**: Integrates with **Google Cloud Text-to-Speech** to generate and play audio for called tickets.
+*   **Performance & Scalability**:
+    *   **Caching Layer**: Implements a Proxy Pattern with **Redis** to cache frequently accessed data, reducing database load.
+    *   **Background Jobs**: Uses **node-cron** to run scheduled jobs for daily report calculation and data housekeeping, preventing performance impact on the main application.
+*   **Developer Experience**:
+    *   **Dependency Injection**: Leverages **Awilix** for a clean, decoupled, and testable architecture.
+    *   **API Documentation**: Auto-generated and interactive API documentation with **Swagger**.
+    *   **Comprehensive Logging**: Uses **Winston** for detailed and structured logging.
+    *   **Code Quality**: Enforced with **ESLint** and **Prettier**.
 
 ## Technologies
 
-*   **Node.js:** JavaScript runtime environment (v22.15.1).
-*   **Express:** Web framework for Node.js.
-*   **Prisma:** Next-generation ORM for Node.js and TypeScript.
-*   **Redis:** In-memory data store for caching.
-*   **Socket.io:** Real-time, bidirectional event-based communication.
-*   **Google Cloud Text-to-Speech:** Converts text into natural-sounding speech.
-*   **Awilix:** Dependency injection container for JavaScript.
-*   **Joi:** Object schema validation.
-*   **Winston:** A multi-transport async logging library for Node.js.
-*   **Jest:** JavaScript testing framework.
+### Backend & Framework
+*   **Node.js**: JavaScript runtime environment (v22.15.1)
+*   **Express**: Web framework for creating the REST API.
+
+### Database & ORM
+*   **PostgreSQL**: Primary relational database.
+*   **Prisma**: Next-generation ORM for database access and migrations.
+*   **Redis**: In-memory data store used for caching.
+
+### Real-time & Communication
+*   **Socket.IO**: Enables real-time, bidirectional communication for live queue updates.
+*   **Google Cloud Text-to-Speech**: For generating audio announcements.
+
+### Authentication & Security
+*   **JSON Web Token (JWT)**: For creating secure access tokens.
+*   **bcrypt**: For hashing user passwords.
+*   **express-rate-limit**: To protect the API from brute-force attacks.
+
+### Tooling & Architecture
+*   **Awilix**: A powerful dependency injection container for managing services and dependencies.
+*   **node-cron**: A simple cron-like job scheduler for background tasks.
+*   **Winston**: A versatile logging library for Node.js.
+*   **Jest**: A delightful JavaScript testing framework.
+*   **ESLint & Prettier**: For maintaining code quality and consistent formatting.
+*   **express-jsdoc-swagger**: For generating interactive API documentation.
 
 ## Getting Started
 
 ### Prerequisites
 
-*   Node.js (v22.15.1 or higher)
-*   npm
-*   PostgreSQL (or any other database compatible with Prisma)
+*   Node.js (v22.15.1, as specified in `.nvmrc`)
+*   `npm`
+*   PostgreSQL
 *   Redis
 *   Google Cloud credentials (for Text-to-Speech)
 
 ### Installation
 
 1.  **Clone the repository:**
-
     ```bash
     git clone https://github.com/your-username/node_queue.git
     cd node_queue
     ```
 
 2.  **Install dependencies:**
-
     ```bash
     npm install
     ```
 
-3.  **Set up environment variables:**
-
-    Create a `.env` file in the root directory and add the following environment variables (you can copy them from `.env.example`):
-
-    ```
-    DATABASE_URL="postgresql://user:password@host:port/database"
-    REDIS_HOST="localhost"
-    REDIS_PORT="6379"
-    JWT_SECRET="your-jwt-secret"
-    GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/google-credentials.json"
-    ```
-
-4.  **Run database migrations:**
-
+3.  **Set up Environment Variables:**
+    Create a `.env` file in the root of the project by copying the example file.
     ```bash
-    npm run generate
+    cp .env.example .env
     ```
+    Then, update the variables in the `.env` file with your local configuration. See the "Environment Variables" section below for details.
 
-### Running the Application
 
-*   **Development mode:**
-
+4.  **Run Database Migrations:**
+    Ensure your PostgreSQL server is running and the `DATABASE_URL` in your `.env` file is correct. Then, apply the Prisma migrations:
     ```bash
-    npm run dev
+    npx prisma migrate dev
     ```
+    This command will also generate the Prisma Client based on your schema.
 
-    This will start the server with Nodemon, which will automatically restart the server on file changes.
+## Usage
 
-*   **Production mode:**
+This project runs as two separate services: the main API server and a background cron job runner.
 
-    ```bash
-    npm start
-    ```
+### Running in Development
+
+For development, you can run both services concurrently with Nodemon for automatic restarts on file changes.
+
+```bash
+npm run dev
+```
+
+You can also run each service individually:
+```bash
+# Run the API server only
+npm run dev:api
+
+# Run the cron service only
+npm run dev:cron
+```
+
+### Running in Production
+
+In production, you should run the services directly with Node.
+
+```bash
+# Start the API server
+npm run start:api
+
+# Start the cron service
+npm run start:cron
+```
+
+### Running Tests
+
+Execute the test suite using Jest:
+```bash
+npm test
+```
+
+### Linting
+
+This project uses ESLint to enforce code quality.
+
+```bash
+# Check for linting errors
+npm run lint
+
+# Automatically fix linting errors
+npm run lint-fix
+```
+
+## Environment Variables
+
+The following environment variables are used to configure the application. These should be defined in a `.env` file in the project root.
+
+| Variable | Description | Default in `.env.example` |
+| :--- | :--- | :--- |
+| `PORT` | The port for the API server to listen on. | `3000` |
+| `DATABASE_URL` | The connection string for the PostgreSQL database. | |
+| `JWT_SECRET` | The secret key used to sign JSON Web Tokens. | |
+| `JWT_EXPIRES_IN` | The expiration time for JWTs (e.g., `1h`, `7d`). | |
+| `BCRYPT_SALT_ROUNDS` | The number of salt rounds for bcrypt password hashing. | |
+| `REDIS_HOST` | The hostname for the Redis server. | |
+| `REDIS_PORT` | The port for the Redis server. | |
+| `REDIS_PASSWORD` | The password for the Redis server. | |
+| `RATE_LIMIT_WINDOW` | The time window for rate limiting in minutes. | `1` |
+| `RATE_LIMIT_MAX` | The maximum number of requests allowed per IP within the time window. | |
+| `GOOGLE_APPLICATION_CREDENTIALS` | The absolute path to your Google Cloud service account credentials JSON file. | |
+| `PRE_CALCULATE_TIME` | The cron schedule for the daily statistics calculation job. | `'0 21 * * *'` |
+| `HOUSEKEEPING_TIME` | The cron schedule for the housekeeping/archiving job. | `'0 22 * * 0'` |
+
 
 ## Project Structure
 
+The project is organized into a modular and layered architecture, making it easy to navigate and extend.
+
 ```
 .
-├───src
-│   ├───api
-│   ├───core
-│   ├───infra
-│   ├───app.js
-│   ├───container.js
-│   └───server.js
-└───tests
+├── .env.example         # Example environment variables
+├── package.json         # Project dependencies and scripts
+├── README.md            # You are here
+├── src/
+│   ├── api/             # API layer (Express)
+│   │   ├── controllers/ # Request handlers that orchestrate business logic
+│   │   ├── middlewares/ # Custom Express middlewares (auth, error handling, etc.)
+│   │   ├── routes/      # API route definitions
+│   │   └── validations/ # Request validation schemas
+│   │
+│   ├── core/            # Core business logic, decoupled from the web layer
+│   │   ├── services/    # Service classes containing business logic
+│   │   └── dto/         # Data Transfer Objects for structured data exchange
+│   │
+│   ├── infra/           # Infrastructure concerns and external service integrations
+│   │   ├── clients/     # Clients for external services (e.g., Redis)
+│   │   ├── db/          # Database setup (Prisma client, schema, migrations)
+│   │   └── socket/      # Socket.IO connection management
+│   │
+│   ├── jobs/            # Background jobs and cron service
+│   │   └── cron.js      # Entry point for the cron service
+│   │
+│   ├── app.js           # Express application setup and configuration
+│   ├── container.js     # Awilix dependency injection container setup
+│   └── server.js        # Main API server entry point
+│
+└── tests/               # Automated tests (Jest)
 ```
 
 ## Architectural Patterns
