@@ -20,6 +20,42 @@
         - Create a scheduled job to run periodically (e.g., nightly or weekly) to copy resolved tickets older than a certain threshold (e.g., 30 days) to the `ArchivedTicket` table.
         - After a successful copy, delete the old tickets from the main `Ticket` table.
 
+## Cron Job and Service Structure
+
+For implementing scheduled tasks like reporting and data archiving, the recommended approach is to separate the cron job runner from the main API server.
+
+-   **API Service (`src/server.js`):** This remains your main entry point for handling user-facing API requests. You would add new reporting endpoints (e.g., `GET /api/analytics/summary`) to this service.
+
+-   **Cron Service (`src/cron.js`):** This will be a new entry point for a background service that runs scheduled jobs. You would run this as a separate process (e.g., `node src/cron.js`).
+
+    -   **Configuration:**
+        1.  **Create `src/cron.js`:** This file will initialize the DI container and schedule the jobs.
+        2.  **Add a Scheduler Library:** Use a library like `node-cron` (`npm install node-cron`).
+        3.  **Create a `ReportingService`:** This service will contain the logic for calculating statistics and saving them to the database.
+        4.  **Implement the Job:** In `src/cron.js`, use `node-cron` to schedule calls to your `ReportingService`.
+
+    -   **Example `src/cron.js`:**
+        ```javascript
+        require('dotenv').config();
+        const cron = require('node-cron');
+        const container = require('./container');
+        const logger = container.resolve('logger');
+        const reportingService = container.resolve('reportingService');
+
+        logger.info('[CRON] Starting cron service...');
+
+        // Schedule a job to run every day at midnight
+        cron.schedule('0 0 * * *', async () => {
+          logger.info('[CRON] Running daily report generation...');
+          try {
+            await reportingService.generateDailyStatistics();
+            logger.info('[CRON] Daily report generation completed successfully.');
+          } catch (error) {
+            logger.error('[CRON] Error generating daily report:', error);
+          }
+        });
+        ```
+
 ## Refined `DailyServiceStats` Table Schema
 
 To efficiently support the reporting APIs, the `DailyServiceStats` table should include the `organizationId` and additional metrics:
