@@ -26,7 +26,7 @@ class ServiceService {
       this.prisma.service.findMany({
         where,
         ...paginationPayload,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [payload.sortBy]: payload.sortOrder },
         include: {
           organization: true,
         },
