@@ -392,3 +392,59 @@ The application uses Winston for logging. Logs are stored in the `logs` director
 ## API Documentation
 
 API documentation is automatically generated using `express-jsdoc-swagger`. You can access the documentation at `http://localhost:3000/api-docs` when the server is running.
+
+## Deployment
+
+Here are general guidelines for deploying this application to a production environment.
+
+### 1. Server Preparation
+- Ensure your production server has Node.js, a PostgreSQL database, and a Redis instance accessible.
+- Set the `NODE_ENV` environment variable to `production`. This is crucial for performance and security.
+
+### 2. Installation
+- On your server, clone the repository and navigate into the project directory.
+- Install only the production dependencies:
+  ```bash
+  npm install --production
+  ```
+
+### 3. Configuration
+- Create a `.env` file and populate it with your production-level credentials and settings (database URL, JWT secret, etc.). Do not commit this file to version control.
+- Ensure the `GOOGLE_APPLICATION_CREDENTIALS` variable points to the correct path on your server, or use a Base64 encoded string for the credentials.
+
+### 4. Running the Application with a Process Manager
+It is highly recommended to use a process manager like **PM2** to keep your application services (API and cron) alive and to manage logs and performance.
+
+- Install PM2 globally:
+  ```bash
+  npm install pm2 -g
+  ```
+
+- **Using the Ecosystem File:**
+  This project includes an `ecosystem.json` file configured for PM2. You can start both the API and cron services with a single command:
+  ```bash
+  pm2 start ecosystem.json
+  ```
+
+- **Manual Start with PM2:**
+  If you prefer to start the services manually:
+  ```bash
+  # Start the API server
+  pm2 start src/server.js --name "api-server"
+
+  # Start the cron job runner
+  pm2 start src/jobs/cron.js --name "cron-service"
+  ```
+
+- **Managing Processes:**
+  ```bash
+  pm2 list        # List all running processes
+  pm2 logs        # View logs for all processes
+  pm2 restart all # Restart all processes
+  ```
+
+## License
+
+Copyright (c) 2025 [Your Company Name]. All Rights Reserved.
+
+This project is proprietary and closed-source. You do not have permission to use, copy, modify, or distribute this software without explicit written permission from the copyright holder.
