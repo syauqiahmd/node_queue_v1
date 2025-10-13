@@ -13,6 +13,8 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    * @param {boolean} isActive.query - Filter by active status
    * @param {number} page.query - Page number for pagination - default: 1
    * @param {number} pageSize.query - Number of items per page - default: 10
+   * @param {string} sortBy.query - Sort by field (e.g., 'counterNumber', 'createdAt') - default: 'createdAt'
+   * @param {string} sortOrder.query - Sort order ('asc' or 'desc') - default: 'desc'
    * @returns {object} 200 - Success response
    * @returns {object} 401 - Unauthorized
    * @returns {object} 500 - Internal Server Error

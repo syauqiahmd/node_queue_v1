@@ -11,11 +11,19 @@ class UserController {
 
   async getAll(req, res, next) {
     try {
-      const { page = 1, pageSize = 10, ...filters } = req.query;
+      const {
+        page = 1,
+        pageSize = 10,
+        sortBy = 'createdAt',
+        sortOrder = 'desc',
+        ...filters
+      } = req.query;
       const data = await this.userService.getAll({
         ...filters,
         page: parseInt(page, 10),
         pageSize: parseInt(pageSize, 10),
+        sortBy,
+        sortOrder,
       });
       return res.status(200).json({ success: true, data });
     } catch (err) {

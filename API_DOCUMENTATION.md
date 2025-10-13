@@ -72,13 +72,15 @@ All endpoints below require a `Bearer <token>` in the `Authorization` header.
     *   **Notes:** Supports pagination using `page` and `pageSize`.
     *   **Query Parameters:**
 
-| Field        | Type    | Required |
-|--------------|---------|----------|
-| `name`       | string  | No       |
-| `fullName`   | string  | No       |
-| `isActive`   | boolean | No       |
-| `page`       | number  | No       |
-| `pageSize`   | number  | No       |
+| Field        | Type    | Required | Valid Values                             |
+|--------------|---------|----------|------------------------------------------|
+| `name`       | string  | No       |                                          |
+| `fullName`   | string  | No       |                                          |
+| `isActive`   | boolean | No       |                                          |
+| `page`       | number  | No       |                                          |
+| `pageSize`   | number  | No       |                                          |
+| `sortBy`     | string  | No       | `name`, `fullName`, `createdAt`          |
+| `sortOrder`  | string  | No       | `asc`, `desc`                            |
 
 *   **`GET /api/v1/organizations/:organizationId`**
     *   **Description:** Get a single organization by ID.
@@ -133,15 +135,17 @@ All endpoints below require a `Bearer <token>` in the `Authorization` header.
     *   **Notes:** Supports pagination using `page` and `pageSize`.
     *   **Query Parameters:**
 
-| Field          | Type    | Required |
-|----------------|---------|----------|
-| `userName`     | string  | No       |
-| `fullName`     | string  | No       |
-| `role`         | string  | No       |
-| `organization` | string  | No       |
-| `isActive`     | boolean | No       |
-| `page`         | number  | No       |
-| `pageSize`     | number  | No       |
+| Field          | Type    | Required | Valid Values                             |
+|----------------|---------|----------|------------------------------------------|
+| `userName`     | string  | No       |                                          |
+| `fullName`     | string  | No       |                                          |
+| `role`         | string  | No       | `ADMIN`, `USER`                          |
+| `organization` | string  | No       |                                          |
+| `isActive`     | boolean | No       |                                          |
+| `page`         | number  | No       |                                          |
+| `pageSize`     | number  | No       |                                          |
+| `sortBy`       | string  | No       | `userName`, `fullName`, `role`, `createdAt` |
+| `sortOrder`    | string  | No       | `asc`, `desc`                            |
 
 *   **`GET /api/v1/users/:userId`**
     *   **Description:** Get a single user by ID.
@@ -209,14 +213,16 @@ All endpoints below require a `Bearer <token>` in the `Authorization` header.
     *   **Notes:** Supports pagination using `page` and `pageSize`.
     *   **Query Parameters:**
 
-| Field              | Type    | Required |
-|--------------------|---------|----------|
-| `name`             | string  | No       |
-| `prefix`           | string  | No       |
-| `organizationName` | string  | No       |
-| `isActive`         | boolean | No       |
-| `page`             | number  | No       |
-| `pageSize`         | number  | No       |
+| Field              | Type    | Required | Valid Values                      |
+|--------------------|---------|----------|-----------------------------------|
+| `name`             | string  | No       |                                   |
+| `prefix`           | string  | No       |                                   |
+| `organizationName` | string  | No       |                                   |
+| `isActive`         | boolean | No       |                                   |
+| `page`             | number  | No       |                                   |
+| `pageSize`         | number  | No       |                                   |
+| `sortBy`           | string  | No       | `name`, `prefix`, `createdAt`     |
+| `sortOrder`        | string  | No       | `asc`, `desc`                     |
 
 *   **`GET /api/v1/services/:serviceId`**
     *   **Description:** Get a single service by ID.
@@ -274,14 +280,16 @@ All endpoints below require a `Bearer <token>` in the `Authorization` header.
     *   **Notes:** Supports pagination using `page` and `pageSize`.
     *   **Query Parameters:**
 
-| Field              | Type    | Required |
-|--------------------|---------|----------|
-| `counterNumber`    | string  | No       |
-| `serviceName`      | string  | No       |
-| `organizationName` | string  | No       |
-| `isActive`         | boolean | No       |
-| `page`             | number  | No       |
-| `pageSize`         | number  | No       |
+| Field              | Type    | Required | Valid Values                   |
+|--------------------|---------|----------|----------------------------------|
+| `counterNumber`    | string  | No       |                                  |
+| `serviceName`      | string  | No       |                                  |
+| `organizationName` | string  | No       |                                  |
+| `isActive`         | boolean | No       |                                  |
+| `page`             | number  | No       |                                  |
+| `pageSize`         | number  | No       |                                  |
+| `sortBy`           | string  | No       | `counterNumber`, `createdAt`     |
+| `sortOrder`        | string  | No       | `asc`, `desc`                    |
 
 *   **`GET /api/v1/counters/:counterId`**
     *   **Description:** Get a single counter by ID.

@@ -1,23 +1,24 @@
-
 # UML Sequence Diagrams
 
-## 1. Get Queue List (Admin/Customer Service)
+## 1. Get List with Sorting (Admin/Customer Service)
+
+This diagram represents fetching a list of resources (e.g., organizations, services, counters, users) with optional sorting.
 
 ```mermaid
 sequenceDiagram
     participant User as Admin/CS
-    participant Routes as /api/queues
-    participant Controller as queueController
-    participant Service as queueService
+    participant Routes as /api/{resource}
+    participant Controller as {resource}Controller
+    participant Service as {resource}Service
     participant DB as Database
 
-    User->>Routes: GET /
-    Routes->>Controller: getQueues(req, res)
-    Controller->>Service: getQueues(queryParams)
-    Service->>DB: Find many queues
-    DB-->>Service: Return queues
-    Service-->>Controller: Return queues
-    Controller-->>User: 200 OK with queue list
+    User->>Routes: GET /?sortBy=name&sortOrder=asc
+    Routes->>Controller: getAll(req, res)
+    Controller->>Service: getAll({ sortBy: 'name', sortOrder: 'asc', ... })
+    Service->>DB: Find many resources with sorting
+    DB-->>Service: Return resources
+    Service-->>Controller: Return resources
+    Controller-->>User: 200 OK with resource list
 ```
 
 ## 2. Create Queue (Customer)

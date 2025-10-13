@@ -19,7 +19,7 @@ class UserService {
         where,
         skip: (payload.page - 1) * payload.pageSize,
         take: payload.pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [payload.sortBy]: payload.sortOrder },
       }),
       this.prisma.user.count({ where }),
     ]);

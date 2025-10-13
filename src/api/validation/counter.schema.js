@@ -22,9 +22,8 @@ const getCounterSchema = Joi.object({
   isActive: Joi.boolean().optional(),
   page: Joi.number().integer().min(1),
   pageSize: Joi.number().integer().min(1).max(25),
-}).prefs({
-  // Ensure defaults are applied even if keys are missing
-  presence: 'optional',
+  sortBy: Joi.string().valid('counterNumber', 'createdAt').optional(),
+  sortOrder: Joi.string().valid('asc', 'desc').optional(),
 });
 
 const idCounterSchema = Joi.object({
