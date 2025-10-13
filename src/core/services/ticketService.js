@@ -1,7 +1,10 @@
+const toTicketCreatedDTO = require('../dto/websocket/TicketCreatedDTO');
+
 class TicketService {
-  constructor({ prismaClient, businessException }) {
+  constructor({ prismaClient, businessException, broadcastService }) {
     this.prisma = prismaClient;
     this.businessException = businessException;
+    this.broadcastService = broadcastService;
   }
 
   async generateQueueNumberAndCreateTicket({
@@ -66,6 +69,10 @@ class TicketService {
         },
       });
     });
+
+    // Broadcast the new ticket event
+    const rooms = [`service-${newTicket.serviceId}`];
+    this.broadcastService.emit('ticket:created', toTicketCreatedDTO(newTicket), rooms);
 
     return { newTicket, totalWaitingQueue };
   }

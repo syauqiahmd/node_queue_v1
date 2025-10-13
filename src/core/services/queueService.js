@@ -1,8 +1,13 @@
+const toTicketCalledDTO = require('../dto/websocket/TicketCalledDTO');
+const toTicketResolvedDTO = require('../dto/websocket/TicketResolvedDTO');
+const toTicketPrioritizedDTO = require('../dto/websocket/TicketPrioritizedDTO');
+
 class QueueService {
-  constructor({ prismaClient, businessException, googleTextToSpeechService }) {
+  constructor({ prismaClient, businessException, googleTextToSpeechService, broadcastService }) {
     this.prisma = prismaClient;
     this.businessException = businessException;
     this.googleTextToSpeechService = googleTextToSpeechService;
+    this.broadcastService = broadcastService;
   }
 
   applyStatusFilter(where, status) {
@@ -105,8 +110,13 @@ class QueueService {
             organization: true,
           },
         },
+        latestAssigneeCounter: true,
       },
     });
+
+    // Broadcast the event
+    const rooms = [`service-${updatedTicket.serviceId}`, 'monitor-room'];
+    this.broadcastService.emit('ticket:called', toTicketCalledDTO(updatedTicket), rooms);
 
     return updatedTicket;
   }
@@ -148,7 +158,7 @@ class QueueService {
       await this.googleTextToSpeechService.invalidateCache(oldAnnouncementText);
     }
 
-    return await this.prisma.ticket.update({
+    const updatedTicket = await this.prisma.ticket.update({
       where: { id },
       data: payload,
       include: {
@@ -159,6 +169,14 @@ class QueueService {
         },
       },
     });
+
+    // Broadcast if the ticket is resolved
+    if (payload.isResolved) {
+      const rooms = [`service-${updatedTicket.serviceId}`];
+      this.broadcastService.emit('ticket:resolved', toTicketResolvedDTO(updatedTicket), rooms);
+    }
+
+    return updatedTicket;
   }
 
   async getCallingQueue() {
@@ -204,10 +222,16 @@ class QueueService {
       throw this.businessException.NotFound('ticket');
     }
 
-    return this.prisma.ticket.update({
+    const updatedTicket = await this.prisma.ticket.update({
       where: { id: queueId },
       data: { isPriority: true },
     });
+
+    // Broadcast the event
+    const rooms = [`service-${updatedTicket.serviceId}`];
+    this.broadcastService.emit('ticket:prioritized', toTicketPrioritizedDTO(updatedTicket), rooms);
+
+    return updatedTicket;
   }
 }
 

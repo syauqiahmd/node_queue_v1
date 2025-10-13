@@ -4,33 +4,26 @@ class BroadcastService {
     this.logger = logger;
   }
 
-  createTicketEvent(payload, type = 'ticket') {
-    const { serviceId, data, eventName = 'ticket:created' } = payload;
-    const roomName = type === 'ticket' ? `service-${serviceId}` : 'monitor-room';
+  /**
+   * Broadcasts an event to one or more Socket.IO rooms.
+   * @param {string} eventName - The name of the event to emit.
+   * @param {object} data - The payload to send with the event.
+   * @param {string[]} rooms - An array of room names to broadcast to.
+   */
+  emit(eventName, data, rooms = []) {
     const io = this.socketManager.getIO();
-
-    if (!io) {
-      this.logger.warn('Socket.io not initialized, cannot broadcast event', {
-        room: roomName,
-        event: eventName,
-        ticketId: data.id,
+    if (!io || !rooms.length) {
+      this.logger.warn('Socket.io not initialized or no rooms specified, cannot broadcast.', {
+        eventName,
       });
       return;
     }
 
     try {
-      io.to(roomName).emit(eventName, data);
-      this.logger.info('Broadcast event sent successfully', {
-        room: roomName,
-        event: eventName,
-        ticketId: data.id,
-      });
+      io.to(rooms).emit(eventName, data);
+      this.logger.info('Broadcast event sent successfully', { rooms, eventName });
     } catch (err) {
-      this.logger.error('Error during broadcasting ticket created event', {
-        error: err.message,
-        serviceId,
-        ticketId: data.id,
-      });
+      this.logger.error('Error during broadcasting event', { error: err.message, eventName });
     }
   }
 }
