@@ -1,7 +1,7 @@
 class CounterServiceProxy {
-  constructor({ counterServiceReal, redisClient, logger }) {
+  constructor({ counterServiceReal, cacheService, logger }) {
     this.counterService = counterServiceReal; // Assign the real service
-    this.redisClient = redisClient;
+    this.cacheService = cacheService;
     this.logger = logger;
     this.cacheKeyPrefix = 'counter:';
     this.cacheDuration = 3600; // 1 hour
@@ -9,7 +9,7 @@ class CounterServiceProxy {
 
   async getAll(payload) {
     const cacheKey = `${this.cacheKeyPrefix}all:${JSON.stringify(payload)}`;
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await this.cacheService.get(cacheKey);
 
     if (cachedData) {
       this.logger.info(`Cache hit for ${cacheKey}`);
@@ -18,13 +18,13 @@ class CounterServiceProxy {
 
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
     const data = await this.counterService.getAll(payload);
-    await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+    await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     return data;
   }
 
   async getById(id) {
     const cacheKey = `${this.cacheKeyPrefix}id:${id}`;
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await this.cacheService.get(cacheKey);
 
     if (cachedData) {
       this.logger.info(`Cache hit for ${cacheKey}`);
@@ -34,26 +34,29 @@ class CounterServiceProxy {
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
     const data = await this.counterService.getById(id);
     if (data) {
-      await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+      await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     }
     return data;
   }
 
   async create(data) {
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    return this.counterService.create(data);
+    const result = await this.counterService.create(data);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 
   async update(id, data) {
-    await this.redisClient.del(`${this.cacheKeyPrefix}id:${id}`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    return this.counterService.update(id, data);
+    const result = await this.counterService.update(id, data);
+    await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 
   async remove(id) {
-    await this.redisClient.del(`${this.cacheKeyPrefix}id:${id}`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    return this.counterService.remove(id);
+    const result = await this.counterService.remove(id);
+    await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 }
 

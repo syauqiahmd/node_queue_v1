@@ -7,7 +7,7 @@ const createApp = (container) => {
 
   const whitelist = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
   if (process.env.NODE_ENV === 'development') {
-    whitelist.push('http://localhost:5173'); // Add your local UI port
+    whitelist.push('http://localhost:5173', 'http://localhost:8000'); // Add your local UI port
   }
 
   const corsOptions = {

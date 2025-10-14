@@ -63,12 +63,12 @@ class RedisClient {
     return this.client.get(key);
   }
 
-  async set(key, value, mode, duration) {
+  async set(key, value, options) {
     if (!this.connected) {
       this.logger.warn('[REDIS] Attempted SET on disconnected client', { key });
       throw new Error('Redis client not connected');
     }
-    return this.client.set(key, value, mode, duration);
+    return this.client.set(key, value, options);
   }
 
   async del(key) {
@@ -77,6 +77,24 @@ class RedisClient {
       throw new Error('Redis client not connected');
     }
     return this.client.del(key);
+  }
+
+  async scan(cursor, matchPattern, count) {
+    if (!this.connected) {
+      this.logger.warn('[REDIS] Attempted SCAN on disconnected client');
+      throw new Error('Redis client not connected');
+    }
+    const result = await this.client.sendCommand([
+      'SCAN',
+      cursor.toString(),
+      'MATCH',
+      matchPattern,
+      'COUNT',
+      count.toString(),
+    ]);
+    const newCursor = parseInt(result[0], 10);
+    const keys = result[1];
+    return { cursor: newCursor, keys };
   }
 }
 

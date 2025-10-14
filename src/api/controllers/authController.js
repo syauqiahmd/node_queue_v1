@@ -28,7 +28,7 @@ class AuthController {
         role: data.role,
         isActive: data.isActive,
         organization: {
-          organizationId: data.assigneeOrganization[0].organizationId || '',
+          organizationId: data.assigneeOrganization[0]?.organizationId || '',
           name: data.assigneeOrganization[0]?.organization?.name || '',
           fullName: data.assigneeOrganization[0]?.organization?.FullName || '',
         },

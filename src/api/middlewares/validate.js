@@ -27,6 +27,7 @@ class ValidateMiddleware {
       case 'string.max':
       case 'any.unknown':
       case 'any.only':
+      case 'number.min':
         errorMessage = message;
         break;
       case 'string.guid':
