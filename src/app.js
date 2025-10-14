@@ -1,8 +1,28 @@
 const express = require('express');
+const cors = require('cors');
 const expressJSDocSwagger = require('express-jsdoc-swagger');
 
 const createApp = (container) => {
   const app = express();
+
+  const whitelist = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+  if (process.env.NODE_ENV === 'development') {
+    whitelist.push('http://localhost:5173'); // Add your local UI port
+  }
+
+  const corsOptions = {
+    origin: (origin, callback) => {
+      if (whitelist.indexOf(origin) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  };
+
+  app.use(cors(corsOptions));
+
   const swaggerOptions = require('./api/swagger'); // This path will need to be fixed
   const errorHandler = container.resolve('errorHandler').errorHandler; // Resolve the method
   const rateLimiter = container.resolve('rateLimiter').methodBasedLimiter; // Resolve the method
