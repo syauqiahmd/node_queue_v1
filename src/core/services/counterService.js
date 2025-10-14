@@ -15,6 +15,12 @@ class CounterService {
         payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
     };
 
+    const pagination = {};
+    if (payload.pagination !== 'false') {
+      pagination.skip = (payload.page - 1) * payload.pageSize;
+      pagination.take = payload.pageSize;
+    }
+
     const [data, count] = await Promise.all([
       this.prisma.counter.findMany({
         where,
@@ -25,8 +31,7 @@ class CounterService {
             },
           },
         },
-        skip: (payload.page - 1) * payload.pageSize,
-        take: payload.pageSize,
+        ...pagination,
         orderBy: { [payload.sortBy]: payload.sortOrder },
       }),
       this.prisma.counter.count({

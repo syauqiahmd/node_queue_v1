@@ -94,6 +94,9 @@ container.register({
   // Register RedisClient as a pre-instantiated value
   redisClient: asValue(redisClientInstance),
 
+  // Register CacheService
+  cacheService: asClass(require('./infra/cache/CacheService')).singleton(),
+
   // Register OrganizationService and its proxy
   organizationServiceReal: asClass(require('./core/services/OrganizationService')).singleton(),
   organizationService: asClass(require('./core/services/OrganizationServiceProxy')).singleton(),

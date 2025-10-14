@@ -1,7 +1,7 @@
 class OrganizationServiceProxy {
-  constructor({ organizationServiceReal, redisClient, logger }) {
+  constructor({ organizationServiceReal, cacheService, logger }) {
     this.organizationService = organizationServiceReal; // Assign the real service
-    this.redisClient = redisClient;
+    this.cacheService = cacheService;
     this.logger = logger;
     this.cacheKeyPrefix = 'organization:';
     this.cacheDuration = 3600; // 1 hour
@@ -9,7 +9,7 @@ class OrganizationServiceProxy {
 
   async getAll(payload) {
     const cacheKey = `${this.cacheKeyPrefix}all:${JSON.stringify(payload)}`;
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await this.cacheService.get(cacheKey);
 
     if (cachedData) {
       this.logger.info(`Cache hit for ${cacheKey}`);
@@ -18,13 +18,13 @@ class OrganizationServiceProxy {
 
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
     const data = await this.organizationService.getAll(payload);
-    await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+    await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     return data;
   }
 
   async getById(id) {
     const cacheKey = `${this.cacheKeyPrefix}id:${id}`;
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await this.cacheService.get(cacheKey);
 
     if (cachedData) {
       this.logger.info(`Cache hit for ${cacheKey}`);
@@ -34,14 +34,14 @@ class OrganizationServiceProxy {
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
     const data = await this.organizationService.getById(id);
     if (data) {
-      await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+      await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     }
     return data;
   }
 
   async getPublicList() {
     const cacheKey = `${this.cacheKeyPrefix}publicList`;
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await this.cacheService.get(cacheKey);
 
     if (cachedData) {
       this.logger.info(`Cache hit for ${cacheKey}`);
@@ -51,14 +51,14 @@ class OrganizationServiceProxy {
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
     const data = await this.organizationService.getPublicList();
     if (data) {
-      await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+      await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     }
     return data;
   }
 
   async getAllWithService(payload) {
     const cacheKey = `${this.cacheKeyPrefix}allWithService:${JSON.stringify(payload)}`;
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await this.cacheService.get(cacheKey);
 
     if (cachedData) {
       this.logger.info(`Cache hit for ${cacheKey}`);
@@ -67,34 +67,28 @@ class OrganizationServiceProxy {
 
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
     const data = await this.organizationService.getAllWithService(payload);
-    await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+    await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     return data;
   }
 
   async create(data) {
-    // Invalidate cache for all organizations
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}publicList`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}allWithService:*`);
-    return this.organizationService.create(data);
+    const result = await this.organizationService.create(data);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 
   async update(id, data) {
-    // Invalidate cache for specific organization and all organizations
-    await this.redisClient.del(`${this.cacheKeyPrefix}id:${id}`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}publicList`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}allWithService:*`);
-    return this.organizationService.update(id, data);
+    const result = await this.organizationService.update(id, data);
+    await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 
   async remove(id) {
-    // Invalidate cache for specific organization and all organizations
-    await this.redisClient.del(`${this.cacheKeyPrefix}id:${id}`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}publicList`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}allWithService:*`);
-    return this.organizationService.remove(id);
+    const result = await this.organizationService.remove(id);
+    await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 }
 

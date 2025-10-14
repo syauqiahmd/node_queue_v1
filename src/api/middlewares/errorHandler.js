@@ -43,7 +43,7 @@ class ErrorHandlerMiddleware {
       _next();
     }
 
-    this.logger.error('ErrorHandler:', { err });
+    this.logger.error('ErrorHandler:', err);
 
     let code = 'INTERNAL_SERVER_ERROR';
     let message = 'Something went wrong';

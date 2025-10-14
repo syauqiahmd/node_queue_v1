@@ -34,7 +34,7 @@ class UserService {
   async create(data) {
     const { user, organization = {}, createdBy = 'System', updatedBy = 'System' } = data;
     const userData = await this.prisma.user.create({ data: { ...user, createdBy, updatedBy } });
-    if (userData && organization.id) {
+    if (userData && organization.id && user.role !== 'ADMIN') {
       await this.prisma.userOrganization.create({
         data: {
           userId: userData.id,

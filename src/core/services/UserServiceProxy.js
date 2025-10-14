@@ -1,7 +1,7 @@
 class UserServiceProxy {
-  constructor({ userServiceReal, redisClient, logger }) {
+  constructor({ userServiceReal, cacheService, logger }) {
     this.userService = userServiceReal; // Assign the real service
-    this.redisClient = redisClient;
+    this.cacheService = cacheService;
     this.logger = logger;
     this.cacheKeyPrefix = 'user:';
     this.cacheDuration = 3600; // 1 hour
@@ -9,7 +9,7 @@ class UserServiceProxy {
 
   async getAll(payload) {
     const cacheKey = `${this.cacheKeyPrefix}all:${JSON.stringify(payload)}`;
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await this.cacheService.get(cacheKey);
 
     if (cachedData) {
       this.logger.info(`Cache hit for ${cacheKey}`);
@@ -18,13 +18,13 @@ class UserServiceProxy {
 
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
     const data = await this.userService.getAll(payload);
-    await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+    await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     return data;
   }
 
   async getById(id) {
     const cacheKey = `${this.cacheKeyPrefix}id:${id}`;
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await this.cacheService.get(cacheKey);
 
     if (cachedData) {
       this.logger.info(`Cache hit for ${cacheKey}`);
@@ -34,26 +34,29 @@ class UserServiceProxy {
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
     const data = await this.userService.getById(id);
     if (data) {
-      await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', this.cacheDuration);
+      await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     }
     return data;
   }
 
   async create(data) {
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    return this.userService.create(data);
+    const result = await this.userService.create(data);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 
   async update(id, data) {
-    await this.redisClient.del(`${this.cacheKeyPrefix}id:${id}`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    return this.userService.update(id, data);
+    const result = await this.userService.update(id, data);
+    await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 
   async remove(id) {
-    await this.redisClient.del(`${this.cacheKeyPrefix}id:${id}`);
-    await this.redisClient.del(`${this.cacheKeyPrefix}all:*`);
-    return this.userService.remove(id);
+    const result = await this.userService.remove(id);
+    await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
+    await this.cacheService.invalidate(this.cacheKeyPrefix);
+    return result;
   }
 
   async userDetailByUsername(userName) {

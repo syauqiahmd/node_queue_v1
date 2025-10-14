@@ -26,6 +26,7 @@ const getServiceSchema = Joi.object({
   pageSize: Joi.number().integer().min(1).max(25),
   sortBy: Joi.string().valid('name', 'prefix', 'createdAt').optional(),
   sortOrder: Joi.string().valid('asc', 'desc').optional(),
+  pagination: Joi.boolean().optional(),
 });
 
 const idServiceSchema = Joi.object({
