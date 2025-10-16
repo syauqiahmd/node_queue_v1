@@ -21,7 +21,7 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
    */
   router.get(
     '/',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(serviceSchema.getServiceSchema, 'query'),
     serviceController.getAll.bind(serviceController)
   );
@@ -39,7 +39,7 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
    */
   router.get(
     '/:serviceId',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(serviceSchema.idServiceSchema, 'params'),
     serviceController.getById.bind(serviceController)
   );
@@ -50,6 +50,12 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
    * @tags Service
    * @security BearerAuth
    * @param {object} request.body.required - Service data
+   * @example request - Example payload
+   * {
+   *   "name": "General Inquiries",
+   *   "prefix": "A",
+   *   "organizationId": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+   * }
    * @returns {object} 201 - Created response
    * @returns {object} 400 - Bad Request
    * @returns {object} 401 - Unauthorized
@@ -57,7 +63,7 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
    */
   router.post(
     '/',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(serviceSchema.createServiceSchema),
     serviceController.create.bind(serviceController)
   );
@@ -69,6 +75,13 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
    * @security BearerAuth
    * @param {string} serviceId.path.required - Service ID using UUID format
    * @param {object} request.body.required - Service data
+   * @example request - Example payload
+   * {
+   *   "name": "Specialized Support",
+   *   "prefix": "S",
+   *   "organizationId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+   *   "isActive": true
+   * }
    * @returns {object} 200 - Success response
    * @returns {object} 400 - Bad Request
    * @returns {object} 401 - Unauthorized
@@ -77,7 +90,7 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
    */
   router.put(
     '/:serviceId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(serviceSchema.idServiceSchema, 'params'),
     validateMiddleware.validate(serviceSchema.updateServiceSchema),
     serviceController.update.bind(serviceController)
@@ -96,7 +109,7 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
    */
   router.delete(
     '/:serviceId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(serviceSchema.idServiceSchema, 'params'),
     serviceController.remove.bind(serviceController)
   );

@@ -29,6 +29,10 @@ class AuthUtils {
   verifyToken(token) {
     return jwt.verify(token, this.SECRET);
   }
+
+  decodeToken(token) {
+    return jwt.decode(token);
+  }
 }
 
 module.exports = AuthUtils;

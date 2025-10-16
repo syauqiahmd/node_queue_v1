@@ -21,7 +21,7 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    */
   router.get(
     '/',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(counterSchema.getCounterSchema, 'query'),
     counterController.getAll.bind(counterController)
   );
@@ -39,7 +39,7 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    */
   router.get(
     '/:counterId',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(counterSchema.idCounterSchema, 'params'),
     counterController.getById.bind(counterController)
   );
@@ -50,6 +50,11 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    * @tags Counter
    * @security BearerAuth
    * @param {object} request.body.required - Service data
+   * @example request - Example payload
+   * {
+   *   "counterNumber": "A01",
+   *   "serviceId": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+   * }
    * @returns {object} 201 - Created response
    * @returns {object} 400 - Bad Request
    * @returns {object} 401 - Unauthorized
@@ -57,7 +62,7 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    */
   router.post(
     '/',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(counterSchema.createCounterSchema),
     counterController.create.bind(counterController)
   );
@@ -69,6 +74,12 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    * @security BearerAuth
    * @param {string} counterId.path.required - Service ID using UUID format
    * @param {object} request.body.required - Service data
+   * @example request - Example payload
+   * {
+   *   "counterNumber": "A02",
+   *   "serviceId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+   *   "isActive": true
+   * }
    * @returns {object} 200 - Success response
    * @returns {object} 400 - Bad Request
    * @returns {object} 401 - Unauthorized
@@ -77,7 +88,7 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    */
   router.put(
     '/:counterId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(counterSchema.idCounterSchema, 'params'),
     validateMiddleware.validate(counterSchema.updateCounterSchema),
     counterController.update.bind(counterController)
@@ -96,7 +107,7 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    */
   router.delete(
     '/:counterId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(counterSchema.idCounterSchema, 'params'),
     counterController.remove.bind(counterController)
   );

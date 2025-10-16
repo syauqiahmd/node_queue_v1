@@ -50,8 +50,7 @@ class UserController {
         user: {
           userName,
           fullName,
-          // password: await this.authUtils.hashPassword(password), // Ensure password is included in the payload
-          password,
+          password: await this.authUtils.hashPassword(password),
           role,
         },
         organization: {

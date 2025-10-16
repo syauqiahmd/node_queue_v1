@@ -37,7 +37,7 @@ class AuthMiddleware {
     }
   };
 
-  RBAC = (roles = ['ADMIN', 'USER']) => {
+  authorize = (roles = ['ADMIN', 'USER']) => {
     return (req, res, next) => {
       if (!req.user || !req.user.role) {
         return next(this.businessException.Unauthorized('User role not found'));

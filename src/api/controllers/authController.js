@@ -61,6 +61,19 @@ class AuthController {
       next(err);
     }
   }
+
+  async validateToken(req, res, next) {
+    try {
+      const decodedToken = this.authUtils.decodeToken(req.token);
+      const data = {
+        ...req.user,
+        expiresAt: new Date(decodedToken.exp * 1000),
+      };
+      return res.status(200).json({ success: true, message: 'Token is valid', data });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = AuthController;
