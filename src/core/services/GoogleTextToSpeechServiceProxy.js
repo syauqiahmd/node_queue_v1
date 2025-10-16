@@ -9,14 +9,12 @@ class GoogleTextToSpeechServiceProxy {
     this.cacheDuration = 3600; // Cache for 1 hour
   }
 
-  generateCacheKey(text) {
-    const hash = crypto.createHash('sha256');
-    hash.update(text);
-    return `${this.cacheKeyPrefix}${hash.digest('hex')}`;
+  generateCacheKey(queueId) {
+    return `${this.cacheKeyPrefix}${queueId}`;
   }
 
-  async generateSound(text) {
-    const cacheKey = this.generateCacheKey(text);
+  async generateSound(text, queueId) {
+    const cacheKey = this.generateCacheKey(queueId);
     const cachedData = await this.redisClient.get(cacheKey);
 
     if (cachedData) {
@@ -25,13 +23,13 @@ class GoogleTextToSpeechServiceProxy {
     }
 
     this.logger.info('Cache miss for TTS. Fetching from real service.');
-    const data = await this.googleTextToSpeechService.generateSound(text);
+    const data = await this.googleTextToSpeechService.generateSound(text, queueId);
     await this.redisClient.set(cacheKey, data, 'EX', this.cacheDuration);
     return data;
   }
 
-  async invalidateCache(text) {
-    const cacheKey = this.generateCacheKey(text);
+  async invalidateCache(queueId) {
+    const cacheKey = this.generateCacheKey(queueId);
     this.logger.info(`Invalidating TTS cache for key: ${cacheKey}`);
     await this.redisClient.del(cacheKey);
   }

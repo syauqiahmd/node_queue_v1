@@ -1,6 +1,7 @@
 const toTicketCalledDTO = require('../dto/websocket/TicketCalledDTO');
 const toTicketResolvedDTO = require('../dto/websocket/TicketResolvedDTO');
 const toTicketPrioritizedDTO = require('../dto/websocket/TicketPrioritizedDTO');
+const toTicketRecalledDTO = require('../dto/websocket/TicketRecalledDTO');
 
 class QueueService {
   constructor({ prismaClient, businessException, googleTextToSpeechService, broadcastService }) {
@@ -114,11 +115,70 @@ class QueueService {
       },
     });
 
+    const callingText = `Nomor antrian: ${updatedTicket.prefix} - ${updatedTicket.queueNumber}; silahkan menuju, ke loket nomor, ${updatedTicket.latestAssigneeCounter.counterNumber}`;
+    const soundUrl = await this.googleTextToSpeechService.generateSound(callingText, queueId);
+
+    // Update the ticket with the sound URL
+    const finalTicket = await this.prisma.ticket.update({
+      where: { id: queueId },
+      data: { soundUrl },
+      include: {
+        service: {
+          include: {
+            organization: true,
+          },
+        },
+        latestAssigneeCounter: true,
+      },
+    });
+
     // Broadcast the event
     const rooms = [`service-${updatedTicket.serviceId}`, 'monitor-room'];
-    this.broadcastService.emit('ticket:called', toTicketCalledDTO(updatedTicket), rooms);
+    this.broadcastService.emit('ticket:called', toTicketCalledDTO(finalTicket), rooms);
 
-    return updatedTicket;
+    return finalTicket;
+  }
+
+  async recallTicket(queueId, newCounterId) {
+    let ticket = await this.prisma.ticket.findUnique({
+      where: { id: queueId },
+      include: {
+        service: { include: { organization: true } },
+        latestAssigneeCounter: true,
+      },
+    });
+
+    if (!ticket) {
+      throw this.businessException.NotFound('ticket');
+    }
+
+    // If a new counter is specified and it's different from the current one
+    if (newCounterId && newCounterId !== ticket.latestAssigneeCounterId) {
+      await this.googleTextToSpeechService.invalidateCache(queueId);
+
+      const newCounter = await this.prisma.counter.findUnique({ where: { id: newCounterId } });
+      if (!newCounter) {
+        throw this.businessException.NotFound('new counter');
+      }
+
+      const callingText = `Nomor antrian: ${ticket.prefix} - ${ticket.queueNumber}; silahkan menuju, ke loket nomor, ${newCounter.counterNumber}`;
+      const soundUrl = await this.googleTextToSpeechService.generateSound(callingText, queueId);
+
+      ticket = await this.prisma.ticket.update({
+        where: { id: queueId },
+        data: { latestAssigneeCounterId: newCounterId, soundUrl },
+        include: {
+          service: { include: { organization: true } },
+          latestAssigneeCounter: true,
+        },
+      });
+    }
+
+    // Broadcast the recall event
+    const rooms = [`service-${ticket.serviceId}`, 'monitor-room'];
+    this.broadcastService.emit('ticket:recalled', toTicketRecalledDTO(ticket), rooms);
+
+    return ticket;
   }
 
   async getCurrentQueueDetailById(id) {
@@ -153,10 +213,7 @@ class QueueService {
     const oldCounter = currentTicket.latestAssigneeCounter;
     const newCounterId = payload.latestAssigneeCounterId;
 
-    if (newCounterId && oldCounter && newCounterId !== oldCounter.id) {
-      const oldAnnouncementText = `Nomor antrian: ${currentTicket.prefix} - ${currentTicket.queueNumber}; silahkan menuju, ke loket nomor, ${oldCounter.counterNumber}`;
-      await this.googleTextToSpeechService.invalidateCache(oldAnnouncementText);
-    }
+    
 
     const updatedTicket = await this.prisma.ticket.update({
       where: { id },
@@ -172,7 +229,7 @@ class QueueService {
 
     // Broadcast if the ticket is resolved
     if (payload.isResolved) {
-      const rooms = [`service-${updatedTicket.serviceId}`];
+      const rooms = [`service-${updatedTicket.serviceId}`, 'monitor-room'];
       this.broadcastService.emit('ticket:resolved', toTicketResolvedDTO(updatedTicket), rooms);
     }
 
