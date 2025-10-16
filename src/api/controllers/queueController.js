@@ -106,7 +106,9 @@ class QueueController {
       const callingText = `Nomor antrian: ${data.prefix} - ${data.queueNumber}; silahkan menuju, ke loket nomor, ${data.latestAssigneeCounter.counterNumber}`;
       const soundData = await this.googleTextToSpeechService.generateSound(callingText);
 
-      return res.status(200).json({ success: true, data: { data, soundData } });
+      return res
+        .status(200)
+        .json({ success: true, data: { queueDetail: data, soundUrl: soundData } });
     } catch (err) {
       next(err);
     }

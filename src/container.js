@@ -29,11 +29,9 @@ container.loadModules(
     'infra/clients/*.js',
     'infra/db/repositories/*.js',
     'infra/socket/*.js',
-    // 'api/controllers/*.js', // Removed this line
     'api/middlewares/*.js',
     'infra/utils/*.js',
-    // 'api/utils/*.js', // Removed this line
-    'infra/db/dbConnectionChecker.js', // Register the db connection checker
+    // 'infra/db/dbConnectionChecker.js', // Removed this line
     'core/dto/*.js', // Register DTOs
     'core/interfaces/*.js', // Register interfaces
   ],
@@ -66,7 +64,11 @@ container.register({
   requestId: asClass(require('./api/middlewares/requestId')).singleton(), // Register RequestIdMiddleware
   asyncContextRunner: asClass(require('./api/middlewares/asyncContextRunner')).singleton(), // Register AsyncContextRunnerMiddleware
   errorHandler: asClass(require('./api/middlewares/errorHandler')).singleton(), // Register ErrorHandlerMiddleware
-  responseFormatter: asClass(require('./api/utils/response.formatter')).singleton(), // Register ResponseFormatter
+  // Register ResponseFormatter
+  responseFormatter: asClass(require('./api/utils/response.formatter')).singleton(),
+
+  // Register HealthCheck
+  healthCheck: asClass(require('./infra/utils/healthCheck')).singleton(),
 
   authMiddleware: asClass(require('./api/middlewares/auth')).singleton(),
 
@@ -93,6 +95,9 @@ container.register({
 
   // Register RedisClient as a pre-instantiated value
   redisClient: asValue(redisClientInstance),
+
+  // Register S3Client
+  s3Client: asClass(require('./infra/clients/S3Client')).singleton(),
 
   // Register CacheService
   cacheService: asClass(require('./infra/cache/CacheService')).singleton(),
