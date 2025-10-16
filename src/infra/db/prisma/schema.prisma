@@ -102,6 +102,7 @@ model Ticket {
   isCall                    Boolean  @default(false) @map("is_call")
   isResolved                Boolean  @default(false) @map("is_resolved")
   isPriority                Boolean  @default(false) @map("is_priority")
+  soundUrl                  String?  @map("sound_url")
   serviceId                 String   @db.Uuid @map("service_id")
   latestAssigneeCounterId   String?  @db.Uuid @map("latest_assignee_counter_id")
   createdAt                 DateTime @default(now()) @map("created_at")

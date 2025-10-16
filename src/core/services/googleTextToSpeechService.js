@@ -7,7 +7,7 @@ class GoogleTextToSpeechService {
     this.logger = logger;
   }
 
-  async generateSound(text = '') {
+  async generateSound(text = '', queueId) {
     const request = {
       input: { text },
       voice: { languageCode: 'id-ID', ssmlGender: 'NEUTRAL' },
@@ -17,7 +17,7 @@ class GoogleTextToSpeechService {
     const [response] = await this.client.synthesizeSpeech(request);
 
     const audioBuffer = Buffer.from(response.audioContent, 'binary');
-    const fileName = `sound-generated/${Date.now()}-${text.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50)}.mp3`;
+    const fileName = `sound-generated/${new Date().toISOString().split('T')[0]}/${queueId}.mp3`;
     const contentType = 'audio/mpeg';
     const expiresInHours = parseInt(process.env.S3_SOUND_EXPIRATION_HOURS, 10) || 8; // Default to 8 hours
     const expiresInSeconds = expiresInHours * 3600;

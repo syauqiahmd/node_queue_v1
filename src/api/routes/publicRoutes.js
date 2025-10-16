@@ -166,23 +166,5 @@ module.exports = ({
     queueController.getCallingQueue.bind(queueController)
   );
 
-  /**
-   * GET /public/call-queue/{queueId}
-   * @summary get queue calling sound
-   * @tags #Public
-   * @param {string} queueId.path.required - User ID using UUID format
-   * @returns {object} 200 - Success response (audio file)
-   * @returns {object} 400 - Bad Request
-   * @returns {object} 404 - Not Found
-   * @returns {object} 500 - Internal Server Error
-   * @example response - 200 - Example success response (audio file)
-   * // Binary audio data
-   */
-  router.get(
-    '/call-queue/:queueId',
-    validateMiddleware.validate(queueSchema.idQueueSchema, 'params'),
-    queueController.generateQueueCallingSound.bind(queueController)
-  );
-
   return router;
 };

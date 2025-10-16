@@ -65,15 +65,15 @@ sequenceDiagram
 
 ## 4. Monitoring Called Queue and Sound Generation
 
-This diagram illustrates the real-time update on the monitoring screen and the subsequent sound generation.
+This diagram illustrates the real-time update on the monitoring screen and the subsequent sound generation, including S3 integration.
 
 ```mermaid
 sequenceDiagram
     participant MonitorClient as Monitoring Screen
     participant SocketServer as Socket.IO Server
     participant APIServer as API Server
-    participant BroadcastService as broadcastService
     participant GoogleTTS as googleTextToSpeechService
+    participant S3Client as S3 Client
 
     MonitorClient->>SocketServer: Connect
     SocketServer-->>MonitorClient: Connection established
@@ -82,16 +82,15 @@ sequenceDiagram
 
     participant User as Admin/CS
     User->>APIServer: POST /api/queues/call-next
-    APIServer->>BroadcastService: callTicket(ticket)
-    BroadcastService->>SocketServer: Emit 'call-ticket' event with ticket data
+    APIServer->>SocketServer: Emit 'call-ticket' event with ticket data
     SocketServer->>MonitorClient: Push 'call-ticket' event
     
     MonitorClient->>MonitorClient: Update UI with new ticket info
-    MonitorClient->>APIServer: GET /api/broadcast/tts?ticketNumber=...
-    APIServer->>BroadcastService: generateTTS(ticketNumber)
-    BroadcastService->>GoogleTTS: synthesizeSpeech("Ticket... A 1")
-    GoogleTTS-->>BroadcastService: Return audio stream/file
-    BroadcastService-->>APIServer: Return audio file
-    APIServer-->>MonitorClient: Return audio file
-    MonitorClient->>MonitorClient: Play audio
+    MonitorClient->>APIServer: GET /api/public/call-queue/{queueId}
+    APIServer->>GoogleTTS: generateSound(callingText)
+    GoogleTTS->>S3Client: uploadFile(audioBuffer, fileName, contentType, expiresInSeconds)
+    S3Client-->>GoogleTTS: Return S3 URL
+    GoogleTTS-->>APIServer: Return S3 URL
+    APIServer-->>MonitorClient: Return S3 URL
+    MonitorClient->>MonitorClient: Play audio from S3 URL
 ```

@@ -33,32 +33,19 @@ class QueueController {
 
   async actionQueueById(req, res, next) {
     try {
-      const { action, queueId, counterId: latestAssigneeCounterId } = req.body;
-      const data = await this.queueService.getCurrentQueueDetailById(queueId);
-      if (!data) {
-        throw this.businessException.NotFound('queue');
-      }
-      const updatePayload = {};
-
-      if (!data.isCall) {
-        throw this.businessException.unCalledQueue();
-      }
+      const { action, queueId, counterId } = req.body;
 
       if (action === 'resolve') {
-        updatePayload.isResolved = true;
-        const updatedData = await this.queueService.updateQueueById(queueId, updatePayload);
-        return res.status(200).json({ success: true, data: updatedData });
-      }
-      if (latestAssigneeCounterId) {
-        const updatedData = await this.queueService.updateQueueById(queueId, {
-          latestAssigneeCounterId,
-        });
-        return res.status(200).json({ success: true, data: updatedData });
+        const updatedTicket = await this.queueService.updateQueueById(queueId, { isResolved: true });
+        return res.status(200).json({ success: true, data: updatedTicket, message: 'Ticket resolved' });
       }
 
-      //TODO: broadcast to all counters by serviceId
+      if (action === 'retry') {
+        const recalledTicket = await this.queueService.recallTicket(queueId, counterId);
+        return res.status(200).json({ success: true, data: recalledTicket, message: 'Ticket recalled' });
+      }
 
-      return res.status(200).json({ success: true, data });
+      throw this.businessException.BadRequest('Invalid action specified');
     } catch (err) {
       next(err);
     }
@@ -105,6 +92,9 @@ class QueueController {
 
       const callingText = `Nomor antrian: ${data.prefix} - ${data.queueNumber}; silahkan menuju, ke loket nomor, ${data.latestAssigneeCounter.counterNumber}`;
       const soundData = await this.googleTextToSpeechService.generateSound(callingText);
+
+      // Save the S3 URL to the ticket record
+      await this.queueService.updateQueueById(queueId, { soundUrl: soundData });
 
       return res
         .status(200)

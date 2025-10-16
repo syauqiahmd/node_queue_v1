@@ -8,7 +8,8 @@
     - **Leverage Cloud Storage (e.g., S3) for TTS Audio Caching:** To further optimize costs and performance, store generated audio files in a cloud storage bucket (like AWS S3 or Google Cloud Storage). This ensures you only pay for TTS generation once per unique announcement. Subsequent requests retrieve the file from storage, significantly reducing latency and TTS API costs. Your `GoogleTextToSpeechServiceProxy` can be extended to manage this persistent caching layer, potentially integrating with a CDN for even faster global delivery.
 
 2.  **Queue Management Features:**
-    - **Analytics and Reporting:** To provide more value to administrators, you could create API endpoints for analytics, such as average wait times, peak hours, and counter performance reports.
+    - **Analytics and Reporting:** To provide more value to administrators, you could create API endpoints for analytics, suchs as average wait times, peak hours, and counter performance reports.
+    - **Agent/Counter Status Management:** Implement APIs for agents to update their status (e.g., 'Available', 'Busy', 'Break', 'Offline'). This allows for intelligent routing of calls and accurate display of agent availability on monitoring screens.
 
 3.  **Reporting and Data Archiving Strategy (Cron Jobs):**
 
@@ -148,3 +149,40 @@ Based on the `DailyServiceStats` table, here are the refined reporting APIs:
 - **CSV Export (via `GET /api/analytics/report-overview?format=csv`)**
   - **Purpose:** To export the data from the `report-overview` in CSV format.
   - **How it works:** The controller logic for `/api/analytics/report-overview` would check for a `format=csv` query parameter. If present, it would convert the JSON data to a CSV string and send it back with appropriate `Content-Type` and `Content-Disposition` headers to trigger a file download.
+
+## Configuration Management APIs
+
+Configuration Management APIs allow administrators to dynamically adjust application settings without requiring code changes or application restarts. This significantly enhances the flexibility and maintainability of the system.
+
+### What they would contain:
+
+1.  **Dynamic System Settings:**
+    *   **Queue Behavior:** APIs to set default queue limits (e.g., maximum tickets per service), define rules for when a ticket is considered "long waiting," or configure daily/weekly queue reset schedules.
+    *   **Sound & Announcement Customization:** Endpoints to manage text-to-speech voice settings (language, gender, speaking rate), customize announcement phrases (e.g., "Please proceed to counter {counterNumber}"), or adjust the S3 expiration time for generated sound files.
+    *   **Rate Limiting:** APIs to dynamically update `RATE_LIMIT_WINDOW` and `RATE_LIMIT_MAX` values without redeploying.
+    *   **Feature Flags:** Endpoints to enable or disable specific application features on the fly.
+
+2.  **User & Role-Based Access Control (RBAC) Settings:**
+    *   APIs to define and manage roles, assign permissions to roles, or set default roles for new users. This moves RBAC configuration from code/database seeds to a dynamic system.
+
+3.  **Integration Settings:**
+    *   Endpoints to configure parameters for external integrations, such as API keys (though sensitive keys should be handled with extreme care and not exposed directly via API), webhook URLs, or third-party service endpoints.
+
+4.  **System Messages & Notifications:**
+    *   APIs to customize user-facing messages (e.g., "Queue is currently full," "Service unavailable") or configure notification thresholds and channels (e.g., email/SMS alerts for long wait times).
+
+### Benefits for User Experience (UX) and Administration:
+
+*   **Increased Agility:** Administrators can quickly adapt the system to changing operational needs, business rules, or external factors without developer intervention.
+*   **Empowerment:** Provides administrators with greater control and visibility over the application's behavior.
+*   **Reduced Operational Overhead:** Eliminates the need for code deployments or restarts for configuration changes, leading to higher availability and less downtime.
+*   **Centralized Control:** All configurable aspects of the application can be managed through a single, intuitive interface (built on top of these APIs).
+*   **A/B Testing & Experimentation:** Facilitates dynamic testing of different configurations to optimize performance or user satisfaction.
+
+### Implementation Considerations:
+
+*   **Security:** These APIs must be highly secured, typically restricted to `ADMIN` roles with robust authorization checks.
+*   **Validation:** Strict input validation is crucial to prevent misconfigurations.
+*   **Persistence:** Configuration values need to be stored persistently (e.g., in a dedicated database table or a distributed configuration store).
+*   **Caching:** Configuration values should be aggressively cached within the application to avoid performance bottlenecks from frequent database lookups.
+*   **Real-time Updates:** Mechanisms (e.g., pub/sub, webhooks, or periodic polling) might be needed to notify application instances of configuration changes so they can pick up new values without requiring a restart.
