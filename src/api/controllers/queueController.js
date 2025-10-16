@@ -36,13 +36,19 @@ class QueueController {
       const { action, queueId, counterId } = req.body;
 
       if (action === 'resolve') {
-        const updatedTicket = await this.queueService.updateQueueById(queueId, { isResolved: true });
-        return res.status(200).json({ success: true, data: updatedTicket, message: 'Ticket resolved' });
+        const updatedTicket = await this.queueService.updateQueueById(queueId, {
+          isResolved: true,
+        });
+        return res
+          .status(200)
+          .json({ success: true, data: updatedTicket, message: 'Ticket resolved' });
       }
 
       if (action === 'retry') {
         const recalledTicket = await this.queueService.recallTicket(queueId, counterId);
-        return res.status(200).json({ success: true, data: recalledTicket, message: 'Ticket recalled' });
+        return res
+          .status(200)
+          .json({ success: true, data: recalledTicket, message: 'Ticket recalled' });
       }
 
       throw this.businessException.BadRequest('Invalid action specified');

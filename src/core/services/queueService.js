@@ -210,11 +210,6 @@ class QueueService {
       throw this.businessException.NotFound('ticket');
     }
 
-    const oldCounter = currentTicket.latestAssigneeCounter;
-    const newCounterId = payload.latestAssigneeCounterId;
-
-    
-
     const updatedTicket = await this.prisma.ticket.update({
       where: { id },
       data: payload,

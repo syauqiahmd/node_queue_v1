@@ -1,5 +1,3 @@
-const crypto = require('crypto');
-
 class GoogleTextToSpeechServiceProxy {
   constructor({ googleTextToSpeechServiceReal, redisClient, logger }) {
     this.googleTextToSpeechService = googleTextToSpeechServiceReal;

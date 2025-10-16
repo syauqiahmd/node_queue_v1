@@ -11,7 +11,6 @@ module.exports = ({
   validateMiddleware,
   serviceSchema,
   generalSchema,
-  queueSchema,
 }) => {
   const router = express.Router();
   const rateLimiter = new RateLimiterMiddleware();
