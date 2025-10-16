@@ -1,13 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-module.exports = ({
-  userController,
-  authController,
-  authMiddleware,
-  validateMiddleware,
-  userSchema,
-}) => {
+module.exports = ({ userController, authMiddleware, validateMiddleware, userSchema }) => {
   /**
    * GET /users
    * @summary Get list of users
@@ -28,7 +22,7 @@ module.exports = ({
    */
   router.get(
     '/',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(userSchema.getUserSchema, 'query'),
     userController.getAll.bind(userController)
   );
@@ -46,7 +40,7 @@ module.exports = ({
    */
   router.get(
     '/:userId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(userSchema.idUserSchema, 'params'),
     userController.getById.bind(userController)
   );
@@ -57,6 +51,21 @@ module.exports = ({
    * @tags User
    * @security BearerAuth
    * @param {object} request.body.required - user data
+   * @example request - For 'USER' role
+   * {
+   *   "userName": "john.doe",
+   *   "fullName": "John Doe",
+   *   "password": "password123",
+   *   "role": "USER",
+   *   "organizationId": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+   * }
+   * @example request - For 'ADMIN' role
+   * {
+   *   "userName": "admin.user",
+   *   "fullName": "Admin User",
+   *   "password": "password123",
+   *   "role": "ADMIN"
+   * }
    * @returns {object} 201 - Created response
    * @returns {object} 400 - Bad Request
    * @returns {object} 401 - Unauthorized
@@ -64,7 +73,7 @@ module.exports = ({
    */
   router.post(
     '/',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(userSchema.createUserSchema),
     userController.create.bind(userController)
   );
@@ -76,6 +85,15 @@ module.exports = ({
    * @security BearerAuth
    * @param {string} userId.path.required - User ID using UUID format
    * @param {object} request.body.required - User data
+   * @example request - Example payload for updating a 'USER'
+   * {
+   *   "userName": "john.doe.updated",
+   *   "fullName": "John Doe Updated",
+   *   "password": "newPassword123",
+   *   "role": "USER",
+   *   "organizationId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+   *   "isActive": true
+   * }
    * @returns {object} 200 - Success response
    * @returns {object} 400 - Bad Request
    * @returns {object} 401 - Unauthorized
@@ -84,7 +102,7 @@ module.exports = ({
    */
   router.put(
     '/:userId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(userSchema.idUserSchema, 'params'),
     validateMiddleware.validate(userSchema.updateUserSchema),
     userController.update.bind(userController)
@@ -103,24 +121,9 @@ module.exports = ({
    */
   router.delete(
     '/:userId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(userSchema.idUserSchema, 'params'),
     userController.remove.bind(userController)
-  );
-
-  /**
-   * POST /users/logout
-   * @summary Logout user
-   * @tags #Authorization
-   * @security BearerAuth
-   * @returns {object} 200 - Success response
-   * @returns {object} 401 - Unauthorized
-   * @returns {object} 500 - Internal Server Error
-   */
-  router.post(
-    '/logout',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
-    authController.logout.bind(authController)
   );
 
   return router;

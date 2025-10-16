@@ -25,7 +25,7 @@ module.exports = ({
    */
   router.get(
     '/',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(organizationSchema.getOrganizationSchema, 'query'),
     organizationController.getAll.bind(organizationController)
   );
@@ -43,7 +43,7 @@ module.exports = ({
    */
   router.get(
     '/:organizationId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(organizationSchema.idOrganizationSchema, 'params'),
     organizationController.getById.bind(organizationController)
   );
@@ -54,6 +54,11 @@ module.exports = ({
    * @tags Organization
    * @security BearerAuth
    * @param {object} request.body.required - Organization data
+   * @example request - Example payload
+   * {
+   *   "name": "Main Branch",
+   *   "fullName": "Main Branch Office"
+   * }
    * @returns {object} 201 - Created response
    * @returns {object} 400 - Bad Request
    * @returns {object} 401 - Unauthorized
@@ -61,7 +66,7 @@ module.exports = ({
    */
   router.post(
     '/',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(organizationSchema.createOrganizationSchema),
     organizationController.create.bind(organizationController)
   );
@@ -73,6 +78,12 @@ module.exports = ({
    * @security BearerAuth
    * @param {string} organizationId.path.required - Organization ID using UUID format
    * @param {object} request.body.required - Organization data
+   * @example request - Example payload
+   * {
+   *   "name": "Main Branch Updated",
+   *   "fullName": "Main Branch Office (Renovated)",
+   *   "isActive": false
+   * }
    * @returns {object} 200 - Success response
    * @returns {object} 400 - Bad Request
    * @returns {object} 401 - Unauthorized
@@ -81,7 +92,7 @@ module.exports = ({
    */
   router.put(
     '/:organizationId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(organizationSchema.idOrganizationSchema, 'params'),
     validateMiddleware.validate(organizationSchema.updateOrganizationSchema),
     organizationController.update.bind(organizationController)
@@ -100,7 +111,7 @@ module.exports = ({
    */
   router.delete(
     '/:organizationId',
-    authMiddleware.RBAC(['ADMIN']),
+    authMiddleware.authorize(['ADMIN']),
     validateMiddleware.validate(organizationSchema.idOrganizationSchema, 'params'),
     organizationController.remove.bind(organizationController)
   );

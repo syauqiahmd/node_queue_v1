@@ -32,7 +32,7 @@ module.exports = ({
    */
   router.post(
     '/call',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(queueSchema.callQueueSchema),
     queueController.callNextQueue.bind(queueController)
   );
@@ -62,7 +62,7 @@ module.exports = ({
    */
   router.post(
     '/action',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(queueSchema.actionQueueSchema),
     queueController.actionQueueById.bind(queueController)
   );
@@ -95,7 +95,7 @@ module.exports = ({
    */
   router.get(
     '/:serviceId',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(serviceSchema.idServiceSchema, 'params'),
     validateMiddleware.validate(queueSchema.getQueueListSchema, 'query'),
     queueController.getQueueListByServiceId.bind(queueController)
@@ -124,7 +124,7 @@ module.exports = ({
    */
   router.get(
     '/:serviceId/summary',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(serviceSchema.idServiceSchema, 'params'),
     validateMiddleware.validate(queueSchema.getSummaryQueueSchema, 'query'),
     queueController.getTotalQueueByServiceId.bind(queueController)
@@ -140,7 +140,7 @@ module.exports = ({
    */
   router.put(
     '/:queueId/prioritize',
-    authMiddleware.RBAC(['ADMIN', 'USER']),
+    authMiddleware.authorize(['ADMIN', 'USER']),
     validateMiddleware.validate(queueSchema.idQueueSchema, 'params'),
     queueController.prioritizeTicket.bind(queueController)
   );

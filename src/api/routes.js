@@ -1,9 +1,4 @@
 const { Router } = require('express');
-const counterRoutes = require('./routes/counterRoutes');
-const organizationRoutes = require('./routes/organizationRoutes');
-const queueRoutes = require('./routes/queueRoutes');
-const serviceRoutes = require('./routes/serviceRoutes');
-const userRoutes = require('./routes/userRoutes');
 
 module.exports = ({
   counterController,
@@ -25,61 +20,64 @@ module.exports = ({
   const router = Router();
 
   // Public routes
-  router.post('/public/login', authController.login.bind(authController));
-  router.post(
-    '/public/tickets',
-    validateMiddleware.validate(serviceSchema.idServiceSchema),
-    ticketController.create.bind(ticketController)
-  );
-  router.get(
-    '/public/services',
-    validateMiddleware.validate(generalSchema.emptySchema, 'query'),
-    serviceController.publicServiceList.bind(serviceController)
-  );
-  router.get(
-    '/public/organizations',
-    validateMiddleware.validate(generalSchema.emptySchema, 'query'),
-    organizationController.getPublicList.bind(organizationController)
-  );
-  router.get(
-    '/public/queues',
-    validateMiddleware.validate(generalSchema.emptySchema, 'query'),
-    queueController.getCallingQueue.bind(queueController)
-  );
-  router.get(
-    '/public/call-queue/:queueId',
-    validateMiddleware.validate(queueSchema.idQueueSchema, 'params'),
-    queueController.generateQueueCallingSound.bind(queueController)
-  );
+  const publicRoutes = require('./routes/publicRoutes')({
+    ticketController,
+    queueController,
+    authController,
+    serviceController,
+    organizationController,
+    validateMiddleware,
+    serviceSchema,
+    generalSchema,
+    queueSchema,
+  });
+  router.use('/public', publicRoutes);
 
-  // Apply authentication middleware to all routes below this point
-  router.use(authMiddleware.authenticateToken);
+  // Protected routes
+  const counterRoutes = require('./routes/counterRoutes')({
+    counterController,
+    authMiddleware,
+    validateMiddleware,
+    counterSchema,
+  });
+  router.use('/counters', authMiddleware.authenticateToken, counterRoutes);
 
-  router.use(
-    '/counters',
-    counterRoutes({ counterController, authMiddleware, validateMiddleware, counterSchema })
-  );
-  router.use(
-    '/organizations',
-    organizationRoutes({
-      organizationController,
-      authMiddleware,
-      validateMiddleware,
-      organizationSchema,
-    })
-  );
-  router.use(
-    '/queues',
-    queueRoutes({ queueController, authMiddleware, validateMiddleware, serviceSchema, queueSchema })
-  );
-  router.use(
-    '/services',
-    serviceRoutes({ serviceController, authMiddleware, validateMiddleware, serviceSchema })
-  );
-  router.use(
-    '/users',
-    userRoutes({ userController, authController, authMiddleware, validateMiddleware, userSchema })
-  );
+  const organizationRoutes = require('./routes/organizationRoutes')({
+    organizationController,
+    authMiddleware,
+    validateMiddleware,
+    organizationSchema,
+  });
+  router.use('/organizations', authMiddleware.authenticateToken, organizationRoutes);
+
+  const queueRoutes = require('./routes/queueRoutes')({
+    queueController,
+    authMiddleware,
+    validateMiddleware,
+    serviceSchema,
+    queueSchema,
+  });
+  router.use('/queues', authMiddleware.authenticateToken, queueRoutes);
+
+  const serviceRoutes = require('./routes/serviceRoutes')({
+    serviceController,
+    authMiddleware,
+    validateMiddleware,
+    serviceSchema,
+  });
+  router.use('/services', authMiddleware.authenticateToken, serviceRoutes);
+
+  const userRoutes = require('./routes/userRoutes')({
+    userController,
+    authController,
+    authMiddleware,
+    validateMiddleware,
+    userSchema,
+  });
+  router.use('/users', authMiddleware.authenticateToken, userRoutes);
+
+  const authRoutes = require('./routes/authRoutes')({ authController, authMiddleware });
+  router.use('/auth', authMiddleware.authenticateToken, authRoutes);
 
   return router;
 };
