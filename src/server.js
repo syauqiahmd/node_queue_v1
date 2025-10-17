@@ -20,7 +20,7 @@ const server = http.createServer(app);
   await healthCheck.runChecks(); // Run all infrastructure checks
 
   server.listen(port, () => {
-    logger.info(`[APP] Success to serve at ${port}`);
+    logger.info(`[APP] Success to serve at port ${port} with pid ${process.pid}`);
   });
 })();
 
