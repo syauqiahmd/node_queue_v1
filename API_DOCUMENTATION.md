@@ -238,7 +238,7 @@ These endpoints require authentication and `ADMIN` role.
     | `isActive`   | `boolean`                  | No       | Filter by active status     |
     | `page`       | `number`                   | No       | Page number (default: 1)    |
     | `pageSize`   | `number`                   | No       | Items per page (default: 10)|
-    | `sortBy`     | `string`                   | No       | Sort by field               |
+    | `sortBy`     | `string`                   | No       | Sort by field (`userName`, `fullName`, `role`, `createdAt`) |
     | `sortOrder`  | `string` ('asc' or 'desc') | No       | Sort order                  |
 *   **Responses:**
     *   `200 OK`
@@ -387,7 +387,7 @@ These endpoints require authentication. Some endpoints require `ADMIN` role.
     *   `500 Internal Server Error`
 
 #### `POST /counters`
-*   **Summary:** Create service data
+*   **Summary:** Create counter data
 *   **Tags:** Counter
 *   **Security:** BearerAuth
 *   **Roles:** ADMIN
@@ -471,7 +471,7 @@ These endpoints require authentication and `ADMIN` role.
     | `isActive`     | `boolean`| No       | Filter by active status |
     | `page`         | `number` | No       | Page number (default: 1) |
     | `pageSize`     | `number` | No       | Items per page (default: 10)|
-    | `sortBy`       | `string` | No       | Sort by field (`name`, `createdAt`) |
+    | `sortBy`       | `string` | No       | Sort by field (`name`, `fullName`, `createdAt`) |
     | `sortOrder`    | `string` | No       | Sort order (`asc` or `desc`) |
 *   **Responses:**
     *   `200 OK`

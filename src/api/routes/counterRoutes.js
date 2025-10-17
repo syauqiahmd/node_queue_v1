@@ -46,7 +46,7 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
 
   /**
    * POST /counters
-   * @summary Create service data
+   * @summary Create counter data
    * @tags Counter
    * @security BearerAuth
    * @param {object} request.body.required - Service data
