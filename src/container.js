@@ -18,6 +18,10 @@ const container = createContainer();
 // Register logger explicitly (moved up)
 container.register({
   logger: asValue(require('./infra/utils/log.helper')),
+  code: asValue('INTERNAL_SERVER_ERROR'),
+  message: asValue('Something went wrong'),
+  statusCode: asValue(500),
+  fields: asValue(null),
 });
 
 const redisClientInstance = new RedisClient({ logger: container.resolve('logger') });
@@ -101,6 +105,7 @@ container.register({
 
   // Register CacheService
   cacheService: asClass(require('./infra/cache/CacheService')).singleton(),
+  broadcastService: asClass(require('./core/services/broadcastService')).singleton(),
 
   // Register OrganizationService and its proxy
   organizationServiceReal: asClass(require('./core/services/OrganizationService')).singleton(),
@@ -117,6 +122,9 @@ container.register({
   // Register UserService and its proxy
   userServiceReal: asClass(require('./core/services/UserService')).singleton(),
   userService: asClass(require('./core/services/UserServiceProxy')).singleton(),
+
+  queueService: asClass(require('./core/services/queueService')).singleton(),
+  queueResponse: asClass(require('./core/dto/queueResponse')).singleton(),
 
   // Register GoogleTextToSpeechService and its proxy
   googleTextToSpeechServiceReal: asClass(
