@@ -11,6 +11,7 @@
     "start": "node src/server.js && node src/jobs/cron.js",
     "start:api": "node src/server.js",
     "start:cron": "node src/jobs/cron.js",
+    "start:websocket": "node src/websocket.js",
     "generate": "prisma generate --schema src/infra/db/prisma/schema.prisma",
     "lint": "npx eslint .",
     "lint-fix": "npx eslint . --fix"
@@ -38,7 +39,8 @@
     "uuid": "^11.1.0",
     "aws-sdk": "^2.1651.0",
     "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "ws": "^8.17.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
