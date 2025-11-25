@@ -63,64 +63,70 @@ class QueueService {
 
   async callNextQueue(payload) {
     const { serviceId, counterId } = payload;
+    const dayStart = new Date(new Date().setHours(0, 0, 0, 0));
+    const dayEnd = new Date(new Date().setHours(23, 59, 59, 999));
 
-    const findTicket = async (isPriority) => {
-      return await this.prisma.ticket.findFirst({
-        where: {
-          serviceId,
-          isCall: false,
-          isPriority,
-          createdAt: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
-            lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
-          },
+    const updatedTicket = await this.prisma.$transaction(async (tx) => {
+      const existingCounter = await tx.counter.findUnique({ where: { id: counterId } });
+      if (!existingCounter) {
+        throw this.businessException.NotFound('Counter');
+      }
+
+      const priorityRow = await tx.$queryRaw`
+        SELECT id FROM "Ticket"
+        WHERE "service_id" = CAST(${serviceId} AS uuid)
+          AND "is_call" = false
+          AND "is_priority" = true
+          AND "created_at" BETWEEN CAST(${dayStart} AS timestamp) AND CAST(${dayEnd} AS timestamp)
+        ORDER BY "created_at" ASC
+        LIMIT 1
+        FOR UPDATE SKIP LOCKED
+      `;
+
+      let selectedId = Array.isArray(priorityRow) && priorityRow.length ? priorityRow[0].id : null;
+
+      if (!selectedId) {
+        const normalRow = await tx.$queryRaw`
+          SELECT id FROM "Ticket"
+          WHERE "service_id" = CAST(${serviceId} AS uuid)
+            AND "is_call" = false
+            AND "is_priority" = false
+            AND "created_at" BETWEEN CAST(${dayStart} AS timestamp) AND CAST(${dayEnd} AS timestamp)
+          ORDER BY "created_at" ASC
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED
+        `;
+        selectedId = Array.isArray(normalRow) && normalRow.length ? normalRow[0].id : null;
+      }
+
+      if (!selectedId) {
+        throw this.businessException.NotFound('queue');
+      }
+
+      const updated = await tx.ticket.update({
+        where: { id: selectedId },
+        data: {
+          isCall: true,
+          latestAssigneeCounterId: counterId,
         },
-        orderBy: { createdAt: 'asc' },
+        include: {
+          service: { include: { organization: true } },
+          latestAssigneeCounter: true,
+        },
       });
-    };
 
-    let ticketToCall = await findTicket(true); // Prioritize priority tickets
-
-    if (!ticketToCall) {
-      ticketToCall = await findTicket(false); // Fallback to non-priority tickets
-    }
-
-    if (!ticketToCall) {
-      throw this.businessException.NotFound('queue');
-    }
-
-    // Verify if the counterId exists
-    const existingCounter = await this.prisma.counter.findUnique({
-      where: { id: counterId },
-    });
-
-    if (!existingCounter) {
-      throw this.businessException.NotFound('Counter');
-    }
-
-    const { id: queueId } = ticketToCall;
-    const updatedTicket = await this.prisma.ticket.update({
-      where: { id: queueId },
-      data: {
-        isCall: true,
-        latestAssigneeCounterId: counterId,
-      },
-      include: {
-        service: {
-          include: {
-            organization: true,
-          },
-        },
-        latestAssigneeCounter: true,
-      },
+      return updated;
     });
 
     const callingText = `Nomor antrian: ${updatedTicket.prefix} - ${updatedTicket.queueNumber}; silahkan menuju, ke loket nomor, ${updatedTicket.latestAssigneeCounter.counterNumber}`;
-    const soundUrl = await this.googleTextToSpeechService.generateSound(callingText, queueId);
+    const soundUrl = await this.googleTextToSpeechService.generateSound(
+      callingText,
+      updatedTicket.id
+    );
 
     // Update the ticket with the sound URL
     const finalTicket = await this.prisma.ticket.update({
-      where: { id: queueId },
+      where: { id: updatedTicket.id },
       data: { soundUrl },
       include: {
         service: {
