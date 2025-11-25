@@ -14,6 +14,7 @@ class QueueService {
   applyStatusFilter(where, status) {
     if (status === 'in-progress') {
       where.isCall = true;
+      where.isResolved = false;
     }
     if (status === 'completed') {
       delete where.isCall;

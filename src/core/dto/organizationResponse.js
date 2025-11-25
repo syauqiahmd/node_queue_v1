@@ -3,6 +3,7 @@ class OrganizationResponse {
     this.id = organization.id;
     this.name = organization.name;
     this.fullName = organization.fullName;
+    this.logoUrl = organization.logoUrl || null;
     this.services = organization.services.map((service) => new ServiceResponse(service));
   }
 }

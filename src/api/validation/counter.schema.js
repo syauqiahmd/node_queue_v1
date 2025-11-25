@@ -19,6 +19,9 @@ const getCounterSchema = Joi.object({
   counterNumber: Joi.string().trim().optional(),
   serviceName: Joi.string().trim().optional(),
   organizationName: Joi.string().trim().optional(),
+  serviceId: Joi.string()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .optional(),
   isActive: Joi.boolean().optional(),
   page: Joi.number().integer().min(1),
   pageSize: Joi.number().integer().min(1).max(25),

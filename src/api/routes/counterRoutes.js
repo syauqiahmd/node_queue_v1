@@ -10,6 +10,7 @@ module.exports = ({ counterController, authMiddleware, validateMiddleware, count
    * @param {string} counterNumber.query - Filter by counter number
    * @param {string} serviceName.query - Filter by service name
    * @param {string} organizationName.query - Filter by name organization
+   * @param {string} serviceId.query - Filter by service ID (UUID)
    * @param {boolean} isActive.query - Filter by active status
    * @param {number} page.query - Page number for pagination - default: 1
    * @param {number} pageSize.query - Number of items per page - default: 10

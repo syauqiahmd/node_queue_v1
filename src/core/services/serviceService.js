@@ -10,6 +10,7 @@ class ServiceService {
     const where = {
       name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
       prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
+      organizationId: payload.organizationId || undefined,
       isActive:
         payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
     };

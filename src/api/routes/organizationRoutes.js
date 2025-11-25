@@ -57,7 +57,8 @@ module.exports = ({
    * @example request - Example payload
    * {
    *   "name": "Main Branch",
-   *   "fullName": "Main Branch Office"
+   *   "fullName": "Main Branch Office",
+   *   "logoUrl": "https://cdn.example.com/logo.png"
    * }
    * @returns {object} 201 - Created response
    * @returns {object} 400 - Bad Request
@@ -82,7 +83,8 @@ module.exports = ({
    * {
    *   "name": "Main Branch Updated",
    *   "fullName": "Main Branch Office (Renovated)",
-   *   "isActive": false
+   *   "isActive": false,
+   *   "logoUrl": "https://cdn.example.com/logo-v2.png"
    * }
    * @returns {object} 200 - Success response
    * @returns {object} 400 - Bad Request
