@@ -49,14 +49,36 @@ class UserService {
   }
 
   async update(id, data) {
-    return this.prisma.user.update({
-      where: { id },
-      data,
+    const { organizationId, ...userData } = data;
+    return this.prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.user.update({
+        where: { id },
+        data: userData,
+      });
+
+      if (updatedUser.role === 'USER') {
+        await tx.userOrganization.deleteMany({ where: { userId: id } });
+        await tx.userOrganization.create({
+          data: {
+            userId: id,
+            organizationId,
+            createdBy: userData.updatedBy || 'System',
+            updatedBy: userData.updatedBy || 'System',
+          },
+        });
+      } else {
+        await tx.userOrganization.deleteMany({ where: { userId: id } });
+      }
+
+      return updatedUser;
     });
   }
 
   async remove(id) {
-    return this.prisma.user.delete({ where: { id } });
+    return this.prisma.$transaction(async (tx) => {
+      await tx.userOrganization.deleteMany({ where: { userId: id } });
+      return tx.user.delete({ where: { id } });
+    });
   }
 
   async userDetailByUsername(userName) {
