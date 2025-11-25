@@ -7,9 +7,33 @@ class SocketManager {
   }
 
   initSocket(server) {
+    const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+    if (process.env.NODE_ENV === 'development') {
+      allowedOrigins.push(
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:8000',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:8000'
+      );
+    }
+
     this.io = new Server(server, {
       cors: {
-        origin: '*', // or your frontend URL
+        origin: (origin, callback) => {
+          const isLocalhost =
+            !origin ||
+            (typeof origin === 'string' &&
+              (origin.startsWith('http://localhost') ||
+                origin.startsWith('http://127.0.0.1') ||
+                origin.startsWith('https://localhost')));
+          if (isLocalhost || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        },
       },
     });
 

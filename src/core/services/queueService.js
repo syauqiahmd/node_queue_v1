@@ -140,7 +140,11 @@ class QueueService {
 
     // Broadcast the event
     const rooms = [`service-${updatedTicket.serviceId}`, 'monitor-room'];
-    this.broadcastService.emit('ticket:called', toTicketCalledDTO(finalTicket), rooms);
+    this.broadcastService.emit(
+      'ticket:called',
+      toTicketCalledDTO({ ...finalTicket, soundUrl }),
+      rooms
+    );
 
     return finalTicket;
   }
@@ -180,9 +184,9 @@ class QueueService {
       });
     }
 
-    // Broadcast the recall event
     const rooms = [`service-${ticket.serviceId}`, 'monitor-room'];
     this.broadcastService.emit('ticket:recalled', toTicketRecalledDTO(ticket), rooms);
+    this.broadcastService.emit('ticket:called', toTicketCalledDTO(ticket), rooms);
 
     return ticket;
   }

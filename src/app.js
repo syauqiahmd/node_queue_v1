@@ -7,12 +7,25 @@ const createApp = (container) => {
 
   const whitelist = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
   if (process.env.NODE_ENV === 'development') {
-    whitelist.push('http://localhost:5173', 'http://localhost:8000'); // Add your local UI port
+    whitelist.push(
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://localhost:8000',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:8000'
+    );
   }
 
   const corsOptions = {
     origin: (origin, callback) => {
-      if (whitelist.indexOf(origin) !== -1 || !origin) {
+      const isLocalhost =
+        !origin ||
+        (typeof origin === 'string' &&
+          (origin.startsWith('http://localhost') ||
+            origin.startsWith('http://127.0.0.1') ||
+            origin.startsWith('https://localhost')));
+      if (isLocalhost || whitelist.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
