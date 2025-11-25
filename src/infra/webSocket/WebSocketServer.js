@@ -11,9 +11,15 @@ class WebSocketServer {
     });
     this.heartbeatInterval = setInterval(() => {
       this.server.clients.forEach((ws) => {
-        if (ws.isAlive === false) ws.terminate();
+        if (ws.isAlive === false) {
+          ws.terminate();
+        }
         ws.isAlive = false;
-        try { ws.ping(); } catch (err) {}
+        try {
+          ws.ping();
+        } catch (err) {
+          logger.error('WebSocket ping error', { error: err, context: 'WebSocket' });
+        }
       });
     }, 30000);
     this.server.on('close', () => {
@@ -36,7 +42,11 @@ class WebSocketServer {
       logger.error('Client socket error', { error: err, context: 'WebSocket' });
     });
     ws.on('close', (code, reason) => {
-      logger.info('Client disconnected', { context: 'WebSocket', code, reason: reason?.toString?.() });
+      logger.info('Client disconnected', {
+        context: 'WebSocket',
+        code,
+        reason: reason?.toString?.(),
+      });
     });
   }
 }
