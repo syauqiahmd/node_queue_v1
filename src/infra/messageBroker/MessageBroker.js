@@ -31,9 +31,16 @@ class MessageBroker {
     try {
       this.subscriber.subscribe(channel);
       this.handlers.set(channel, handler);
-      logger.info('Subscribed to channel', { channel, context: 'MessageBroker' });
+      logger.info('Subscribed to channel', {
+        channel,
+        context: 'MessageBroker',
+      });
     } catch (err) {
-      logger.error('Failed to subscribe to channel', { error: err, channel, context: 'MessageBroker' });
+      logger.error('Failed to subscribe to channel', {
+        error: err,
+        channel,
+        context: 'MessageBroker',
+      });
     }
   }
 
@@ -41,7 +48,11 @@ class MessageBroker {
     try {
       this.publisher.publish(channel, JSON.stringify(message));
     } catch (err) {
-      logger.error('Failed to publish message', { error: err, channel, context: 'MessageBroker' });
+      logger.error('Failed to publish message', {
+        error: err,
+        channel,
+        context: 'MessageBroker',
+      });
     }
   }
 
@@ -52,10 +63,17 @@ class MessageBroker {
       if (handler) {
         handler(payload);
       } else {
-        logger.warn('No handler for channel', { channel, context: 'MessageBroker' });
+        logger.warn('No handler for channel', {
+          channel,
+          context: 'MessageBroker',
+        });
       }
     } catch (err) {
-      logger.error('Failed to handle broker message', { error: err, channel, context: 'MessageBroker' });
+      logger.error('Failed to handle broker message', {
+        error: err,
+        channel,
+        context: 'MessageBroker',
+      });
     }
   }
   close() {

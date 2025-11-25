@@ -19,7 +19,8 @@ class TicketController {
         createdAt: newTicket.createdAt,
         totalWaitingQueue: totalWaitingQueue.totalRecords,
       };
-      this.broadcastService.emit('new-ticket', responseData, [req.body.serviceId]);
+      const rooms = [`service-${req.body.serviceId}`, 'monitor-room'];
+      this.broadcastService.emit('new-ticket', responseData, rooms);
       return res.status(201).json({ success: true, data: responseData, message: 'Created' });
     } catch (err) {
       next(err);

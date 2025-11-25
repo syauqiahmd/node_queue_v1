@@ -11,6 +11,7 @@ class CounterService {
       counterNumber: payload.counterNumber
         ? { contains: payload.counterNumber, mode: 'insensitive' }
         : undefined,
+      serviceId: payload.serviceId || undefined,
       isActive:
         payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
     };

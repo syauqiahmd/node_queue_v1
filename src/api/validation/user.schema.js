@@ -18,7 +18,7 @@ const createUserSchema = Joi.object({
 const updateUserSchema = Joi.object({
   userName: Joi.string().trim().required(),
   fullName: Joi.string().trim().required(),
-  password: Joi.string().trim().required(),
+  password: Joi.string().trim().optional(),
   role: Joi.string().valid('ADMIN', 'USER').required(),
   organizationId: Joi.when('role', {
     is: 'USER',

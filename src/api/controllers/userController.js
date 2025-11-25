@@ -72,7 +72,7 @@ class UserController {
       const payload = { ...rest, updatedBy: this.identityHelper.getCurrentUserId() };
 
       if (password) {
-        // payload.password = await this.authUtils.hashPassword(password);
+        payload.password = await this.authUtils.hashPassword(password);
       }
 
       const data = await this.userService.update(req.params.userId, payload);

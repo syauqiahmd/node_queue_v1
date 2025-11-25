@@ -63,6 +63,7 @@ class OrganizationService {
         id: true,
         name: true,
         fullName: true,
+        logoUrl: true,
         services: {
           where,
           select: {

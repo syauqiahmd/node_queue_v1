@@ -13,6 +13,7 @@ class QueueResponse {
         organizationId: item.service.organization.id,
         organizationName: item.service.organization.name,
         organizationFullName: item.service.organization.fullName,
+        organizationLogoUrl: item.service.organization.logoUrl || null,
         counterNumber: item.latestAssigneeCounter.counterNumber,
       };
     });

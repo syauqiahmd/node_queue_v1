@@ -89,6 +89,7 @@ class ServiceController {
             id: item.organization.id,
             name: item.organization.name,
             fullName: item.organization.fullName,
+            logoUrl: item.organization.logoUrl || null,
           },
         };
       });

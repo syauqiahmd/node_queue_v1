@@ -10,6 +10,7 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
    * @param {string} name.query - Filter by service name
    * @param {string} prefix.query - Filter by service prefix
    * @param {string} organizationName.query - Filter by name organization
+   * @param {string} organizationId.query - Filter by organization ID (UUID)
    * @param {boolean} isActive.query - Filter by active status
    * @param {number} page.query - Page number for pagination - default: 1
    * @param {number} pageSize.query - Number of items per page - default: 10
