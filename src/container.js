@@ -108,19 +108,19 @@ container.register({
   broadcastService: asClass(require('./core/services/broadcastService')).singleton(),
 
   // Register OrganizationService and its proxy
-  organizationServiceReal: asClass(require('./core/services/OrganizationService')).singleton(),
+  organizationServiceReal: asClass(require('./core/services/organizationService')).singleton(),
   organizationService: asClass(require('./core/services/OrganizationServiceProxy')).singleton(),
 
   // Register CounterService and its proxy
-  counterServiceReal: asClass(require('./core/services/CounterService')).singleton(),
+  counterServiceReal: asClass(require('./core/services/counterService')).singleton(),
   counterService: asClass(require('./core/services/CounterServiceProxy')).singleton(),
 
   // Register ServiceService and its proxy
-  serviceServiceReal: asClass(require('./core/services/ServiceService')).singleton(),
+  serviceServiceReal: asClass(require('./core/services/serviceService')).singleton(),
   serviceService: asClass(require('./core/services/ServiceServiceProxy')).singleton(),
 
   // Register UserService and its proxy
-  userServiceReal: asClass(require('./core/services/UserService')).singleton(),
+  userServiceReal: asClass(require('./core/services/userService')).singleton(),
   userService: asClass(require('./core/services/UserServiceProxy')).singleton(),
 
   queueService: asClass(require('./core/services/queueService')).singleton(),
@@ -135,7 +135,7 @@ container.register({
   ).singleton(),
 
   // Register TicketService (no proxy for transactional data)
-  ticketService: asClass(require('./core/services/TicketService')).singleton(),
+  ticketService: asClass(require('./core/services/ticketService')).singleton(),
 
   // Explicitly register all schemas
   counterSchema: asValue(counterSchema),
