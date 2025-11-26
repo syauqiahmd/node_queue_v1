@@ -12,7 +12,7 @@ const messageBroker = new MessageBroker({
 });
 
 const webSocketServer = new WebSocketServer(process.env.WEBSOCKET_PORT, webSocketGateway);
-webSocketGateway.server = webSocketServer;
+webSocketGateway.webSocketServer = webSocketServer;
 
 messageBroker.subscribe('websocket', ({ event, data }) => {
   webSocketGateway.broadcast(event, data);

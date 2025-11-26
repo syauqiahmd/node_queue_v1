@@ -22,7 +22,7 @@ class GoogleTextToSpeechServiceProxy {
 
     this.logger.info('Cache miss for TTS. Fetching from real service.');
     const data = await this.googleTextToSpeechService.generateSound(text, queueId);
-    await this.redisClient.set(cacheKey, data, 'EX', this.cacheDuration);
+    await this.redisClient.set(cacheKey, data, { EX: this.cacheDuration });
     return data;
   }
 

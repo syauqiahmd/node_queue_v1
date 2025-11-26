@@ -146,4 +146,15 @@ container.register({
   userSchema: asValue(userSchema),
 });
 
+const MessageBroker = require('./infra/messageBroker/MessageBroker');
+const messageBrokerInstance = new MessageBroker({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
+});
+
+container.register({
+  messageBroker: asValue(messageBrokerInstance),
+});
+
 module.exports = container;

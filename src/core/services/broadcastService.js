@@ -1,7 +1,8 @@
 class BroadcastService {
-  constructor({ socket, logger }) {
+  constructor({ socket, logger, messageBroker }) {
     this.socketManager = socket;
     this.logger = logger;
+    this.messageBroker = messageBroker;
   }
 
   /**
@@ -16,12 +17,18 @@ class BroadcastService {
       this.logger.warn('Socket.io not initialized or no rooms specified, cannot broadcast.', {
         eventName,
       });
+      if (this.messageBroker) {
+        this.messageBroker.publish('websocket', { event: eventName, data });
+      }
       return;
     }
 
     try {
       io.to(rooms).emit(eventName, data);
       this.logger.info('Broadcast event sent successfully', { rooms, eventName });
+      if (this.messageBroker) {
+        this.messageBroker.publish('websocket', { event: eventName, data });
+      }
     } catch (err) {
       this.logger.error('Error during broadcasting event', { error: err.message, eventName });
     }
