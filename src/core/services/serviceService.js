@@ -37,6 +37,49 @@ class ServiceService {
 
     return { totalRecord: count, data };
   }
+  async publicGetAll(payload, pagination = true) {
+    const where = {
+      name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
+      prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
+      organizationId: payload.organizationId || undefined,
+      isActive:
+        payload.isActive === 'true' ? true : payload.isActive === 'false' ? false : undefined,
+    };
+
+    let paginationPayload = {};
+    if (pagination) {
+      paginationPayload = {
+        skip: (payload.page - 1) * payload.pageSize || 0,
+        take: payload.pageSize || 10,
+      };
+    }
+
+    const [data, count] = await Promise.all([
+      this.prisma.service.findMany({
+        where: {
+          ...where,
+          organization: {
+            isActive: true,
+          },
+        },
+        ...paginationPayload,
+        orderBy: { [payload.sortBy]: payload.sortOrder },
+        include: {
+          organization: true,
+        },
+      }),
+      this.prisma.service.count({
+        where: {
+          ...where,
+          organization: {
+            isActive: true,
+          },
+        },
+      }),
+    ]);
+
+    return { totalRecord: count, data };
+  }
 
   async getById(id) {
     return this.prisma.service.findUnique({

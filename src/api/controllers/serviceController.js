@@ -79,7 +79,10 @@ class ServiceController {
 
   async publicServiceList(req, res, next) {
     try {
-      const { totalRecord, data } = await this.serviceService.getAll({ isActive: 'true' }, false);
+      const { totalRecord, data } = await this.serviceService.publicGetAll(
+        { isActive: 'true' },
+        false
+      );
       const response = data?.map((item) => {
         return {
           id: item.id,
