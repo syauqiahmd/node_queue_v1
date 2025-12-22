@@ -21,6 +21,20 @@ class ServiceServiceProxy {
     await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     return data;
   }
+  async publicGetAll(payload, pagination = true) {
+    const cacheKey = `${this.cacheKeyPrefix}allPublic:${JSON.stringify(payload)}:${pagination}`;
+    const cachedData = await this.cacheService.get(cacheKey);
+
+    if (cachedData) {
+      this.logger.info(`Cache hit for ${cacheKey}`);
+      return JSON.parse(cachedData);
+    }
+
+    this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
+    const data = await this.serviceService.getAll(payload, pagination);
+    await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
+    return data;
+  }
 
   async getById(id) {
     const cacheKey = `${this.cacheKeyPrefix}id:${id}`;
