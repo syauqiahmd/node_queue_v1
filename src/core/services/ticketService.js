@@ -12,7 +12,8 @@ class TicketService {
     updatedBy = null,
     latestAssigneeCounterId = null,
   }) {
-    const today = new Date();
+    // Create a date in GMT+8 (UTC+8)
+    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
     today.setHours(0, 0, 0, 0);
 
     const service = await this.prisma.service.findUnique({
@@ -50,6 +51,7 @@ class TicketService {
       totalWaitingQueue.totalRecords = totalWaitingQueueByServiceId;
 
       const nextQueueNumber = lastTicket ? lastTicket.queueNumber + 1 : 1;
+      const timeStamp = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
 
       return tx.ticket.create({
         data: {
@@ -57,6 +59,8 @@ class TicketService {
           prefix,
           queueDate: today,
           serviceId,
+          createdAt: timeStamp,
+          updatedAt: timeStamp,
           updatedBy, // your updatedBy value here
           latestAssigneeCounterId, // optional
         },
