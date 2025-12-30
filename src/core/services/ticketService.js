@@ -14,7 +14,7 @@ class TicketService {
   }) {
     // Create a date in GMT+8 (UTC+8)
     const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     const service = await this.prisma.service.findUnique({
       where: { id: serviceId },
