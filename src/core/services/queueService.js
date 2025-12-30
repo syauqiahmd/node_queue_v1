@@ -177,7 +177,7 @@ class QueueService {
 
       ticket = await this.prisma.ticket.update({
         where: { id: queueId },
-        data: { latestAssigneeCounterId: newCounterId, soundUrl },
+        data: { latestAssigneeCounterId: newCounterId, soundUrl, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) },
         include: {
           service: { include: { organization: true } },
           latestAssigneeCounter: true,
@@ -223,7 +223,7 @@ class QueueService {
 
     const updatedTicket = await this.prisma.ticket.update({
       where: { id },
-      data: payload,
+      data: { ...payload, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) },
       include: {
         service: {
           include: {
