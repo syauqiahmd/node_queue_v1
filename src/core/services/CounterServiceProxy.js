@@ -42,6 +42,7 @@ class CounterServiceProxy {
   async create(data) {
     const result = await this.counterService.create(data);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
+    await this.cacheService.invalidate('service:');
     return result;
   }
 
@@ -49,6 +50,7 @@ class CounterServiceProxy {
     const result = await this.counterService.update(id, data);
     await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
+    await this.cacheService.invalidate('service:');
     return result;
   }
 
@@ -56,6 +58,7 @@ class CounterServiceProxy {
     const result = await this.counterService.remove(id);
     await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
+    await this.cacheService.invalidate('service:');
     return result;
   }
 }
