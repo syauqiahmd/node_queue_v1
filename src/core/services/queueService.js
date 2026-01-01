@@ -109,6 +109,7 @@ class QueueService {
         where: { id: selectedId },
         data: {
           isCall: true,
+          calledAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // Set call time (GMT+8)
           latestAssigneeCounterId: counterId,
         },
         include: {
@@ -222,9 +223,16 @@ class QueueService {
       throw this.businessException.NotFound('ticket');
     }
 
+    const updateData = { ...payload, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) };
+
+    // Set resolvedAt if ticket is being resolved
+    if (payload.isResolved && !currentTicket.isResolved) {
+      updateData.resolvedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    }
+
     const updatedTicket = await this.prisma.ticket.update({
       where: { id },
-      data: { ...payload, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) },
+      data: updateData,
       include: {
         service: {
           include: {
@@ -311,6 +319,34 @@ class QueueService {
 
   async cleanUpS3Files(dirName) {
     const result = await this.s3Service.deleteFilesInDirectory(dirName);
+    return result;
+  }
+
+  async getDailyStats(dateInput) {
+    // Normalize date to match queueDate format (UTC midnight)
+    // Assuming dateInput is a Date object or string "YYYY-MM-DD"
+    const date = new Date(dateInput);
+    date.setUTCHours(0, 0, 0, 0);
+
+    const result = await this.prisma.$queryRaw`
+      SELECT
+        s."organization_id" as "organizationId",
+        t."service_id" as "serviceId",
+        t."queue_date" as "date",
+        COUNT(*)::int as "totalTickets",
+        COUNT(*) FILTER (WHERE t."is_resolved" = true)::int as "resolvedTickets",
+        COUNT(*) FILTER (WHERE t."is_call" = true AND t."is_resolved" = false)::int as "ticketsInProgress",
+        COALESCE(AVG(EXTRACT(EPOCH FROM (t."called_at" - t."created_at"))/60), 0)::float as "avgWaitTime",
+        COALESCE(MIN(EXTRACT(EPOCH FROM (t."called_at" - t."created_at"))/60), 0)::float as "minWaitTime",
+        COALESCE(MAX(EXTRACT(EPOCH FROM (t."called_at" - t."created_at"))/60), 0)::float as "maxWaitTime",
+        COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (t."called_at" - t."created_at"))/60), 0)::float as "medianWaitTime",
+        COALESCE(MODE() WITHIN GROUP (ORDER BY EXTRACT(HOUR FROM t."created_at")), 0)::int as "peakHour"
+      FROM "Ticket" t
+      JOIN "Service" s ON t."service_id" = s."id"
+      WHERE t."queue_date" = ${date}
+      GROUP BY s."organization_id", t."service_id", t."queue_date"
+    `;
+
     return result;
   }
 }
