@@ -24,15 +24,16 @@ class QueueService {
   }
 
   async getQueueListByServiceId(serviceId, { counterId, status }) {
+    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    today.setUTCHours(0, 0, 0, 0);
+
     const where = {
       serviceId,
       isCall: false,
       latestAssigneeCounterId: counterId || undefined, // Use undefined to ignore if not provided
-      createdAt: {
-        gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
-        lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
-      },
+      queueDate: today,
     };
+
     if (status) {
       this.applyStatusFilter(where, status);
     }
@@ -44,13 +45,12 @@ class QueueService {
   }
 
   async getTotalQueueByServiceId(serviceId, status = null) {
+    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    today.setUTCHours(0, 0, 0, 0);
     const where = {
       serviceId,
       isCall: false,
-      createdAt: {
-        gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
-        lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
-      },
+      queueDate: today,
     };
 
     if (status) {
