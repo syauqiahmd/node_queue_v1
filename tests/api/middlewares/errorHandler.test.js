@@ -164,7 +164,6 @@ describe('ErrorHandlerMiddleware', () => {
         errorHandlerMiddleware.errorHandler(null, mockReq, mockRes, mockNext);
         expect(mockNext).toHaveBeenCalled();
         expect(mockResponseFormatter.errorResponse).not.toHaveBeenCalled();
-        return; // Exit early to avoid errorResponse call
     });
   });
 });

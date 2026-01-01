@@ -153,7 +153,7 @@ describe('ServiceController', () => {
           id: 'org-1',
           name: 'Org 1',
           fullName: 'Organization 1',
-          logoUrl: 'http://logo.url'
+          logoUrl: 'https://logo.url'
         }
       }];
       mockServiceService.publicGetAll.mockResolvedValue({ totalRecord: 1, data });
@@ -174,7 +174,7 @@ describe('ServiceController', () => {
               id: 'org-1',
               name: 'Org 1',
               fullName: 'Organization 1',
-              logoUrl: 'http://logo.url'
+              logoUrl: 'https://logo.url'
             }
           }]
         }

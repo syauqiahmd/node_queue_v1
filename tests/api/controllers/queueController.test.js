@@ -165,7 +165,7 @@ describe('QueueController', () => {
         queueNumber: '001',
         latestAssigneeCounter: { counterNumber: '1' },
       };
-      const soundUrl = 'http://sound.url';
+      const soundUrl = 'https://sound.url';
 
       mockQueueService.queueDetailById.mockResolvedValue(queueDetail);
       mockGoogleTextToSpeechService.generateSound.mockResolvedValue(soundUrl);

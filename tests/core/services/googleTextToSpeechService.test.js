@@ -42,7 +42,7 @@ describe('GoogleTextToSpeechService', () => {
       const text = 'Queue number A 1';
       const queueId = 'ticket-1';
       const mockAudioContent = 'audio-content';
-      const mockS3Url = 'http://s3.url/sound.mp3';
+      const mockS3Url = 'https://s3.url/sound.mp3';
 
       mockSynthesizeSpeech.mockResolvedValue([{ audioContent: mockAudioContent }]);
       mockS3Client.uploadFile.mockResolvedValue(mockS3Url);

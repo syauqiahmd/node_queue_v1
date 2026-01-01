@@ -36,7 +36,7 @@ describe('GoogleTextToSpeechServiceProxy', () => {
     it('should return cached data if available', async () => {
       const text = 'hello';
       const queueId = 'ticket-1';
-      const cachedUrl = 'http://sound.url';
+      const cachedUrl = 'https://sound.url';
       const cacheKey = `tts:${queueId}`;
       mockRedisClient.get.mockResolvedValue(cachedUrl);
 

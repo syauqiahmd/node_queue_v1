@@ -169,7 +169,7 @@ describe('OrganizationService', () => {
         id: 'org-1',
         name: 'Org 1',
         fullName: 'Organization 1',
-        logoUrl: 'http://logo.url',
+        logoUrl: 'https://logo.url',
         services: [
           { id: 'svc-1', name: 'Service 1', prefix: 'A' }
         ]

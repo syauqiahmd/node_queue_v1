@@ -117,12 +117,12 @@ describe('QueueService', () => {
             prefix: 'A', 
             queueNumber: 1, 
             serviceId: 'service-1',
-            soundUrl: 'http://sound.url',
+            soundUrl: 'https://sound.url',
             latestAssigneeCounter: { counterNumber: 1 },
             service: { name: 'Service 1', organization: { name: 'Org 1' } }
         });
 
-      mockGoogleTextToSpeechService.generateSound.mockResolvedValue('http://sound.url');
+      mockGoogleTextToSpeechService.generateSound.mockResolvedValue('https://sound.url');
 
       const result = await queueService.callNextQueue(payload);
 
@@ -130,7 +130,7 @@ describe('QueueService', () => {
       expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(1); // Only priority check needed
       expect(mockGoogleTextToSpeechService.generateSound).toHaveBeenCalled();
       expect(mockBroadcastService.emit).toHaveBeenCalledWith('ticket:called', expect.any(Object), expect.any(Array));
-      expect(result.soundUrl).toBe('http://sound.url');
+      expect(result.soundUrl).toBe('https://sound.url');
     });
 
     it('should call normal ticket if no priority ticket', async () => {
@@ -148,7 +148,7 @@ describe('QueueService', () => {
         queueNumber: 2,
         serviceId: 'service-1',
         latestAssigneeCounter: { counterNumber: 1 },
-        soundUrl: 'http://sound.url',
+        soundUrl: 'https://sound.url',
         service: { name: 'Service 1', organization: { name: 'Org 1' } }
       });
 
