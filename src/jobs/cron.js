@@ -44,11 +44,12 @@ cron.schedule(HOUSEKEEPING_TIME_S3_FILES, async () => {
     const now = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
-    const dirName = `sound-generated/${yesterday.toISOString().split('T')[0]}`;
-    console.log("🚀 ~ dirName:", dirName)
-    const result = await queueService.cleanUpS3Files(dirName);
-    logger.info(`[CRON] Housekeeping S3 files ${dirName} task completed successfully. Deleted ${result.count} files.`);
 
+    const dirName = `sound-generated/${yesterday.toISOString().split('T')[0]}`;
+
+    const result = await queueService.cleanUpS3Files(dirName);
+
+    logger.info(`[CRON] Housekeeping S3 files ${dirName} task completed successfully. Deleted ${result.count} files.`);
   } catch (error) {
     logger.error(`[CRON] Housekeeping S3 files ${dirName} task failed`, error);
   }
