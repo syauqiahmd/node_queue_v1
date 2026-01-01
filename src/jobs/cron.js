@@ -13,7 +13,14 @@ const HOUSEKEEPING_TIME_S3_FILES = process.env.HOUSEKEEPING_TIME_S3_FILES || '0 
 cron.schedule(PRE_CALCULATE_TIME, async () => {
   logger.info('[CRON] Running daily report generation...');
   try {
-    logger.info('[CRON] Daily report generation completed successfully');
+    const date = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    const formatedDate = date.toISOString().split('T')[0];
+    const result = await queueService.generateDailyStats(formatedDate);
+    if (result) {
+      logger.info(`[CRON] Daily report generation completed successfully. Created ${result.count} daily stats.`);
+    } else {
+      logger.info('[CRON] Daily report generation completed successfully. No data to create.');
+    }
   } catch (error) {
     logger.error('[CRON] Daily report generation failed', error);
   }

@@ -322,13 +322,8 @@ class QueueService {
     return result;
   }
 
-  async getDailyStats(dateInput) {
-    // Normalize date to match queueDate format (UTC midnight)
-    // Assuming dateInput is a Date object or string "YYYY-MM-DD"
-    const date = new Date(dateInput);
-    date.setUTCHours(0, 0, 0, 0);
-
-    const result = await this.prisma.$queryRaw`
+  async generateDailyStats(dateInput) {
+    const dailyStatsData = await this.prisma.$queryRaw`
       SELECT
         s."organization_id" as "organizationId",
         t."service_id" as "serviceId",
@@ -343,9 +338,22 @@ class QueueService {
         COALESCE(MODE() WITHIN GROUP (ORDER BY EXTRACT(HOUR FROM t."created_at")), 0)::int as "peakHour"
       FROM "Ticket" t
       JOIN "Service" s ON t."service_id" = s."id"
-      WHERE t."queue_date" = ${date}
+      WHERE t."queue_date" = CAST(${dateInput} AS DATE)
       GROUP BY s."organization_id", t."service_id", t."queue_date"
     `;
+
+    if (dailyStatsData.length === 0) {
+      return;
+    }
+
+    const timestamp = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    const result = await this.prisma.dailyServiceStats.createMany({
+      data: dailyStatsData.map((item) => ({
+        ...item,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      })),
+    });
 
     return result;
   }
