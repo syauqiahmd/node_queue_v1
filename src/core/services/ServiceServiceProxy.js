@@ -31,7 +31,7 @@ class ServiceServiceProxy {
     }
 
     this.logger.info(`Cache miss for ${cacheKey}. Fetching from real service.`);
-    const data = await this.serviceService.getAll(payload, pagination);
+    const data = await this.serviceService.publicGetAll(payload, pagination);
     await this.cacheService.set(cacheKey, JSON.stringify(data), this.cacheDuration);
     return data;
   }
