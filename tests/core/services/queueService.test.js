@@ -86,6 +86,21 @@ describe('QueueService', () => {
         })
       }));
     });
+
+    it('should apply completed status filter', async () => {
+      const serviceId = 'service-1';
+      mockPrisma.ticket.findMany.mockResolvedValue([]);
+
+      await queueService.getQueueListByServiceId(serviceId, { status: 'completed' });
+
+      expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({
+          isResolved: true
+        })
+      }));
+      const callArgs = mockPrisma.ticket.findMany.mock.calls[0][0];
+      expect(callArgs.where).not.toHaveProperty('isCall');
+    });
   });
 
   describe('getTotalQueueByServiceId', () => {
@@ -99,6 +114,22 @@ describe('QueueService', () => {
         where: expect.objectContaining({ serviceId, isCall: false }),
       }));
       expect(result).toBe(5);
+    });
+
+    it('should apply status filter', async () => {
+      const serviceId = 'service-1';
+      mockPrisma.ticket.count.mockResolvedValue(2);
+
+      const result = await queueService.getTotalQueueByServiceId(serviceId, 'in-progress');
+
+      expect(mockPrisma.ticket.count).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({
+          serviceId,
+          isCall: true,
+          isResolved: false
+        }),
+      }));
+      expect(result).toBe(2);
     });
   });
 
@@ -174,6 +205,13 @@ describe('QueueService', () => {
 
       await expect(queueService.callNextQueue(payload)).rejects.toThrow('queue not found');
     });
+
+    it('should throw if counter not found', async () => {
+      const payload = { serviceId: 'service-1', counterId: 'counter-1' };
+      mockPrisma.counter.findUnique.mockResolvedValue(null);
+
+      await expect(queueService.callNextQueue(payload)).rejects.toThrow('Counter not found');
+    });
   });
 
   describe('recallTicket', () => {
@@ -208,6 +246,26 @@ describe('QueueService', () => {
       expect(mockGoogleTextToSpeechService.generateSound).toHaveBeenCalled();
       expect(mockPrisma.ticket.update).toHaveBeenCalled();
       expect(mockBroadcastService.emit).toHaveBeenCalledTimes(2); // recalled + called
+    });
+
+    it('should throw if ticket not found', async () => {
+      const queueId = 'ticket-1';
+      mockPrisma.ticket.findUnique.mockResolvedValue(null);
+
+      await expect(queueService.recallTicket(queueId, 'counter-2')).rejects.toThrow('ticket not found');
+    });
+
+    it('should throw if new counter not found', async () => {
+      const queueId = 'ticket-1';
+      const newCounterId = 'counter-2';
+      mockPrisma.ticket.findUnique.mockResolvedValue({
+        id: queueId,
+        latestAssigneeCounterId: 'counter-1',
+        serviceId: 'service-1'
+      });
+      mockPrisma.counter.findUnique.mockResolvedValue(null);
+
+      await expect(queueService.recallTicket(queueId, newCounterId)).rejects.toThrow('new counter not found');
     });
 
     it('should just broadcast if counter is same', async () => {
@@ -247,6 +305,13 @@ describe('QueueService', () => {
       expect(mockPrisma.ticket.update).toHaveBeenCalled();
       expect(mockBroadcastService.emit).toHaveBeenCalledWith('ticket:resolved', expect.any(Object), expect.any(Array));
     });
+
+    it('should throw if ticket not found', async () => {
+      const id = 'ticket-1';
+      mockPrisma.ticket.findUnique.mockResolvedValue(null);
+
+      await expect(queueService.updateQueueById(id, {})).rejects.toThrow('ticket not found');
+    });
   });
 
   describe('prioritizeTicket', () => {
@@ -259,9 +324,70 @@ describe('QueueService', () => {
 
       expect(mockPrisma.ticket.update).toHaveBeenCalledWith(expect.objectContaining({
         where: { id },
-        data: { isPriority: true }
+        data: expect.objectContaining({ isPriority: true })
       }));
       expect(mockBroadcastService.emit).toHaveBeenCalledWith('ticket:prioritized', expect.any(Object), expect.any(Array));
+    });
+
+    it('should throw if ticket not found', async () => {
+      const id = 'ticket-1';
+      mockPrisma.ticket.findUnique.mockResolvedValue(null);
+
+      await expect(queueService.prioritizeTicket(id)).rejects.toThrow('ticket not found');
+    });
+  });
+
+  describe('getCurrentQueueDetailById', () => {
+    it('should return queue detail for current day', async () => {
+      const id = 'ticket-1';
+      const mockTicket = { id, serviceId: 'service-1' };
+      mockPrisma.ticket.findUnique.mockResolvedValue(mockTicket);
+
+      const result = await queueService.getCurrentQueueDetailById(id);
+
+      expect(mockPrisma.ticket.findUnique).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({
+          id,
+          queueDate: expect.any(Date),
+        }),
+      }));
+      expect(result).toEqual(mockTicket);
+    });
+  });
+
+  describe('getCallingQueue', () => {
+    it('should return list of calling queues', async () => {
+      const mockTickets = [{ id: 1 }, { id: 2 }];
+      mockPrisma.ticket.findMany.mockResolvedValue(mockTickets);
+
+      const result = await queueService.getCallingQueue();
+
+      expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({
+          isCall: true,
+          isResolved: false,
+          queueDate: expect.any(Date),
+        }),
+        orderBy: { updatedAt: 'desc' },
+        take: 4,
+      }));
+      expect(result).toEqual(mockTickets);
+    });
+  });
+
+  describe('queueDetailById', () => {
+    it('should return queue detail by id', async () => {
+      const id = 'ticket-1';
+      const mockTicket = { id, latestAssigneeCounter: { id: 'counter-1' } };
+      mockPrisma.ticket.findUnique.mockResolvedValue(mockTicket);
+
+      const result = await queueService.queueDetailById(id);
+
+      expect(mockPrisma.ticket.findUnique).toHaveBeenCalledWith(expect.objectContaining({
+        where: { id },
+        include: { latestAssigneeCounter: true },
+      }));
+      expect(result).toEqual(mockTicket);
     });
   });
 
