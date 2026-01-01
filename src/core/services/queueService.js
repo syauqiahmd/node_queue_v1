@@ -4,11 +4,12 @@ const toTicketPrioritizedDTO = require('../dto/websocket/TicketPrioritizedDTO');
 const toTicketRecalledDTO = require('../dto/websocket/TicketRecalledDTO');
 
 class QueueService {
-  constructor({ prismaClient, businessException, googleTextToSpeechService, broadcastService }) {
+  constructor({ prismaClient, businessException, googleTextToSpeechService, broadcastService, s3Client }) {
     this.prisma = prismaClient;
     this.businessException = businessException;
     this.googleTextToSpeechService = googleTextToSpeechService;
     this.broadcastService = broadcastService;
+    this.s3Service = s3Client;
   }
 
   applyStatusFilter(where, status) {
@@ -305,6 +306,11 @@ class QueueService {
         },
       },
     });
+    return result;
+  }
+
+  async cleanUpS3Files(dirName) {
+    const result = await this.s3Service.deleteFilesInDirectory(dirName);
     return result;
   }
 }
