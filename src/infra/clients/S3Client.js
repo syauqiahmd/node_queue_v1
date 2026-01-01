@@ -39,6 +39,43 @@ class S3Client {
       throw error;
     }
   }
+
+  async deleteFilesInDirectory(dirName) {
+    let deletedCount = 0;
+    let continuationToken = null;
+
+    try {
+      do {
+        const listParams = {
+          Bucket: this.bucketName,
+          Prefix: dirName,
+          ContinuationToken: continuationToken,
+        };
+
+        const listData = await this.s3.listObjectsV2(listParams).promise();
+
+        if (listData.Contents.length > 0) {
+          const deleteParams = {
+            Bucket: this.bucketName,
+            Delete: {
+              Objects: listData.Contents.map((item) => ({ Key: item.Key })),
+            },
+          };
+
+          const deleteData = await this.s3.deleteObjects(deleteParams).promise();
+          deletedCount += deleteData.Deleted.length;
+        }
+
+        continuationToken = listData.NextContinuationToken;
+      } while (continuationToken);
+
+      this.logger.info(`Deleted ${deletedCount} files from S3 directory: ${dirName}`);
+      return { count: deletedCount };
+    } catch (error) {
+      this.logger.error(`Error deleting files from S3 directory ${dirName}: ${error.message}`);
+      throw error;
+    }
+  }
 }
 
 module.exports = S3Client;

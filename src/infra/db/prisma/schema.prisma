@@ -27,6 +27,7 @@ model Organization {
 
   services  Service[]
   users     UserOrganization[]
+  dailyStats DailyServiceStats[]
 }
 
 
@@ -44,6 +45,7 @@ model Service {
   organization    Organization @relation(fields: [organizationId], references: [id])
   counters        Counter[]
   tickets         Ticket[]     @relation("ServiceTicket")
+  dailyStats      DailyServiceStats[]
 }
 
 model Counter {
@@ -104,6 +106,8 @@ model Ticket {
   isResolved                Boolean  @default(false) @map("is_resolved")
   isPriority                Boolean  @default(false) @map("is_priority")
   soundUrl                  String?  @map("sound_url")
+  calledAt                  DateTime? @map("called_at")
+  resolvedAt                DateTime? @map("resolved_at")
   serviceId                 String   @db.Uuid @map("service_id")
   latestAssigneeCounterId   String?  @db.Uuid @map("latest_assignee_counter_id")
   createdAt                 DateTime @default(now()) @map("created_at")
@@ -119,6 +123,30 @@ model Ticket {
   @@index([isResolved, createdAt])
 }
 
+model DailyServiceStats {
+  id                  String    @id @default(uuid()) @db.Uuid
+  organizationId      String    @db.Uuid @map("organization_id")
+  serviceId           String    @db.Uuid @map("service_id")
+  date                DateTime  @db.Date
+  totalTickets        Int       @map("total_tickets")
+  resolvedTickets     Int       @map("resolved_tickets")
+  ticketsInProgress   Int       @map("tickets_in_progress")
+  avgWaitTime         Float     @map("avg_wait_time")
+  minWaitTime         Float     @map("min_wait_time")
+  maxWaitTime         Float     @map("max_wait_time")
+  medianWaitTime      Float     @map("median_wait_time")
+  peakHour            Int       @map("peak_hour")
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  createdBy           String    @default("-1") @map("created_by")
+
+  service             Service   @relation(fields: [serviceId], references: [id])
+  organization        Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([serviceId, date])
+  @@index([organizationId, serviceId, date])
+}
 
 
 
