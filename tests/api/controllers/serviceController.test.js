@@ -68,6 +68,15 @@ describe('ServiceController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
     });
+
+    it('should handle errors', async () => {
+      const error = new Error('Service error');
+      mockServiceService.getAll.mockRejectedValue(error);
+
+      await serviceController.getAll(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('getById', () => {
@@ -92,6 +101,16 @@ describe('ServiceController', () => {
       expect(mockBusinessException.NotFound).toHaveBeenCalledWith('Service');
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should handle errors', async () => {
+      mockReq.params.serviceId = 's-1';
+      const error = new Error('Service error');
+      mockServiceService.getById.mockRejectedValue(error);
+
+      await serviceController.getById(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('create', () => {
@@ -108,6 +127,16 @@ describe('ServiceController', () => {
       });
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Created' });
+    });
+
+    it('should handle errors', async () => {
+      mockReq.body = { name: 'S1' };
+      const error = new Error('Service error');
+      mockServiceService.create.mockRejectedValue(error);
+
+      await serviceController.create(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -127,6 +156,17 @@ describe('ServiceController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Updated' });
     });
+
+    it('should handle errors', async () => {
+      mockReq.params.serviceId = 's-1';
+      mockReq.body = { name: 'S2' };
+      const error = new Error('Service error');
+      mockServiceService.update.mockRejectedValue(error);
+
+      await serviceController.update(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('remove', () => {
@@ -140,6 +180,16 @@ describe('ServiceController', () => {
       expect(mockServiceService.remove).toHaveBeenCalledWith('s-1');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Deleted' });
+    });
+
+    it('should handle errors', async () => {
+      mockReq.params.serviceId = 's-1';
+      const error = new Error('Service error');
+      mockServiceService.remove.mockRejectedValue(error);
+
+      await serviceController.remove(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -179,6 +229,44 @@ describe('ServiceController', () => {
           }]
         }
       });
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Service error');
+      mockServiceService.publicGetAll.mockRejectedValue(error);
+
+      await serviceController.publicServiceList(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
+    it('should return null for logoUrl if not present', async () => {
+      const data = [{
+        id: 1,
+        name: 'S1',
+        prefix: 'A',
+        organization: {
+          id: 'org-1',
+          name: 'Org 1',
+          fullName: 'Organization 1'
+          // No logoUrl
+        }
+      }];
+      mockServiceService.publicGetAll.mockResolvedValue({ totalRecord: 1, data });
+
+      await serviceController.publicServiceList(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({
+          data: expect.arrayContaining([
+            expect.objectContaining({
+              organization: expect.objectContaining({
+                logoUrl: null
+              })
+            })
+          ])
+        })
+      }));
     });
   });
 });

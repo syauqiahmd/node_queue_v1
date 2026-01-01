@@ -297,12 +297,44 @@ describe('QueueService', () => {
       const id = 'ticket-1';
       const payload = { isResolved: true };
 
-      mockPrisma.ticket.findUnique.mockResolvedValue({ id });
+      mockPrisma.ticket.findUnique.mockResolvedValue({ id, isResolved: false });
       mockPrisma.ticket.update.mockResolvedValue({ id, serviceId: 'service-1', isResolved: true });
 
       await queueService.updateQueueById(id, payload);
 
-      expect(mockPrisma.ticket.update).toHaveBeenCalled();
+      expect(mockPrisma.ticket.update).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({ resolvedAt: expect.any(Date) })
+      }));
+      expect(mockBroadcastService.emit).toHaveBeenCalledWith('ticket:resolved', expect.any(Object), expect.any(Array));
+    });
+
+    it('should update ticket without broadcasting if not resolved', async () => {
+      const id = 'ticket-1';
+      const payload = { isResolved: false };
+
+      mockPrisma.ticket.findUnique.mockResolvedValue({ id, isResolved: false });
+      mockPrisma.ticket.update.mockResolvedValue({ id, serviceId: 'service-1', isResolved: false });
+
+      await queueService.updateQueueById(id, payload);
+
+      expect(mockPrisma.ticket.update).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.not.objectContaining({ resolvedAt: expect.any(Date) })
+      }));
+      expect(mockBroadcastService.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not update resolvedAt if ticket is already resolved', async () => {
+      const id = 'ticket-1';
+      const payload = { isResolved: true };
+
+      mockPrisma.ticket.findUnique.mockResolvedValue({ id, isResolved: true });
+      mockPrisma.ticket.update.mockResolvedValue({ id, serviceId: 'service-1', isResolved: true });
+
+      await queueService.updateQueueById(id, payload);
+
+      expect(mockPrisma.ticket.update).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.not.objectContaining({ resolvedAt: expect.any(Date) })
+      }));
       expect(mockBroadcastService.emit).toHaveBeenCalledWith('ticket:resolved', expect.any(Object), expect.any(Array));
     });
 
@@ -467,6 +499,25 @@ describe('QueueService', () => {
       expect(mockPrisma.$queryRaw).toHaveBeenCalled();
       expect(mockPrisma.dailyServiceStats.createMany).not.toHaveBeenCalled();
       expect(result).toBeUndefined();
+    });
+
+    it('should throw error if dailyServiceStats model is missing in prisma client', async () => {
+      const dateInput = '2025-12-31';
+      const mockStatsData = [{ some: 'data' }];
+      mockPrisma.$queryRaw.mockResolvedValue(mockStatsData);
+
+      // Temporarily remove dailyServiceStats from mock
+      const originalDailyServiceStats = mockPrisma.dailyServiceStats;
+      delete mockPrisma.dailyServiceStats;
+
+      await expect(queueService.generateDailyStats(dateInput)).rejects.toThrow(
+        'Prisma Client is out of sync. Model dailyServiceStats is missing. Please run "npm run generate".'
+      );
+
+      // Restore for other tests if needed (though afterEach clears mocks, it doesn't restore deleted props unless re-instantiated)
+      // Since beforeEach re-creates mockPrisma, we should be fine for subsequent tests, 
+      // but this is the last test in the suite anyway.
+      mockPrisma.dailyServiceStats = originalDailyServiceStats;
     });
   });
 });

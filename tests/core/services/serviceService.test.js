@@ -97,7 +97,7 @@ describe('ServiceService', () => {
 
     it('should handle boolean isActive filter "false"', async () => {
       const payload = { isActive: 'false', sortBy: 'name', sortOrder: 'asc' };
-      
+
       mockPrisma.service.findMany.mockResolvedValue([]);
       mockPrisma.service.count.mockResolvedValue(0);
 
@@ -131,10 +131,74 @@ describe('ServiceService', () => {
       }));
       expect(mockPrisma.service.count).toHaveBeenCalledWith(expect.objectContaining({
         where: expect.objectContaining({
-            organization: { isActive: true }
+          organization: { isActive: true }
         })
       }));
       expect(result).toEqual({ totalRecord: mockCount, data: mockServices });
+    });
+
+    it('should apply filters correctly in publicGetAll', async () => {
+      const payload = {
+        name: 'test',
+        prefix: 'A',
+        organizationId: 'org-1',
+        isActive: 'true',
+        page: 1,
+        pageSize: 10,
+        sortBy: 'name',
+        sortOrder: 'asc',
+      };
+
+      mockPrisma.service.findMany.mockResolvedValue([]);
+      mockPrisma.service.count.mockResolvedValue(0);
+
+      await serviceService.publicGetAll(payload);
+
+      const expectedWhere = {
+        name: { contains: 'test', mode: 'insensitive' },
+        prefix: { contains: 'A', mode: 'insensitive' },
+        organizationId: 'org-1',
+        isActive: true,
+        organization: { isActive: true },
+      };
+
+      expect(mockPrisma.service.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expectedWhere }));
+      expect(mockPrisma.service.count).toHaveBeenCalledWith({ where: expectedWhere });
+    });
+
+    it('should return list without pagination if pagination is false in publicGetAll', async () => {
+      const payload = { sortBy: 'name', sortOrder: 'asc' };
+      const mockServices = [{ id: 1, name: 'Service 1' }];
+      const mockCount = 1;
+
+      mockPrisma.service.findMany.mockResolvedValue(mockServices);
+      mockPrisma.service.count.mockResolvedValue(mockCount);
+
+      const result = await serviceService.publicGetAll(payload, false);
+
+      expect(mockPrisma.service.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        orderBy: { name: 'asc' },
+        include: { organization: true },
+      }));
+      expect(mockPrisma.service.findMany).not.toHaveBeenCalledWith(expect.objectContaining({
+        skip: expect.any(Number),
+        take: expect.any(Number),
+      }));
+      expect(result).toEqual({ totalRecord: mockCount, data: mockServices });
+    });
+
+    it('should handle boolean isActive filter "false" and default pageSize in publicGetAll', async () => {
+      const payload = { isActive: 'false', page: 1, sortBy: 'name', sortOrder: 'asc' }; // No pageSize
+
+      mockPrisma.service.findMany.mockResolvedValue([]);
+      mockPrisma.service.count.mockResolvedValue(0);
+
+      await serviceService.publicGetAll(payload);
+
+      expect(mockPrisma.service.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({ isActive: false }),
+        take: 10 // Default pageSize
+      }));
     });
   });
 

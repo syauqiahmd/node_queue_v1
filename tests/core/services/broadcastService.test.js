@@ -102,9 +102,32 @@ describe('BroadcastService', () => {
 
       broadcastService.emit(eventName, data, rooms);
 
-      expect(mockIO.emit).toHaveBeenCalled();
-      expect(mockLogger.info).toHaveBeenCalled();
-      // Should not throw error
+      expect(mockMessageBroker.publish).not.toHaveBeenCalled();
+    });
+
+    it('should use default rooms empty array and warn', () => {
+      const eventName = 'test-event';
+      const data = { foo: 'bar' };
+
+      broadcastService.emit(eventName, data); // No rooms arg
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('no rooms specified'), { eventName });
+      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', { event: eventName, data });
+    });
+
+    it('should warn and NOT publish if no rooms and no messageBroker', () => {
+      broadcastService = new BroadcastService({
+        socket: mockSocketManager,
+        logger: mockLogger,
+        // No messageBroker
+      });
+
+      const eventName = 'test-event';
+      const data = { foo: 'bar' };
+
+      broadcastService.emit(eventName, data);
+
+      expect(mockLogger.warn).toHaveBeenCalled();
     });
   });
 });

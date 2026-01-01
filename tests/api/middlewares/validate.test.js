@@ -62,10 +62,27 @@ describe('ValidateMiddleware', () => {
       expect(msg).toBe('Validation failed');
     });
 
+    it('should return default message if err is null', () => {
+      const msg = validateMiddleware.generateJoiErrorMessage(null);
+      expect(msg).toBe('Validation failed');
+    });
+
     it('should return specific message for known types', () => {
-      const err = { type: 'string.empty', message: 'Field cannot be empty' };
-      const msg = validateMiddleware.generateJoiErrorMessage(err);
-      expect(msg).toBe('Field cannot be empty');
+      const knownTypes = [
+        'object.unknown',
+        'any.required',
+        'string.empty',
+        'string.max',
+        'any.unknown',
+        'any.only',
+        'number.min'
+      ];
+
+      knownTypes.forEach(type => {
+        const err = { type, message: 'Specific error message' };
+        const msg = validateMiddleware.generateJoiErrorMessage(err);
+        expect(msg).toBe('Specific error message');
+      });
     });
 
     it('should return id must be a valid value for string.guid', () => {
@@ -96,6 +113,18 @@ describe('ValidateMiddleware', () => {
       });
       mockReq.body = { name: 'test' };
       const middleware = validateMiddleware.validate(schema, 'body');
+
+      middleware(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalled();
+    });
+
+    it('should validate successfully using default type (body)', () => {
+      const schema = Joi.object({
+        name: Joi.string().required(),
+      });
+      mockReq.body = { name: 'test' };
+      const middleware = validateMiddleware.validate(schema);
 
       middleware(mockReq, mockRes, mockNext);
 

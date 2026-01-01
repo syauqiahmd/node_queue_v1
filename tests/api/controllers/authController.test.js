@@ -90,9 +90,45 @@ describe('AuthController', () => {
       }));
     });
 
+    it('should login successfully with empty assigneeOrganization', async () => {
+      mockReq.body = { userName: 'user1', password: 'password' };
+      const user = {
+        id: 1,
+        userName: 'user1',
+        fullName: 'User One',
+        role: 'USER',
+        isActive: true,
+        password: 'hashed-password',
+        assigneeOrganization: [], // Empty array
+      };
+      mockUserService.userDetailByUsername.mockResolvedValue(user);
+      mockAuthUtils.comparePassword.mockResolvedValue(true);
+      mockAuthUtils.generateToken.mockReturnValue('new-token');
+
+      await authController.login(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRedisClient.set).toHaveBeenCalledWith(
+        'auth:token:new-token',
+        expect.stringContaining('"organizationId":""'),
+        'EX',
+        3600
+      );
+    });
+
     it('should throw Unauthorized if user not found or inactive', async () => {
       mockReq.body = { userName: 'user1', password: 'password' };
       mockUserService.userDetailByUsername.mockResolvedValue(null);
+
+      await authController.login(mockReq, mockRes, mockNext);
+
+      expect(mockBusinessException.Unauthorized).toHaveBeenCalledWith('Invalid credentials');
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('should throw Unauthorized if user is inactive', async () => {
+      mockReq.body = { userName: 'user1', password: 'password' };
+      mockUserService.userDetailByUsername.mockResolvedValue({ id: 1, isActive: false });
 
       await authController.login(mockReq, mockRes, mockNext);
 
@@ -122,6 +158,25 @@ describe('AuthController', () => {
       expect(mockRedisClient.del).toHaveBeenCalledWith('auth:token:some-token');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: { message: 'logout success' } });
+    });
+
+    it('should skip deletion if token is missing', async () => {
+      mockReq.token = undefined;
+
+      await authController.logout(mockReq, mockRes, mockNext);
+
+      expect(mockRedisClient.del).not.toHaveBeenCalled();
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+    });
+
+    it('should handle errors during logout', async () => {
+      mockReq.token = 'some-token';
+      const error = new Error('Redis error');
+      mockRedisClient.del.mockRejectedValue(error);
+
+      await authController.logout(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 

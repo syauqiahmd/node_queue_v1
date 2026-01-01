@@ -73,6 +73,15 @@ describe('UserController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
     });
+
+    it('should handle errors', async () => {
+      const error = new Error('Service error');
+      mockUserService.getAll.mockRejectedValue(error);
+
+      await userController.getAll(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('getById', () => {
@@ -130,6 +139,17 @@ describe('UserController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Created' });
     });
+
+    it('should handle errors', async () => {
+      const error = new Error('Service error');
+      mockUserService.create.mockRejectedValue(error);
+      // Ensure required body fields are present to avoid destructuring errors if any validation logic existed before service call (though here it's fine)
+      mockReq.body = { userName: 'user1' };
+
+      await userController.create(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('update', () => {
@@ -172,6 +192,16 @@ describe('UserController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Updated' });
     });
+
+    it('should handle errors', async () => {
+      mockReq.params.userId = 'user-1';
+      const error = new Error('Service error');
+      mockUserService.update.mockRejectedValue(error);
+
+      await userController.update(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('remove', () => {
@@ -185,6 +215,16 @@ describe('UserController', () => {
       expect(mockUserService.remove).toHaveBeenCalledWith('user-1');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Deleted' });
+    });
+
+    it('should handle errors', async () => {
+      mockReq.params.userId = 'user-1';
+      const error = new Error('Service error');
+      mockUserService.remove.mockRejectedValue(error);
+
+      await userController.remove(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 });

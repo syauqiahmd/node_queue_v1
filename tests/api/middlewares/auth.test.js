@@ -149,5 +149,23 @@ describe('AuthMiddleware', () => {
       expect(mockBusinessException.Forbidden).toHaveBeenCalledWith('Insufficient permissions');
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should use default roles if none provided', () => {
+      mockReq.user = { role: 'USER' };
+      const middleware = authMiddleware.authorize();
+
+      middleware(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith();
+    });
+
+    it('should handle array of roles', () => {
+      mockReq.user = { role: ['USER', 'MANAGER'] };
+      const middleware = authMiddleware.authorize(['MANAGER']);
+
+      middleware(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith();
+    });
   });
 });

@@ -13,6 +13,7 @@
     "start:cron": "node src/jobs/cron.js",
     "start:websocket": "node src/websocket.js",
     "generate": "prisma generate --schema src/infra/db/prisma/schema.prisma",
+    "postinstall": "npm run generate",
     "lint": "npx eslint .",
     "lint-fix": "npx eslint . --fix"
   },

@@ -77,5 +77,17 @@ describe('GoogleTextToSpeechService', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining(error.message));
     });
+
+    it('should use default text if not provided', async () => {
+      const queueId = 'ticket-1';
+      mockSynthesizeSpeech.mockResolvedValue([{ audioContent: 'audio-content' }]);
+      mockS3Client.uploadFile.mockResolvedValue('url');
+
+      await googleTextToSpeechService.generateSound(undefined, queueId);
+
+      expect(mockSynthesizeSpeech).toHaveBeenCalledWith(expect.objectContaining({
+        input: { text: '' }
+      }));
+    });
   });
 });
