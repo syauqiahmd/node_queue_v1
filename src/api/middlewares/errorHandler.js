@@ -40,7 +40,7 @@ class ErrorHandlerMiddleware {
 
   errorHandler = (err, req, res, _next) => {
     if (!err) {
-      _next();
+      return _next();
     }
 
     this.logger.error('ErrorHandler:', err);
