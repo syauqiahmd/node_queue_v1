@@ -74,6 +74,7 @@ class OrganizationServiceProxy {
   async create(data) {
     const result = await this.organizationService.create(data);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
+    await this.cacheService.invalidate('service:');
     return result;
   }
 
@@ -81,6 +82,7 @@ class OrganizationServiceProxy {
     const result = await this.organizationService.update(id, data);
     await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
+    await this.cacheService.invalidate('service:');
     return result;
   }
 
@@ -88,6 +90,7 @@ class OrganizationServiceProxy {
     const result = await this.organizationService.remove(id);
     await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
+    await this.cacheService.invalidate('service:');
     return result;
   }
 }
