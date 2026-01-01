@@ -65,8 +65,8 @@ class QueueService {
 
   async callNextQueue(payload) {
     const { serviceId, counterId } = payload;
-    const dayStart = new Date(new Date().setHours(0, 0, 0, 0));
-    const dayEnd = new Date(new Date().setHours(23, 59, 59, 999));
+    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    today.setUTCHours(0, 0, 0, 0);
 
     const updatedTicket = await this.prisma.$transaction(async (tx) => {
       const existingCounter = await tx.counter.findUnique({ where: { id: counterId } });
@@ -79,7 +79,7 @@ class QueueService {
         WHERE "service_id" = CAST(${serviceId} AS uuid)
           AND "is_call" = false
           AND "is_priority" = true
-          AND "created_at" BETWEEN CAST(${dayStart} AS timestamp) AND CAST(${dayEnd} AS timestamp)
+          AND "queue_date" = CAST(${today} AS date)
         ORDER BY "created_at" ASC
         LIMIT 1
         FOR UPDATE SKIP LOCKED
@@ -93,7 +93,7 @@ class QueueService {
           WHERE "service_id" = CAST(${serviceId} AS uuid)
             AND "is_call" = false
             AND "is_priority" = false
-            AND "created_at" BETWEEN CAST(${dayStart} AS timestamp) AND CAST(${dayEnd} AS timestamp)
+            AND "queue_date" = CAST(${today} AS date)
           ORDER BY "created_at" ASC
           LIMIT 1
           FOR UPDATE SKIP LOCKED
@@ -105,12 +105,14 @@ class QueueService {
         throw this.businessException.NotFound('queue');
       }
 
+      const updatedTime = new Date(Date.now() + 8 * 60 * 60 * 1000); // Set update time (GMT+8)
       const updated = await tx.ticket.update({
         where: { id: selectedId },
         data: {
           isCall: true,
-          calledAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // Set call time (GMT+8)
+          calledAt: updatedTime, // Set call time (GMT+8)
           latestAssigneeCounterId: counterId,
+          updatedAt: updatedTime, // Set update time (GMT+8)
         },
         include: {
           service: { include: { organization: true } },
@@ -130,7 +132,7 @@ class QueueService {
     // Update the ticket with the sound URL
     const finalTicket = await this.prisma.ticket.update({
       where: { id: updatedTicket.id },
-      data: { soundUrl },
+      data: { soundUrl, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) },
       include: {
         service: {
           include: {
@@ -195,13 +197,13 @@ class QueueService {
   }
 
   async getCurrentQueueDetailById(id) {
+    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    today.setHours(0, 0, 0, 0); // Set to start of the day
+
     return await this.prisma.ticket.findUnique({
       where: {
         id,
-        createdAt: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
-          lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
-        },
+        queueDate: today,
       },
       include: {
         service: {
@@ -252,13 +254,13 @@ class QueueService {
   }
 
   async getCallingQueue() {
+    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    today.setHours(0, 0, 0, 0); // Set to start of the day
+
     const where = {
       isCall: true,
       isResolved: false,
-      updatedAt: {
-        gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of the day
-        lte: new Date(new Date().setHours(23, 59, 59, 999)), // End of the day
-      },
+      queueDate: today,
     };
 
     return this.prisma.ticket.findMany({
@@ -296,7 +298,7 @@ class QueueService {
 
     const updatedTicket = await this.prisma.ticket.update({
       where: { id: queueId },
-      data: { isPriority: true },
+      data: { isPriority: true, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) },
     });
 
     // Broadcast the event
