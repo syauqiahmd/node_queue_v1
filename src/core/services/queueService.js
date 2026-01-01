@@ -296,6 +296,17 @@ class QueueService {
 
     return updatedTicket;
   }
+
+  async cleanUpTicket(date) {
+    const result = await this.prisma.ticket.deleteMany({
+      where: {
+        queueDate: {
+          lt: date,
+        },
+      },
+    });
+    return result;
+  }
 }
 
 module.exports = QueueService;
