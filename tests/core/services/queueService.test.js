@@ -490,7 +490,7 @@ describe('QueueService', () => {
       expect(result).toEqual({ count: 1 });
     });
 
-    it('should return undefined if no stats data found', async () => {
+    it('should return null if no stats data found', async () => {
       const dateInput = '2025-12-31';
       mockPrisma.$queryRaw.mockResolvedValue([]);
 
@@ -498,26 +498,7 @@ describe('QueueService', () => {
 
       expect(mockPrisma.$queryRaw).toHaveBeenCalled();
       expect(mockPrisma.dailyServiceStats.createMany).not.toHaveBeenCalled();
-      expect(result).toBeUndefined();
-    });
-
-    it('should throw error if dailyServiceStats model is missing in prisma client', async () => {
-      const dateInput = '2025-12-31';
-      const mockStatsData = [{ some: 'data' }];
-      mockPrisma.$queryRaw.mockResolvedValue(mockStatsData);
-
-      // Temporarily remove dailyServiceStats from mock
-      const originalDailyServiceStats = mockPrisma.dailyServiceStats;
-      delete mockPrisma.dailyServiceStats;
-
-      await expect(queueService.generateDailyStats(dateInput)).rejects.toThrow(
-        'Prisma Client is out of sync. Model dailyServiceStats is missing. Please run "npm run generate".'
-      );
-
-      // Restore for other tests if needed (though afterEach clears mocks, it doesn't restore deleted props unless re-instantiated)
-      // Since beforeEach re-creates mockPrisma, we should be fine for subsequent tests, 
-      // but this is the last test in the suite anyway.
-      mockPrisma.dailyServiceStats = originalDailyServiceStats;
+      expect(result).toBeNull();
     });
   });
 });

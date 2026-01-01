@@ -346,7 +346,7 @@ class QueueService {
 
     let result = null;
 
-    if (dailyStatsData) {
+    if (dailyStatsData && dailyStatsData.length > 0) {
       const timestamp = new Date(Date.now() + 8 * 60 * 60 * 1000);
       result = await this.prisma.dailyServiceStats.createMany({
         data: dailyStatsData.map((item) => ({
