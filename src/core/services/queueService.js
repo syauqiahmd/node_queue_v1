@@ -344,18 +344,19 @@ class QueueService {
       GROUP BY s."organization_id", t."service_id", t."queue_date"
     `;
 
-    if (dailyStatsData.length === 0) {
-      return;
+    let result = null;
+
+    if (dailyStatsData) {
+      const timestamp = new Date(Date.now() + 8 * 60 * 60 * 1000);
+      result = await this.prisma.dailyServiceStats.createMany({
+        data: dailyStatsData.map((item) => ({
+          ...item,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        })),
+      });
     }
 
-    const timestamp = new Date(Date.now() + 8 * 60 * 60 * 1000);
-    const result = await this.prisma.dailyServiceStats.createMany({
-      data: dailyStatsData.map((item) => ({
-        ...item,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      })),
-    });
 
     return result;
   }

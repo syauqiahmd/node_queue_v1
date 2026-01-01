@@ -31,7 +31,7 @@ class ErrorHandlerMiddleware {
 
       default:
         code = 'BAD_REQUEST';
-        message = err.meta.message || err.message || 'Bad request';
+        message = err.meta?.message || err.message || 'Bad request';
         statusCode = 400;
         break;
     }
