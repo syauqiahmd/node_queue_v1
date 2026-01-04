@@ -163,11 +163,11 @@ class ServiceController {
             r.totalTickets,
             r.resolvedTickets,
             r.ticketsInProgress,
-            r.avgWaitTime,
-            r.minWaitTime,
-            r.maxWaitTime,
-            r.medianWaitTime,
-            r.peakHour,
+            `${Number(r.avgWaitTime).toFixed(2)} menit`,
+            `${Number(r.minWaitTime).toFixed(2)} menit`,
+            `${Number(r.maxWaitTime).toFixed(2)} menit`,
+            `${Number(r.medianWaitTime).toFixed(2)} menit`,
+            `${r.peakHour}`,
           ].join(',')
         )
         .join('\n');
