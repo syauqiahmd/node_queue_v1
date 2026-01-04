@@ -40,7 +40,7 @@ class CronController {
           throw new Error('Invalid cron type');
       }
 
-      return this.responseFormatter.success(res, result, 'Cron triggered successfully');
+      return res.status(200).json({ success: true, message: `Cron ${cronType} triggered successfully` });
     } catch (error) {
       this.logger.error('[CronController] Failed to trigger cron', error);
       next(error);
