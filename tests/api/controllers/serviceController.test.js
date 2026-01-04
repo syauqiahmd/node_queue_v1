@@ -5,6 +5,7 @@ describe('ServiceController', () => {
   let mockServiceService;
   let mockBusinessException;
   let mockIdentityHelper;
+  let mockLogger;
   let mockReq;
   let mockRes;
   let mockNext;
@@ -27,6 +28,11 @@ describe('ServiceController', () => {
       getCurrentUserId: jest.fn().mockReturnValue(1),
     };
 
+    mockLogger = {
+      info: jest.fn(),
+      error: jest.fn(),
+    };
+
     mockReq = {
       query: {},
       params: {},
@@ -44,6 +50,7 @@ describe('ServiceController', () => {
       serviceService: mockServiceService,
       businessException: mockBusinessException,
       identityHelper: mockIdentityHelper,
+      logger: mockLogger,
     });
   });
 

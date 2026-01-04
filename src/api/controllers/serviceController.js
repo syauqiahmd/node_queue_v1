@@ -1,11 +1,12 @@
 class ServiceController {
   /**
-   * @param {{ serviceService: IServiceService, businessException: any, identityHelper: any }}
+   * @param {{ serviceService: IServiceService, businessException: any, identityHelper: any, logger: any }}
    */
-  constructor({ serviceService, businessException, identityHelper }) {
+  constructor({ serviceService, businessException, identityHelper, logger }) {
     this.serviceService = serviceService;
     this.businessException = businessException;
     this.identityHelper = identityHelper;
+    this.logger = logger;
   }
 
   async getAll(req, res, next) {
@@ -17,6 +18,9 @@ class ServiceController {
         sortOrder = 'desc',
         ...filters
       } = req.query;
+
+      this.logger.info('[ServiceController] Getting all services', { filters, page, pageSize });
+
       const data = await this.serviceService.getAll({
         ...filters,
         page: parseInt(page, 10),
@@ -32,6 +36,7 @@ class ServiceController {
 
   async getById(req, res, next) {
     try {
+      this.logger.info(`[ServiceController] Getting service by id: ${req.params.serviceId}`);
       const data = await this.serviceService.getById(req.params.serviceId);
       if (data === null) {
         throw this.businessException.NotFound('Service');
@@ -48,6 +53,9 @@ class ServiceController {
         ...req.body,
         createdBy: this.identityHelper.getCurrentUserId(),
       };
+      
+      this.logger.info('[ServiceController] Creating new service', { payload });
+
       const data = await this.serviceService.create(payload);
       return res.status(201).json({ success: true, data, message: 'Created' });
     } catch (err) {
@@ -61,6 +69,9 @@ class ServiceController {
         ...req.body,
         updatedBy: this.identityHelper.getCurrentUserId(),
       };
+
+      this.logger.info(`[ServiceController] Updating service: ${req.params.serviceId}`, { payload });
+
       const data = await this.serviceService.update(req.params.serviceId, payload);
       return res.status(200).json({ success: true, data, message: 'Updated' });
     } catch (err) {
@@ -70,6 +81,7 @@ class ServiceController {
 
   async remove(req, res, next) {
     try {
+      this.logger.info(`[ServiceController] Removing service: ${req.params.serviceId}`);
       const data = await this.serviceService.remove(req.params.serviceId);
       return res.status(200).json({ success: true, data, message: 'Deleted' });
     } catch (err) {
@@ -79,6 +91,7 @@ class ServiceController {
 
   async publicServiceList(req, res, next) {
     try {
+      this.logger.info('[ServiceController] Getting public service list');
       const { totalRecord, data } = await this.serviceService.publicGetAll(
         { isActive: 'true' },
         false

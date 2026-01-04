@@ -30,7 +30,7 @@ class Logger {
       });
 
     this.logger = winston.createLogger({
-      level: 'debug',
+      level: process.env.LOG_LEVEL || 'debug',
       format: logFormat,
       transports: [
         transportFile('error'),
@@ -64,6 +64,8 @@ class Logger {
           ),
         })
       );
+    } else {
+      this.logger.add(new winston.transports.Console());
     }
   }
 

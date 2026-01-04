@@ -3,6 +3,7 @@ const ServiceService = require('../../../src/core/services/serviceService');
 describe('ServiceService', () => {
   let serviceService;
   let mockPrisma;
+  let mockLogger;
 
   beforeEach(() => {
     mockPrisma = {
@@ -16,8 +17,14 @@ describe('ServiceService', () => {
       },
     };
 
+    mockLogger = {
+      info: jest.fn(),
+      error: jest.fn(),
+    };
+
     serviceService = new ServiceService({
       prismaClient: mockPrisma,
+      logger: mockLogger,
     });
   });
 
