@@ -8,6 +8,7 @@ module.exports = ({
   serviceController,
   userController,
   authController,
+  cronController,
   validateMiddleware,
   counterSchema,
   organizationSchema,
@@ -78,6 +79,13 @@ module.exports = ({
 
   const authRoutes = require('./routes/authRoutes')({ authController, authMiddleware });
   router.use('/auth', authMiddleware.authenticateToken, authRoutes);
+
+  const cronRoutes = require('./routes/cronRoutes')({
+    cronController,
+    authMiddleware,
+    validateMiddleware,
+  });
+  router.use('/cron', authMiddleware.authenticateToken, cronRoutes);
 
   return router;
 };

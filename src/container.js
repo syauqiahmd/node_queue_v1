@@ -85,6 +85,7 @@ container.register({
   // Register Controllers explicitly
   authController: asClass(require('./api/controllers/authController')).singleton(),
   counterController: asClass(require('./api/controllers/counterController')).singleton(),
+  cronController: asClass(require('./api/controllers/cronController')).singleton(),
   organizationController: asClass(require('./api/controllers/organizationController')).singleton(),
   ticketController: asClass(require('./api/controllers/ticketController')).singleton(),
   queueController: asClass(require('./api/controllers/queueController')).singleton(),
