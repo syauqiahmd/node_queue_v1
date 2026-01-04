@@ -66,7 +66,9 @@ describe('AuthController', () => {
         role: 'USER',
         isActive: true,
         password: 'hashed-password',
-        assigneeOrganization: [{ organization: { name: 'Org 1', FullName: 'Organization 1' }, organizationId: 'org-1' }],
+        assigneeOrganization: [
+          { organization: { name: 'Org 1', FullName: 'Organization 1' }, organizationId: 'org-1' },
+        ],
       };
       mockUserService.userDetailByUsername.mockResolvedValue(user);
       mockAuthUtils.comparePassword.mockResolvedValue(true);
@@ -84,10 +86,12 @@ describe('AuthController', () => {
         3600
       );
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-        success: true,
-        data: expect.objectContaining({ token: 'new-token' })
-      }));
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: expect.objectContaining({ token: 'new-token' }),
+        })
+      );
     });
 
     it('should login successfully with empty assigneeOrganization', async () => {
@@ -157,7 +161,10 @@ describe('AuthController', () => {
 
       expect(mockRedisClient.del).toHaveBeenCalledWith('auth:token:some-token');
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: { message: 'logout success' } });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: { message: 'logout success' },
+      });
     });
 
     it('should skip deletion if token is missing', async () => {
@@ -190,14 +197,18 @@ describe('AuthController', () => {
 
       expect(mockAuthUtils.decodeToken).toHaveBeenCalledWith('some-token');
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-        success: true,
-        data: expect.objectContaining({ expiresAt: expect.any(Date) })
-      }));
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: expect.objectContaining({ expiresAt: expect.any(Date) }),
+        })
+      );
     });
 
     it('should handle errors', async () => {
-      mockAuthUtils.decodeToken.mockImplementation(() => { throw new Error('Invalid token'); });
+      mockAuthUtils.decodeToken.mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
 
       await authController.validateToken(mockReq, mockRes, mockNext);
 

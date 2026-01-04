@@ -41,11 +41,13 @@ describe('UserService', () => {
 
       const result = await userService.getAll(payload);
 
-      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        skip: 0,
-        take: 10,
-        orderBy: { userName: 'asc' },
-      }));
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 0,
+          take: 10,
+          orderBy: { userName: 'asc' },
+        })
+      );
       expect(mockPrisma.user.count).toHaveBeenCalled();
       expect(result).toEqual({ totalRecord: mockCount, data: mockUsers });
     });
@@ -72,22 +74,32 @@ describe('UserService', () => {
         isActive: true,
       };
 
-      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expectedWhere }));
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expectedWhere })
+      );
       expect(mockPrisma.user.count).toHaveBeenCalledWith({ where: expectedWhere });
     });
 
     it('should handle boolean isActive filter "false"', async () => {
-        const payload = { isActive: 'false', page: 1, pageSize: 10, sortBy: 'userName', sortOrder: 'asc' };
-        
-        mockPrisma.user.findMany.mockResolvedValue([]);
-        mockPrisma.user.count.mockResolvedValue(0);
-  
-        await userService.getAll(payload);
-  
-        expect(mockPrisma.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
-          where: expect.objectContaining({ isActive: false })
-        }));
-      });
+      const payload = {
+        isActive: 'false',
+        page: 1,
+        pageSize: 10,
+        sortBy: 'userName',
+        sortOrder: 'asc',
+      };
+
+      mockPrisma.user.findMany.mockResolvedValue([]);
+      mockPrisma.user.count.mockResolvedValue(0);
+
+      await userService.getAll(payload);
+
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ isActive: false }),
+        })
+      );
+    });
   });
 
   describe('getById', () => {
@@ -114,12 +126,16 @@ describe('UserService', () => {
 
       const result = await userService.create(data);
 
-      expect(mockPrisma.user.create).toHaveBeenCalledWith(expect.objectContaining({
-        data: expect.objectContaining({ userName: 'user1', createdBy: 'System' })
-      }));
-      expect(mockPrisma.userOrganization.create).toHaveBeenCalledWith(expect.objectContaining({
-        data: expect.objectContaining({ userId: 'new-id', organizationId: 'org-1' })
-      }));
+      expect(mockPrisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ userName: 'user1', createdBy: 'System' }),
+        })
+      );
+      expect(mockPrisma.userOrganization.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ userId: 'new-id', organizationId: 'org-1' }),
+        })
+      );
       expect(result).toEqual(mockCreatedUser);
     });
 
@@ -139,18 +155,18 @@ describe('UserService', () => {
     });
 
     it('should create user only if no organization provided', async () => {
-        const data = {
-          user: { userName: 'user1', role: 'USER' },
-        };
-        const mockCreatedUser = { id: 'new-id', ...data.user };
-        mockPrisma.user.create.mockResolvedValue(mockCreatedUser);
-  
-        const result = await userService.create(data);
-  
-        expect(mockPrisma.user.create).toHaveBeenCalled();
-        expect(mockPrisma.userOrganization.create).not.toHaveBeenCalled();
-        expect(result).toEqual(mockCreatedUser);
-      });
+      const data = {
+        user: { userName: 'user1', role: 'USER' },
+      };
+      const mockCreatedUser = { id: 'new-id', ...data.user };
+      mockPrisma.user.create.mockResolvedValue(mockCreatedUser);
+
+      const result = await userService.create(data);
+
+      expect(mockPrisma.user.create).toHaveBeenCalled();
+      expect(mockPrisma.userOrganization.create).not.toHaveBeenCalled();
+      expect(result).toEqual(mockCreatedUser);
+    });
   });
 
   describe('update', () => {
@@ -158,7 +174,7 @@ describe('UserService', () => {
       const id = 'user-1';
       const data = { userName: 'updated', role: 'USER', organizationId: 'org-2' };
       const mockUpdatedUser = { id, userName: 'updated', role: 'USER' };
-      
+
       mockPrisma.user.update.mockResolvedValue(mockUpdatedUser);
 
       const result = await userService.update(id, data);
@@ -168,40 +184,48 @@ describe('UserService', () => {
         where: { id },
         data: expect.objectContaining({ userName: 'updated' }),
       });
-      expect(mockPrisma.userOrganization.deleteMany).toHaveBeenCalledWith({ where: { userId: id } });
-      expect(mockPrisma.userOrganization.create).toHaveBeenCalledWith(expect.objectContaining({
-        data: expect.objectContaining({ userId: id, organizationId: 'org-2' })
-      }));
+      expect(mockPrisma.userOrganization.deleteMany).toHaveBeenCalledWith({
+        where: { userId: id },
+      });
+      expect(mockPrisma.userOrganization.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ userId: id, organizationId: 'org-2' }),
+        })
+      );
       expect(result).toEqual(mockUpdatedUser);
     });
 
     it('should update user and remove userOrganization if ADMIN role', async () => {
-        const id = 'admin-1';
-        const data = { userName: 'updated-admin', role: 'ADMIN', organizationId: 'org-2' };
-        const mockUpdatedUser = { id, userName: 'updated-admin', role: 'ADMIN' };
-        
-        mockPrisma.user.update.mockResolvedValue(mockUpdatedUser);
-  
-        const result = await userService.update(id, data);
-  
-        expect(mockPrisma.user.update).toHaveBeenCalled();
-        expect(mockPrisma.userOrganization.deleteMany).toHaveBeenCalledWith({ where: { userId: id } });
-        expect(mockPrisma.userOrganization.create).not.toHaveBeenCalled();
-        expect(result).toEqual(mockUpdatedUser);
+      const id = 'admin-1';
+      const data = { userName: 'updated-admin', role: 'ADMIN', organizationId: 'org-2' };
+      const mockUpdatedUser = { id, userName: 'updated-admin', role: 'ADMIN' };
+
+      mockPrisma.user.update.mockResolvedValue(mockUpdatedUser);
+
+      const result = await userService.update(id, data);
+
+      expect(mockPrisma.user.update).toHaveBeenCalled();
+      expect(mockPrisma.userOrganization.deleteMany).toHaveBeenCalledWith({
+        where: { userId: id },
       });
+      expect(mockPrisma.userOrganization.create).not.toHaveBeenCalled();
+      expect(result).toEqual(mockUpdatedUser);
+    });
   });
 
   describe('remove', () => {
     it('should delete user and userOrganization', async () => {
       const id = 'user-1';
       const mockDeletedUser = { id, userName: 'user1' };
-      
+
       mockPrisma.user.delete.mockResolvedValue(mockDeletedUser);
 
       const result = await userService.remove(id);
 
       expect(mockPrisma.$transaction).toHaveBeenCalled();
-      expect(mockPrisma.userOrganization.deleteMany).toHaveBeenCalledWith({ where: { userId: id } });
+      expect(mockPrisma.userOrganization.deleteMany).toHaveBeenCalledWith({
+        where: { userId: id },
+      });
       expect(mockPrisma.user.delete).toHaveBeenCalledWith({ where: { id } });
       expect(result).toEqual(mockDeletedUser);
     });

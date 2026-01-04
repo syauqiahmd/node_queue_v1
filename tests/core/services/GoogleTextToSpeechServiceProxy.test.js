@@ -73,7 +73,9 @@ describe('GoogleTextToSpeechServiceProxy', () => {
 
       await googleTextToSpeechServiceProxy.invalidateCache(queueId);
 
-      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Invalidating TTS cache'));
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Invalidating TTS cache')
+      );
       expect(mockRedisClient.del).toHaveBeenCalledWith(cacheKey);
     });
   });

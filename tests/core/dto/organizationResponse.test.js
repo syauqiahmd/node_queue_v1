@@ -7,7 +7,7 @@ describe('OrganizationResponse', () => {
       name: 'Org 1',
       fullName: 'Organization 1',
       logoUrl: 'http://logo.url',
-      services: []
+      services: [],
     };
     const response = new OrganizationResponse(org);
     expect(response.logoUrl).toBe('http://logo.url');
@@ -19,7 +19,7 @@ describe('OrganizationResponse', () => {
       name: 'Org 1',
       fullName: 'Organization 1',
       // logoUrl missing
-      services: []
+      services: [],
     };
     const response = new OrganizationResponse(org);
     expect(response.logoUrl).toBeNull();
@@ -30,9 +30,7 @@ describe('OrganizationResponse', () => {
       id: 'org-1',
       name: 'Org 1',
       fullName: 'Organization 1',
-      services: [
-        { id: 'svc-1', name: 'Service 1', prefix: 'S1' }
-      ]
+      services: [{ id: 'svc-1', name: 'Service 1', prefix: 'S1' }],
     };
     const response = new OrganizationResponse(org);
     expect(response.services).toHaveLength(1);

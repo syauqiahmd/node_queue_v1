@@ -52,7 +52,10 @@ describe('HealthCheck', () => {
       const result = await healthCheck.checkDbConnection();
 
       expect(result).toBe(true);
-      expect(mockLogger.info).toHaveBeenCalledWith('Database connected successfully', expect.anything());
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Database connected successfully',
+        expect.anything()
+      );
     });
 
     it('should return false if DB connection fails', async () => {
@@ -61,7 +64,10 @@ describe('HealthCheck', () => {
       const result = await healthCheck.checkDbConnection();
 
       expect(result).toBe(false);
-      expect(mockLogger.error).toHaveBeenCalledWith('Database connection failed', expect.anything());
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Database connection failed',
+        expect.anything()
+      );
     });
   });
 
@@ -72,7 +78,10 @@ describe('HealthCheck', () => {
       const result = await healthCheck.checkRedisConnection();
 
       expect(result).toBe(true);
-      expect(mockLogger.info).toHaveBeenCalledWith('Redis connected successfully', expect.anything());
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Redis connected successfully',
+        expect.anything()
+      );
     });
 
     it('should return false if Redis status is not okay', async () => {
@@ -81,17 +90,22 @@ describe('HealthCheck', () => {
       const result = await healthCheck.checkRedisConnection();
 
       expect(result).toBe(false);
-      expect(mockLogger.error).toHaveBeenCalledWith('Redis connection failed: Client not connected after startup.', expect.anything());
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Redis connection failed: Client not connected after startup.',
+        expect.anything()
+      );
     });
 
     it('should return false if Redis check throws error', async () => {
-        mockRedisClient.status.mockImplementation(() => { throw new Error('Redis Error'); });
-  
-        const result = await healthCheck.checkRedisConnection();
-  
-        expect(result).toBe(false);
-        expect(mockLogger.error).toHaveBeenCalledWith('Redis connection failed', expect.anything());
+      mockRedisClient.status.mockImplementation(() => {
+        throw new Error('Redis Error');
       });
+
+      const result = await healthCheck.checkRedisConnection();
+
+      expect(result).toBe(false);
+      expect(mockLogger.error).toHaveBeenCalledWith('Redis connection failed', expect.anything());
+    });
   });
 
   describe('checkS3Connection', () => {
@@ -123,7 +137,10 @@ describe('HealthCheck', () => {
       const result = await healthCheck.runChecks();
 
       expect(result).toBe(true);
-      expect(mockLogger.info).toHaveBeenCalledWith('All critical infrastructure services are connected.', expect.anything());
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'All critical infrastructure services are connected.',
+        expect.anything()
+      );
     });
 
     it('should exit process if any check fails', async () => {
@@ -134,7 +151,10 @@ describe('HealthCheck', () => {
       await healthCheck.runChecks();
 
       expect(process.exit).toHaveBeenCalledWith(1);
-      expect(mockLogger.error).toHaveBeenCalledWith('One or more critical infrastructure services failed to connect. Exiting application.', expect.anything());
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'One or more critical infrastructure services failed to connect. Exiting application.',
+        expect.anything()
+      );
     });
   });
 });

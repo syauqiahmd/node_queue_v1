@@ -1,4 +1,9 @@
-const { asyncLocalStorage, getTransactionId, setUser, getUser } = require('../../../src/infra/utils/asyncContext');
+const {
+  asyncLocalStorage,
+  getTransactionId,
+  setUser,
+  getUser,
+} = require('../../../src/infra/utils/asyncContext');
 
 describe('AsyncContext', () => {
   it('should return undefined if no store', () => {

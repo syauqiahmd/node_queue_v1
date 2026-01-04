@@ -21,7 +21,7 @@ describe('ErrorHandlerMiddleware', () => {
     };
 
     mockPrismaClient = {
-      Prisma: Prisma,
+      Prisma,
     };
 
     mockReq = {};
@@ -44,7 +44,7 @@ describe('ErrorHandlerMiddleware', () => {
       const err = new BusinessError({
         message: 'Custom error',
         code: 'CUSTOM_CODE',
-        statusCode: 418
+        statusCode: 418,
       });
       errorHandlerMiddleware.errorHandler(err, mockReq, mockRes, mockNext);
 

@@ -72,7 +72,7 @@ describe('Logger Helper', () => {
     expect(winston.transports.Console).toHaveBeenCalled();
     // In production, we expect Console called without arguments (using default format)
     // However, since we cleared mocks, we need to check the calls.
-    // The previous test runs might have polluted the calls if not cleared properly, 
+    // The previous test runs might have polluted the calls if not cleared properly,
     // but beforeEach clears mocks.
 
     // Check if the last call to Console was with no arguments or empty object
@@ -110,7 +110,7 @@ describe('Logger Helper', () => {
 
   it('should include transactionId and requestContext in log info', () => {
     // Find the call to winston.format that passes a function
-    const transformCall = winston.format.mock.calls.find(call => typeof call[0] === 'function');
+    const transformCall = winston.format.mock.calls.find((call) => typeof call[0] === 'function');
     expect(transformCall).toBeDefined();
     const transformFn = transformCall[0];
 
@@ -119,7 +119,9 @@ describe('Logger Helper', () => {
     store.set('transactionId', 'tx-123');
     store.set('requestContext', { method: 'GET', path: '/test' });
     mockStore.get.mockImplementation((key) => store.get(key));
-    require('../../../src/infra/utils/asyncContext').asyncLocalStorage.getStore.mockReturnValue(mockStore);
+    require('../../../src/infra/utils/asyncContext').asyncLocalStorage.getStore.mockReturnValue(
+      mockStore
+    );
 
     const info = {};
     const result = transformFn(info);
@@ -129,10 +131,12 @@ describe('Logger Helper', () => {
   });
 
   it('should not include transactionId and requestContext if no store', () => {
-    const transformCall = winston.format.mock.calls.find(call => typeof call[0] === 'function');
+    const transformCall = winston.format.mock.calls.find((call) => typeof call[0] === 'function');
     const transformFn = transformCall[0];
 
-    require('../../../src/infra/utils/asyncContext').asyncLocalStorage.getStore.mockReturnValue(null);
+    require('../../../src/infra/utils/asyncContext').asyncLocalStorage.getStore.mockReturnValue(
+      null
+    );
 
     const info = {};
     const result = transformFn(info);
@@ -158,7 +162,7 @@ describe('Logger Helper', () => {
     const log1 = templateFn({
       timestamp: '2023-01-01',
       level: 'info',
-      message: 'Test message'
+      message: 'Test message',
     });
     expect(log1).toBe('2023-01-01 info: Test message');
 
@@ -167,7 +171,7 @@ describe('Logger Helper', () => {
       timestamp: '2023-01-01',
       level: 'info',
       message: 'Test message',
-      transactionId: 'tx-123'
+      transactionId: 'tx-123',
     });
     expect(log2).toBe('2023-01-01 info: [tx-123] Test message');
 
@@ -176,7 +180,7 @@ describe('Logger Helper', () => {
       timestamp: '2023-01-01',
       level: 'info',
       message: 'Test message',
-      requestContext: { method: 'GET', path: '/test' }
+      requestContext: { method: 'GET', path: '/test' },
     });
     expect(log3).toBe('2023-01-01 info: [GET /test] Test message');
 
@@ -185,7 +189,7 @@ describe('Logger Helper', () => {
       timestamp: '2023-01-01',
       level: 'info',
       message: 'Test message',
-      requestContext: { method: 'GET', path: '/test', userId: 'user-1' }
+      requestContext: { method: 'GET', path: '/test', userId: 'user-1' },
     });
     expect(log4).toBe('2023-01-01 info: [GET /test] [User:user-1] Test message');
 
@@ -194,7 +198,7 @@ describe('Logger Helper', () => {
       timestamp: '2023-01-01',
       level: 'error',
       message: 'Error message',
-      stack: 'Error stack trace'
+      stack: 'Error stack trace',
     });
     expect(log5).toBe('2023-01-01 error: Error stack trace');
 

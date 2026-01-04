@@ -19,7 +19,7 @@ describe('RequestIdMiddleware', () => {
 
   beforeEach(() => {
     uuid.v4.mockReturnValue('test-uuid');
-    
+
     mockAsyncLocalStorage = {
       run: jest.fn((store, callback) => callback()),
     };
@@ -53,25 +53,22 @@ describe('RequestIdMiddleware', () => {
       expect(mockReq.transactionId).toBe('test-uuid');
       expect(mockReq.headers['x-transaction-id']).toBe('test-uuid');
       expect(mockRes.setHeader).toHaveBeenCalledWith('x-transaction-id', 'test-uuid');
-      
-      expect(mockAsyncLocalStorage.run).toHaveBeenCalledWith(
-        expect.any(Map),
-        expect.any(Function)
-      );
-      
+
+      expect(mockAsyncLocalStorage.run).toHaveBeenCalledWith(expect.any(Map), expect.any(Function));
+
       // Check if map contains transactionId
       const storeMap = mockAsyncLocalStorage.run.mock.calls[0][0];
       expect(storeMap.get('transactionId')).toBe('test-uuid');
-      
+
       expect(mockNext).toHaveBeenCalled();
     });
 
     it('should patch res.json to include transactionId', () => {
       requestIdMiddleware.requestIdMiddleware(mockReq, mockRes, mockNext);
-      
+
       const body = { success: true };
       mockRes.json(body);
-      
+
       expect(body.transactionId).toBe('test-uuid');
     });
 
@@ -88,7 +85,7 @@ describe('RequestIdMiddleware', () => {
     it('should set user in async context if req.user exists', () => {
       mockReq.user = { id: 1 };
       requestIdMiddleware.requestIdMiddleware(mockReq, mockRes, mockNext);
-      
+
       expect(asyncContext.setUser).toHaveBeenCalledWith({ id: 1 });
     });
   });

@@ -207,17 +207,19 @@ describe('ServiceController', () => {
 
   describe('publicServiceList', () => {
     it('should return public service list formatted', async () => {
-      const data = [{
-        id: 1,
-        name: 'S1',
-        prefix: 'A',
-        organization: {
-          id: 'org-1',
-          name: 'Org 1',
-          fullName: 'Organization 1',
-          logoUrl: 'https://logo.url'
-        }
-      }];
+      const data = [
+        {
+          id: 1,
+          name: 'S1',
+          prefix: 'A',
+          organization: {
+            id: 'org-1',
+            name: 'Org 1',
+            fullName: 'Organization 1',
+            logoUrl: 'https://logo.url',
+          },
+        },
+      ];
       mockServiceService.publicGetAll.mockResolvedValue({ totalRecord: 1, data });
 
       await serviceController.publicServiceList(mockReq, mockRes, mockNext);
@@ -228,18 +230,20 @@ describe('ServiceController', () => {
         success: true,
         data: {
           totalRecord: 1,
-          data: [{
-            id: 1,
-            name: 'S1',
-            prefix: 'A',
-            organization: {
-              id: 'org-1',
-              name: 'Org 1',
-              fullName: 'Organization 1',
-              logoUrl: 'https://logo.url'
-            }
-          }]
-        }
+          data: [
+            {
+              id: 1,
+              name: 'S1',
+              prefix: 'A',
+              organization: {
+                id: 'org-1',
+                name: 'Org 1',
+                fullName: 'Organization 1',
+                logoUrl: 'https://logo.url',
+              },
+            },
+          ],
+        },
       });
     });
 
@@ -253,32 +257,36 @@ describe('ServiceController', () => {
     });
 
     it('should return null for logoUrl if not present', async () => {
-      const data = [{
-        id: 1,
-        name: 'S1',
-        prefix: 'A',
-        organization: {
-          id: 'org-1',
-          name: 'Org 1',
-          fullName: 'Organization 1'
-          // No logoUrl
-        }
-      }];
+      const data = [
+        {
+          id: 1,
+          name: 'S1',
+          prefix: 'A',
+          organization: {
+            id: 'org-1',
+            name: 'Org 1',
+            fullName: 'Organization 1',
+            // No logoUrl
+          },
+        },
+      ];
       mockServiceService.publicGetAll.mockResolvedValue({ totalRecord: 1, data });
 
       await serviceController.publicServiceList(mockReq, mockRes, mockNext);
 
-      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-        data: expect.objectContaining({
-          data: expect.arrayContaining([
-            expect.objectContaining({
-              organization: expect.objectContaining({
-                logoUrl: null
-              })
-            })
-          ])
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            data: expect.arrayContaining([
+              expect.objectContaining({
+                organization: expect.objectContaining({
+                  logoUrl: null,
+                }),
+              }),
+            ]),
+          }),
         })
-      }));
+      );
     });
   });
 
@@ -465,10 +473,7 @@ describe('ServiceController', () => {
         organizationId: undefined,
       });
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.setHeader).toHaveBeenCalledWith(
-        'Content-Type',
-        'text/csv'
-      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
       expect(mockRes.setHeader).toHaveBeenCalledWith(
         'Content-Disposition',
         'attachment; filename=laporan_antrian_2025-12-20_2025-12-20.csv'

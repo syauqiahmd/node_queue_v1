@@ -121,7 +121,11 @@ describe('QueueController', () => {
 
       expect(mockQueueService.updateQueueById).toHaveBeenCalledWith('q-1', { isResolved: true });
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: updatedTicket, message: 'Ticket resolved' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: updatedTicket,
+        message: 'Ticket resolved',
+      });
     });
 
     it('should recall ticket if action is retry', async () => {
@@ -133,7 +137,11 @@ describe('QueueController', () => {
 
       expect(mockQueueService.recallTicket).toHaveBeenCalledWith('q-1', 'c-1');
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: recalledTicket, message: 'Ticket recalled' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: recalledTicket,
+        message: 'Ticket recalled',
+      });
     });
 
     it('should throw BadRequest for invalid action', async () => {
@@ -164,7 +172,10 @@ describe('QueueController', () => {
 
       await queueController.callNextQueue(mockReq, mockRes, mockNext);
 
-      expect(mockQueueService.callNextQueue).toHaveBeenCalledWith({ serviceId: 's-1', counterId: 'c-1' });
+      expect(mockQueueService.callNextQueue).toHaveBeenCalledWith({
+        serviceId: 's-1',
+        counterId: 'c-1',
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
     });
@@ -246,7 +257,9 @@ describe('QueueController', () => {
 
       await queueController.generateQueueCallingSound(mockReq, mockRes, mockNext);
 
-      expect(mockBusinessException.BadRequest).toHaveBeenCalledWith('Queue has not been assigned to a counter');
+      expect(mockBusinessException.BadRequest).toHaveBeenCalledWith(
+        'Queue has not been assigned to a counter'
+      );
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
 
@@ -271,7 +284,11 @@ describe('QueueController', () => {
 
       expect(mockQueueService.prioritizeTicket).toHaveBeenCalledWith('q-1');
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: updatedTicket, message: 'Ticket prioritized' });
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: updatedTicket,
+        message: 'Ticket prioritized',
+      });
     });
 
     it('should handle errors', async () => {

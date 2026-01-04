@@ -49,8 +49,14 @@ describe('BroadcastService', () => {
       expect(mockSocketManager.getIO).toHaveBeenCalled();
       expect(mockIO.to).toHaveBeenCalledWith(rooms);
       expect(mockIO.emit).toHaveBeenCalledWith(eventName, data);
-      expect(mockLogger.info).toHaveBeenCalledWith('Broadcast event sent successfully', { rooms, eventName });
-      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', { event: eventName, data });
+      expect(mockLogger.info).toHaveBeenCalledWith('Broadcast event sent successfully', {
+        rooms,
+        eventName,
+      });
+      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', {
+        event: eventName,
+        data,
+      });
     });
 
     it('should warn and publish to broker if IO not initialized', () => {
@@ -61,9 +67,15 @@ describe('BroadcastService', () => {
 
       broadcastService.emit(eventName, data, rooms);
 
-      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Socket.io not initialized'), { eventName });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Socket.io not initialized'),
+        { eventName }
+      );
       expect(mockIO.emit).not.toHaveBeenCalled();
-      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', { event: eventName, data });
+      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', {
+        event: eventName,
+        data,
+      });
     });
 
     it('should warn and publish to broker if no rooms specified', () => {
@@ -73,21 +85,31 @@ describe('BroadcastService', () => {
 
       broadcastService.emit(eventName, data, rooms);
 
-      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('no rooms specified'), { eventName });
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('no rooms specified'), {
+        eventName,
+      });
       expect(mockIO.emit).not.toHaveBeenCalled();
-      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', { event: eventName, data });
+      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', {
+        event: eventName,
+        data,
+      });
     });
 
     it('should handle emit errors gracefully', () => {
       const error = new Error('Emit failed');
-      mockIO.to.mockImplementation(() => { throw error; });
+      mockIO.to.mockImplementation(() => {
+        throw error;
+      });
       const eventName = 'test-event';
       const data = { foo: 'bar' };
       const rooms = ['room-1'];
 
       broadcastService.emit(eventName, data, rooms);
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Error during broadcasting event', { error: error.message, eventName });
+      expect(mockLogger.error).toHaveBeenCalledWith('Error during broadcasting event', {
+        error: error.message,
+        eventName,
+      });
     });
 
     it('should work without messageBroker', () => {
@@ -111,8 +133,13 @@ describe('BroadcastService', () => {
 
       broadcastService.emit(eventName, data); // No rooms arg
 
-      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('no rooms specified'), { eventName });
-      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', { event: eventName, data });
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('no rooms specified'), {
+        eventName,
+      });
+      expect(mockMessageBroker.publish).toHaveBeenCalledWith('websocket', {
+        event: eventName,
+        data,
+      });
     });
 
     it('should warn and NOT publish if no rooms and no messageBroker', () => {
