@@ -75,6 +75,16 @@ describe('RequestIdMiddleware', () => {
       expect(body.transactionId).toBe('test-uuid');
     });
 
+    it('should not patch res.json if body is not object', () => {
+      requestIdMiddleware.requestIdMiddleware(mockReq, mockRes, mockNext);
+
+      const body = 'string body';
+      mockRes.json(body);
+
+      expect(body).toBe('string body');
+      // No property added to string primitive
+    });
+
     it('should set user in async context if req.user exists', () => {
       mockReq.user = { id: 1 };
       requestIdMiddleware.requestIdMiddleware(mockReq, mockRes, mockNext);

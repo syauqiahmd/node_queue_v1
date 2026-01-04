@@ -71,6 +71,20 @@ describe('OrganizationServiceProxy', () => {
       );
       expect(result).toEqual(realData);
     });
+
+    it('should not set cache if real service returns null', async () => {
+      const id = 'org-1';
+      mockCacheService.get.mockResolvedValue(null);
+      mockOrganizationServiceReal.getById.mockResolvedValue(null);
+
+      const result = await organizationServiceProxy.getById(id);
+
+      expect(mockCacheService.get).toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Cache miss'));
+      expect(mockOrganizationServiceReal.getById).toHaveBeenCalledWith(id);
+      expect(mockCacheService.set).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
   });
 
   describe('getById', () => {
@@ -104,6 +118,19 @@ describe('OrganizationServiceProxy', () => {
         3600
       );
       expect(result).toEqual(realData);
+    });
+
+    it('should not set cache if real service returns null', async () => {
+      mockCacheService.get.mockResolvedValue(null);
+      mockOrganizationServiceReal.getPublicList.mockResolvedValue(null);
+
+      const result = await organizationServiceProxy.getPublicList();
+
+      expect(mockCacheService.get).toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Cache miss'));
+      expect(mockOrganizationServiceReal.getPublicList).toHaveBeenCalled();
+      expect(mockCacheService.set).not.toHaveBeenCalled();
+      expect(result).toBeNull();
     });
   });
 

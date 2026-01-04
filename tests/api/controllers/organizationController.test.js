@@ -87,6 +87,15 @@ describe('OrganizationController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
     });
+
+    it('should handle errors', async () => {
+      const error = new Error('Service error');
+      mockOrganizationService.getAllWithService.mockRejectedValue(error);
+
+      await organizationController.getPublicList(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('getById', () => {
@@ -111,6 +120,16 @@ describe('OrganizationController', () => {
       expect(mockBusinessException.NotFound).toHaveBeenCalledWith('Organization');
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should handle errors', async () => {
+      mockReq.params.organizationId = 'org-1';
+      const error = new Error('Service error');
+      mockOrganizationService.getById.mockRejectedValue(error);
+
+      await organizationController.getById(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('create', () => {
@@ -127,6 +146,16 @@ describe('OrganizationController', () => {
       });
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Created' });
+    });
+
+    it('should handle errors', async () => {
+      mockReq.body = { name: 'Org 1' };
+      const error = new Error('Service error');
+      mockOrganizationService.create.mockRejectedValue(error);
+
+      await organizationController.create(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -146,6 +175,17 @@ describe('OrganizationController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Updated' });
     });
+
+    it('should handle errors', async () => {
+      mockReq.params.organizationId = 'org-1';
+      mockReq.body = { name: 'Org 2' };
+      const error = new Error('Service error');
+      mockOrganizationService.update.mockRejectedValue(error);
+
+      await organizationController.update(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('remove', () => {
@@ -159,6 +199,16 @@ describe('OrganizationController', () => {
       expect(mockOrganizationService.remove).toHaveBeenCalledWith('org-1');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Deleted' });
+    });
+
+    it('should handle errors', async () => {
+      mockReq.params.organizationId = 'org-1';
+      const error = new Error('Service error');
+      mockOrganizationService.remove.mockRejectedValue(error);
+
+      await organizationController.remove(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 });

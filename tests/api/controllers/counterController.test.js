@@ -67,6 +67,15 @@ describe('CounterController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
     });
+
+    it('should handle errors', async () => {
+      const error = new Error('Service error');
+      mockCounterService.getAll.mockRejectedValue(error);
+
+      await counterController.getAll(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('getById', () => {
@@ -91,6 +100,16 @@ describe('CounterController', () => {
       expect(mockBusinessException.NotFound).toHaveBeenCalledWith('Counter');
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should handle errors', async () => {
+      mockReq.params.counterId = 'c-1';
+      const error = new Error('Service error');
+      mockCounterService.getById.mockRejectedValue(error);
+
+      await counterController.getById(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('create', () => {
@@ -107,6 +126,16 @@ describe('CounterController', () => {
       });
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Created' });
+    });
+
+    it('should handle errors', async () => {
+      mockReq.body = { counterNumber: 'C1' };
+      const error = new Error('Service error');
+      mockCounterService.create.mockRejectedValue(error);
+
+      await counterController.create(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -126,6 +155,17 @@ describe('CounterController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Updated' });
     });
+
+    it('should handle errors', async () => {
+      mockReq.params.counterId = 'c-1';
+      mockReq.body = { counterNumber: 'C2' };
+      const error = new Error('Service error');
+      mockCounterService.update.mockRejectedValue(error);
+
+      await counterController.update(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('remove', () => {
@@ -139,6 +179,16 @@ describe('CounterController', () => {
       expect(mockCounterService.remove).toHaveBeenCalledWith('c-1');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data, message: 'Deleted' });
+    });
+
+    it('should handle errors', async () => {
+      mockReq.params.counterId = 'c-1';
+      const error = new Error('Service error');
+      mockCounterService.remove.mockRejectedValue(error);
+
+      await counterController.remove(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 });

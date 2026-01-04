@@ -70,6 +70,20 @@ describe('ServiceServiceProxy', () => {
       );
       expect(result).toEqual(realData);
     });
+
+    it('should not set cache if real service returns null', async () => {
+      const id = 'service-1';
+      mockCacheService.get.mockResolvedValue(null);
+      mockServiceServiceReal.getById.mockResolvedValue(null);
+
+      const result = await serviceServiceProxy.getById(id);
+
+      expect(mockCacheService.get).toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Cache miss'));
+      expect(mockServiceServiceReal.getById).toHaveBeenCalledWith(id);
+      expect(mockCacheService.set).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
   });
 
   describe('publicGetAll', () => {

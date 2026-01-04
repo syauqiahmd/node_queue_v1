@@ -69,6 +69,20 @@ describe('CounterServiceProxy', () => {
       );
       expect(result).toEqual(realData);
     });
+
+    it('should not set cache if real service returns null', async () => {
+      const id = 'counter-1';
+      mockCacheService.get.mockResolvedValue(null);
+      mockCounterServiceReal.getById.mockResolvedValue(null);
+
+      const result = await counterServiceProxy.getById(id);
+
+      expect(mockCacheService.get).toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Cache miss'));
+      expect(mockCounterServiceReal.getById).toHaveBeenCalledWith(id);
+      expect(mockCacheService.set).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
   });
 
   describe('getById', () => {

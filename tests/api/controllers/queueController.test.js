@@ -76,6 +76,15 @@ describe('QueueController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
     });
+
+    it('should handle errors', async () => {
+      const error = new Error('Test error');
+      mockQueueService.getQueueListByServiceId.mockRejectedValue(error);
+
+      await queueController.getQueueListByServiceId(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('getTotalQueueByServiceId', () => {
@@ -90,6 +99,15 @@ describe('QueueController', () => {
       expect(mockQueueService.getTotalQueueByServiceId).toHaveBeenCalledWith('s-1', 'WAITING');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: { totalRecords: count } });
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Test error');
+      mockQueueService.getTotalQueueByServiceId.mockRejectedValue(error);
+
+      await queueController.getTotalQueueByServiceId(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -126,6 +144,16 @@ describe('QueueController', () => {
       expect(mockBusinessException.BadRequest).toHaveBeenCalledWith('Invalid action specified');
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should handle generic errors', async () => {
+      const error = new Error('Test error');
+      mockReq.body = { action: 'resolve', queueId: 'q-1' };
+      mockQueueService.updateQueueById.mockRejectedValue(error);
+
+      await queueController.actionQueueById(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('callNextQueue', () => {
@@ -140,6 +168,15 @@ describe('QueueController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
     });
+
+    it('should handle errors', async () => {
+      const error = new Error('Test error');
+      mockQueueService.callNextQueue.mockRejectedValue(error);
+
+      await queueController.callNextQueue(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('getCallingQueue', () => {
@@ -153,6 +190,15 @@ describe('QueueController', () => {
       expect(mockQueueResponse.monitorCurrentQueue).toHaveBeenCalledWith(data);
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Test error');
+      mockQueueService.getCallingQueue.mockRejectedValue(error);
+
+      await queueController.getCallingQueue(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -203,6 +249,16 @@ describe('QueueController', () => {
       expect(mockBusinessException.BadRequest).toHaveBeenCalledWith('Queue has not been assigned to a counter');
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should handle generic errors', async () => {
+      const error = new Error('Test error');
+      mockReq.params.queueId = 'q-1';
+      mockQueueService.queueDetailById.mockRejectedValue(error);
+
+      await queueController.generateQueueCallingSound(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('prioritizeTicket', () => {
@@ -216,6 +272,15 @@ describe('QueueController', () => {
       expect(mockQueueService.prioritizeTicket).toHaveBeenCalledWith('q-1');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: updatedTicket, message: 'Ticket prioritized' });
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Test error');
+      mockQueueService.prioritizeTicket.mockRejectedValue(error);
+
+      await queueController.prioritizeTicket(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 });

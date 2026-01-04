@@ -47,24 +47,24 @@ describe('OrganizationService', () => {
     });
 
     it('should return list without pagination if pagination is "false"', async () => {
-        const payload = { pagination: 'false', sortBy: 'name', sortOrder: 'asc' };
-        const mockOrgs = [{ id: 1, name: 'Org 1' }];
-        const mockCount = 1;
-  
-        mockPrisma.organization.findMany.mockResolvedValue(mockOrgs);
-        mockPrisma.organization.count.mockResolvedValue(mockCount);
-  
-        const result = await organizationService.getAll(payload);
-  
-        expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
-          orderBy: { name: 'asc' },
-        }));
-        expect(mockPrisma.organization.findMany).not.toHaveBeenCalledWith(expect.objectContaining({
-            skip: expect.any(Number),
-            take: expect.any(Number),
-        }));
-        expect(result).toEqual({ totalRecord: mockCount, data: mockOrgs });
-      });
+      const payload = { pagination: 'false', sortBy: 'name', sortOrder: 'asc' };
+      const mockOrgs = [{ id: 1, name: 'Org 1' }];
+      const mockCount = 1;
+
+      mockPrisma.organization.findMany.mockResolvedValue(mockOrgs);
+      mockPrisma.organization.count.mockResolvedValue(mockCount);
+
+      const result = await organizationService.getAll(payload);
+
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        orderBy: { name: 'asc' },
+      }));
+      expect(mockPrisma.organization.findMany).not.toHaveBeenCalledWith(expect.objectContaining({
+        skip: expect.any(Number),
+        take: expect.any(Number),
+      }));
+      expect(result).toEqual({ totalRecord: mockCount, data: mockOrgs });
+    });
 
     it('should apply filters correctly', async () => {
       const payload = {
@@ -93,17 +93,17 @@ describe('OrganizationService', () => {
     });
 
     it('should handle boolean isActive filter "false"', async () => {
-        const payload = { isActive: 'false', sortBy: 'name', sortOrder: 'asc', page: 1, pageSize: 10 };
-        
-        mockPrisma.organization.findMany.mockResolvedValue([]);
-        mockPrisma.organization.count.mockResolvedValue(0);
-  
-        await organizationService.getAll(payload);
-  
-        expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
-          where: expect.objectContaining({ isActive: false })
-        }));
-      });
+      const payload = { isActive: 'false', sortBy: 'name', sortOrder: 'asc', page: 1, pageSize: 10 };
+
+      mockPrisma.organization.findMany.mockResolvedValue([]);
+      mockPrisma.organization.count.mockResolvedValue(0);
+
+      await organizationService.getAll(payload);
+
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({ isActive: false })
+      }));
+    });
   });
 
   describe('getById', () => {
@@ -182,9 +182,9 @@ describe('OrganizationService', () => {
       expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
         where: { isActive: true },
         select: expect.objectContaining({
-            services: expect.objectContaining({
-                where: { isActive: true }
-            })
+          services: expect.objectContaining({
+            where: { isActive: true }
+          })
         }),
         orderBy: { name: 'desc' }
       }));
@@ -194,6 +194,38 @@ describe('OrganizationService', () => {
       expect(result[0].id).toBe('org-1');
       expect(result[0].services).toHaveLength(1);
       expect(result[0].services[0].serviceId).toBe('svc-1');
+    });
+
+    it('should handle boolean isActive filter "false" in getAllWithService', async () => {
+      const payload = { isActive: 'false' };
+      mockPrisma.organization.findMany.mockResolvedValue([]);
+
+      await organizationService.getAllWithService(payload);
+
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: { isActive: false },
+        select: expect.objectContaining({
+          services: expect.objectContaining({
+            where: { isActive: false }
+          })
+        })
+      }));
+    });
+
+    it('should handle missing isActive filter in getAllWithService', async () => {
+      const payload = {};
+      mockPrisma.organization.findMany.mockResolvedValue([]);
+
+      await organizationService.getAllWithService(payload);
+
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: { isActive: undefined },
+        select: expect.objectContaining({
+          services: expect.objectContaining({
+            where: { isActive: undefined }
+          })
+        })
+      }));
     });
   });
 });
