@@ -342,8 +342,8 @@ describe('ServiceController', () => {
       const expectedCsv =
         [
           'no,tanggal,organisasi,layanan,total_antrian,antrian_selesai,antrian_diproses,rata_rata_waktu_tunggu,waktu_tunggu_minimum,waktu_tunggu_maksimum,median_waktu_tunggu,jam_puncak',
-          '1,2025-12-01,Organisasi X,Layanan A,10,7,3,5.5,1.2,12.3,4.1,11',
-          '2,2025-12-02,Organisasi X,Layanan A,8,6,2,6.2,2,10,5,13',
+          '1,2025-12-01,Organisasi X,Layanan A,10,7,3,5.50 menit,1.20 menit,12.30 menit,4.10 menit,11',
+          '2,2025-12-02,Organisasi X,Layanan A,8,6,2,6.20 menit,2.00 menit,10.00 menit,5.00 menit,13',
         ].join('\n') + '\n';
       expect(mockRes.send).toHaveBeenCalledWith(expectedCsv);
     });
@@ -428,7 +428,7 @@ describe('ServiceController', () => {
       const expectedCsv =
         [
           'no,tanggal,organisasi,layanan,total_antrian,antrian_selesai,antrian_diproses,rata_rata_waktu_tunggu,waktu_tunggu_minimum,waktu_tunggu_maksimum,median_waktu_tunggu,jam_puncak',
-          '1,2025-12-15,,,' + '5,3,2,4.5,1,9,4,10', // empty org and service
+          '1,2025-12-15,,,' + '5,3,2,4.50 menit,1.00 menit,9.00 menit,4.00 menit,10', // empty org and service
         ].join('\n') + '\n';
       expect(mockRes.send).toHaveBeenCalledWith(expectedCsv);
     });
@@ -476,7 +476,7 @@ describe('ServiceController', () => {
       expect(mockRes.send).toHaveBeenCalledWith(
         [
           'no,tanggal,organisasi,layanan,total_antrian,antrian_selesai,antrian_diproses,rata_rata_waktu_tunggu,waktu_tunggu_minimum,waktu_tunggu_maksimum,median_waktu_tunggu,jam_puncak',
-          '1,2025-12-20,Organisasi Z,Layanan C,3,2,1,3.5,1,7,3,14',
+          '1,2025-12-20,Organisasi Z,Layanan C,3,2,1,3.50 menit,1.00 menit,7.00 menit,3.00 menit,14',
         ].join('\n') + '\n'
       );
     });
