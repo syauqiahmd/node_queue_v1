@@ -2,11 +2,15 @@
  * @implements {IServiceService}
  */
 class ServiceService {
-  constructor({ prismaClient }) {
+  constructor({ prismaClient, logger }) {
     this.prisma = prismaClient;
+    this.logger = logger;
   }
 
   async getAll(payload, pagination = true) {
+    if (this.logger) {
+      this.logger.info('[ServiceService] Fetching all services', { payload, pagination });
+    }
     const where = {
       name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
       prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
@@ -38,6 +42,9 @@ class ServiceService {
     return { totalRecord: count, data };
   }
   async publicGetAll(payload, pagination = true) {
+    if (this.logger) {
+      this.logger.info('[ServiceService] Fetching public services', { payload, pagination });
+    }
     const where = {
       name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
       prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
@@ -82,6 +89,9 @@ class ServiceService {
   }
 
   async getById(id) {
+    if (this.logger) {
+      this.logger.info(`[ServiceService] Fetching service by id: ${id}`);
+    }
     return this.prisma.service.findUnique({
       where: { id },
       include: {
@@ -91,10 +101,16 @@ class ServiceService {
   }
 
   async create(data) {
+    if (this.logger) {
+      this.logger.info('[ServiceService] Creating new service', { data });
+    }
     return this.prisma.service.create({ data });
   }
 
   async update(id, data) {
+    if (this.logger) {
+      this.logger.info(`[ServiceService] Updating service: ${id}`, { data });
+    }
     return this.prisma.service.update({
       where: { id },
       data,
@@ -102,7 +118,12 @@ class ServiceService {
   }
 
   async remove(id) {
-    return this.prisma.service.delete({ where: { id } });
+    if (this.logger) {
+      this.logger.info(`[ServiceService] Removing service: ${id}`);
+    }
+    return this.prisma.service.delete({
+      where: { id },
+    });
   }
 }
 

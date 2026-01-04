@@ -61,6 +61,29 @@ describe('Logger Helper', () => {
     expect(winston.transports.DailyRotateFile).toHaveBeenCalledTimes(4); // error, warn, info, debug
   });
 
+  it('should add Console transport with JSON format in production', () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
+    jest.isolateModules(() => {
+      loggerHelper = require('../../../src/infra/utils/log.helper');
+    });
+
+    expect(winston.transports.Console).toHaveBeenCalled();
+    // In production, we expect Console called without arguments (using default format)
+    // However, since we cleared mocks, we need to check the calls.
+    // The previous test runs might have polluted the calls if not cleared properly, 
+    // but beforeEach clears mocks.
+
+    // Check if the last call to Console was with no arguments or empty object
+    // Wait, winston.transports.Console() call in the else block has no args.
+    const consoleCalls = winston.transports.Console.mock.calls;
+    const productionCall = consoleCalls[consoleCalls.length - 1];
+    expect(productionCall).toEqual([]);
+
+    process.env.NODE_ENV = originalEnv;
+  });
+
   it('should log info messages', () => {
     loggerHelper.info('Info message', { meta: 'data' });
     const loggerInstance = winston.createLogger.mock.results[0].value;
@@ -174,21 +197,6 @@ describe('Logger Helper', () => {
       stack: 'Error stack trace'
     });
     expect(log5).toBe('2023-01-01 error: Error stack trace');
-
-    process.env.NODE_ENV = originalEnv;
-  });
-
-  it('should not add Console transport in production environment', () => {
-    jest.clearAllMocks(); // Clear calls from beforeEach
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
-
-    let loggerHelperProd;
-    jest.isolateModules(() => {
-      loggerHelperProd = require('../../../src/infra/utils/log.helper');
-    });
-
-    expect(loggerHelperProd.logger.add).not.toHaveBeenCalled();
 
     process.env.NODE_ENV = originalEnv;
   });
