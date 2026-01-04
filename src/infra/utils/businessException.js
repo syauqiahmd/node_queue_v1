@@ -23,6 +23,9 @@ module.exports = {
   Unauthorized: (message = 'Unauthorized') =>
     new BusinessError({ code: 'UNAUTHORIZED', message, statusCode: 401 }),
 
+  Forbidden: (message = 'Forbidden') =>
+    new BusinessError({ code: 'FORBIDDEN', message, statusCode: 403 }),
+
   ExpiredSession: () =>
     new BusinessError({
       code: 'UNAUTHORIZED',
