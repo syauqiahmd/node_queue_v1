@@ -121,8 +121,8 @@ class ServiceService {
       endDate,
       organizationId,
     });
-    const start = startDate;
-    const end = endDate || undefined;
+    const start = new Date(startDate);
+    const end = endDate ? new Date(endDate) : undefined;
     const where = {
       serviceId: serviceId || undefined,
       organizationId: organizationId || undefined,
