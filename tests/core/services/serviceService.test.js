@@ -267,4 +267,94 @@ describe('ServiceService', () => {
       expect(result).toEqual(mockDeletedService);
     });
   });
+
+  describe('getDailyServiceStats', () => {
+    it('should fetch stats with serviceId and date range including relations', async () => {
+      const rows = [
+        {
+          date: new Date('2025-12-01'),
+          serviceId: 's-1',
+          organizationId: 'org-1',
+          totalTickets: 10,
+          resolvedTickets: 7,
+          ticketsInProgress: 3,
+          avgWaitTime: 5.5,
+          minWaitTime: 1.2,
+          maxWaitTime: 12.3,
+          medianWaitTime: 4.1,
+          peakHour: 11,
+        },
+      ];
+      mockPrisma.dailyServiceStats = {
+        findMany: jest.fn().mockResolvedValue(rows),
+      };
+
+      const result = await serviceService.getDailyServiceStats({
+        serviceId: 's-1',
+        startDate: '2025-12-01',
+        endDate: '2025-12-31',
+      });
+
+      expect(mockPrisma.dailyServiceStats.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            serviceId: 's-1',
+            date: expect.objectContaining({
+              gte: '2025-12-01',
+              lte: '2025-12-31',
+            }),
+          }),
+          orderBy: { date: 'asc' },
+          include: { service: true, organization: true },
+        })
+      );
+      expect(result).toEqual(rows);
+    });
+
+    it('should apply organizationId when provided', async () => {
+      const rows = [];
+      mockPrisma.dailyServiceStats = {
+        findMany: jest.fn().mockResolvedValue(rows),
+      };
+
+      await serviceService.getDailyServiceStats({
+        startDate: '2025-12-01',
+        endDate: '2025-12-15',
+        organizationId: 'org-42',
+      });
+
+      expect(mockPrisma.dailyServiceStats.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            organizationId: 'org-42',
+            date: expect.objectContaining({
+              gte: '2025-12-01',
+              lte: '2025-12-15',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should handle only startDate without endDate', async () => {
+      mockPrisma.dailyServiceStats = {
+        findMany: jest.fn().mockResolvedValue([]),
+      };
+
+      await serviceService.getDailyServiceStats({
+        startDate: '2025-12-01',
+      });
+
+      expect(mockPrisma.dailyServiceStats.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            date: expect.objectContaining({
+              gte: '2025-12-01',
+            }),
+          }),
+        })
+      );
+    });
+  });
+
 });

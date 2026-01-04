@@ -8,9 +8,7 @@ class ServiceService {
   }
 
   async getAll(payload, pagination = true) {
-    if (this.logger) {
-      this.logger.info('[ServiceService] Fetching all services', { payload, pagination });
-    }
+    this.logger.info('[ServiceService] Fetching all services', { payload, pagination });
     const where = {
       name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
       prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
@@ -42,9 +40,7 @@ class ServiceService {
     return { totalRecord: count, data };
   }
   async publicGetAll(payload, pagination = true) {
-    if (this.logger) {
-      this.logger.info('[ServiceService] Fetching public services', { payload, pagination });
-    }
+    this.logger.info('[ServiceService] Fetching public services', { payload, pagination });
     const where = {
       name: payload.name ? { contains: payload.name, mode: 'insensitive' } : undefined,
       prefix: payload.prefix ? { contains: payload.prefix, mode: 'insensitive' } : undefined,
@@ -89,9 +85,7 @@ class ServiceService {
   }
 
   async getById(id) {
-    if (this.logger) {
-      this.logger.info(`[ServiceService] Fetching service by id: ${id}`);
-    }
+    this.logger.info(`[ServiceService] Fetching service by id: ${id}`);
     return this.prisma.service.findUnique({
       where: { id },
       include: {
@@ -101,16 +95,12 @@ class ServiceService {
   }
 
   async create(data) {
-    if (this.logger) {
-      this.logger.info('[ServiceService] Creating new service', { data });
-    }
+    this.logger.info('[ServiceService] Creating new service', { data });
     return this.prisma.service.create({ data });
   }
 
   async update(id, data) {
-    if (this.logger) {
-      this.logger.info(`[ServiceService] Updating service: ${id}`, { data });
-    }
+    this.logger.info(`[ServiceService] Updating service: ${id}`, { data });
     return this.prisma.service.update({
       where: { id },
       data,
@@ -118,11 +108,37 @@ class ServiceService {
   }
 
   async remove(id) {
-    if (this.logger) {
-      this.logger.info(`[ServiceService] Removing service: ${id}`);
-    }
+    this.logger.info(`[ServiceService] Removing service: ${id}`);
     return this.prisma.service.delete({
       where: { id },
+    });
+  }
+
+  async getDailyServiceStats({ serviceId, startDate, endDate, organizationId }) {
+    this.logger.info('[ServiceService] Fetching DailyServiceStats', {
+      serviceId,
+      startDate,
+      endDate,
+      organizationId,
+    });
+    const start = startDate;
+    const end = endDate || undefined;
+    const where = {
+      serviceId: serviceId || undefined,
+      organizationId: organizationId || undefined,
+      date: {
+        gte: start,
+        lte: end,
+      },
+    };
+
+    return this.prisma.dailyServiceStats.findMany({
+      where,
+      orderBy: { date: 'asc' },
+      include: {
+        service: true,
+        organization: true,
+      },
     });
   }
 }

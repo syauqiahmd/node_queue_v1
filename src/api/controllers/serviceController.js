@@ -53,7 +53,7 @@ class ServiceController {
         ...req.body,
         createdBy: this.identityHelper.getCurrentUserId(),
       };
-      
+
       this.logger.info('[ServiceController] Creating new service', { payload });
 
       const data = await this.serviceService.create(payload);
@@ -110,6 +110,73 @@ class ServiceController {
         };
       });
       return res.status(200).json({ success: true, data: { totalRecord, data: response } });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async exportDailyServiceStatsReport(req, res, next) {
+    try {
+      const { serviceId, startDate, endDate } = req.body;
+      const endDateFinal = endDate || startDate;
+      this.logger.info('[ServiceController] Exporting DailyServiceStats CSV', {
+        serviceId,
+        startDate,
+        endDate: endDateFinal,
+      });
+      const role = this.identityHelper.getCurrentUserRole();
+      const organizationId =
+        role === 'USER' ? this.identityHelper.getCurrentUserOrganizationId() : undefined;
+
+      const rows = await this.serviceService.getDailyServiceStats({
+        serviceId,
+        startDate,
+        endDate: endDateFinal,
+        organizationId,
+      });
+      if (!rows || rows.length === 0) {
+        throw this.businessException.NotFound('DailyServiceStats');
+      }
+
+      const header = [
+        'no',
+        'tanggal',
+        'organisasi',
+        'layanan',
+        'total_antrian',
+        'antrian_selesai',
+        'antrian_diproses',
+        'rata_rata_waktu_tunggu',
+        'waktu_tunggu_minimum',
+        'waktu_tunggu_maksimum',
+        'median_waktu_tunggu',
+        'jam_puncak',
+      ].join(',');
+
+      const dataLines = rows
+        .map((r, i) =>
+          [
+            i + 1,
+            new Date(r.date).toISOString().split('T')[0],
+            r.organization?.name || '',
+            r.service?.name || '',
+            r.totalTickets,
+            r.resolvedTickets,
+            r.ticketsInProgress,
+            r.avgWaitTime,
+            r.minWaitTime,
+            r.maxWaitTime,
+            r.medianWaitTime,
+            r.peakHour,
+          ].join(',')
+        )
+        .join('\n');
+
+      const csv = `${header}\n${dataLines}\n`;
+      const filename = `laporan_antrian_${startDate}_${endDateFinal}.csv`;
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+      return res.status(200).send(csv);
     } catch (err) {
       next(err);
     }
