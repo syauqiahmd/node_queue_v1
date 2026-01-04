@@ -5,6 +5,10 @@ const expressJSDocSwagger = require('express-jsdoc-swagger');
 const createApp = (container) => {
   const app = express();
 
+  // Trust the first proxy (e.g. Nginx, Load Balancer)
+  // This is required for express-rate-limit to correctly identify users when running behind a proxy
+  app.set('trust proxy', 1);
+
   const whitelist = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
   if (process.env.NODE_ENV === 'development') {
     whitelist.push(
