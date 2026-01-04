@@ -336,7 +336,7 @@ describe('ServiceController', () => {
       expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
       expect(mockRes.setHeader).toHaveBeenCalledWith(
         'Content-Disposition',
-        'attachment; filename="daily_service_stats.csv"'
+        'attachment; filename=laporan_antrian_2025-12-01_2025-12-31.csv'
       );
       expect(mockRes.status).toHaveBeenCalledWith(200);
       const expectedCsv =
@@ -431,6 +431,54 @@ describe('ServiceController', () => {
           '1,2025-12-15,,,' + '5,3,2,4.5,1,9,4,10', // empty org and service
         ].join('\n') + '\n';
       expect(mockRes.send).toHaveBeenCalledWith(expectedCsv);
+    });
+
+    it('should default endDate to startDate when missing', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('ADMIN');
+      const payload = {
+        startDate: '2025-12-20',
+      };
+      mockReq.body = payload;
+      const rows = [
+        {
+          date: new Date('2025-12-20'),
+          totalTickets: 3,
+          resolvedTickets: 2,
+          ticketsInProgress: 1,
+          avgWaitTime: 3.5,
+          minWaitTime: 1.0,
+          maxWaitTime: 7.0,
+          medianWaitTime: 3.0,
+          peakHour: 14,
+          service: { name: 'Layanan C' },
+          organization: { name: 'Organisasi Z' },
+        },
+      ];
+      mockServiceService.getDailyServiceStats.mockResolvedValue(rows);
+
+      await serviceController.exportDailyServiceStatsReport(mockReq, mockRes, mockNext);
+
+      expect(mockServiceService.getDailyServiceStats).toHaveBeenCalledWith({
+        serviceId: undefined,
+        startDate: '2025-12-20',
+        endDate: '2025-12-20',
+        organizationId: undefined,
+      });
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Type',
+        'text/csv'
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Disposition',
+        'attachment; filename=laporan_antrian_2025-12-20_2025-12-20.csv'
+      );
+      expect(mockRes.send).toHaveBeenCalledWith(
+        [
+          'no,tanggal,organisasi,layanan,total_antrian,antrian_selesai,antrian_diproses,rata_rata_waktu_tunggu,waktu_tunggu_minimum,waktu_tunggu_maksimum,median_waktu_tunggu,jam_puncak',
+          '1,2025-12-20,Organisasi Z,Layanan C,3,2,1,3.5,1,7,3,14',
+        ].join('\n') + '\n'
+      );
     });
   });
 });

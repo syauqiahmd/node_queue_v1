@@ -118,10 +118,11 @@ class ServiceController {
   async exportDailyServiceStatsReport(req, res, next) {
     try {
       const { serviceId, startDate, endDate } = req.body;
+      const endDateFinal = endDate || startDate;
       this.logger.info('[ServiceController] Exporting DailyServiceStats CSV', {
         serviceId,
         startDate,
-        endDate,
+        endDate: endDateFinal,
       });
       const role = this.identityHelper.getCurrentUserRole();
       const organizationId =
@@ -130,7 +131,7 @@ class ServiceController {
       const rows = await this.serviceService.getDailyServiceStats({
         serviceId,
         startDate,
-        endDate,
+        endDate: endDateFinal,
         organizationId,
       });
       if (!rows || rows.length === 0) {
@@ -172,8 +173,9 @@ class ServiceController {
         .join('\n');
 
       const csv = `${header}\n${dataLines}\n`;
+      const filename = `laporan_antrian_${startDate}_${endDateFinal}.csv`;
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', 'attachment; filename=\"daily_service_stats.csv\"');
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
       return res.status(200).send(csv);
     } catch (err) {
       next(err);
