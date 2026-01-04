@@ -115,5 +115,30 @@ module.exports = ({ serviceController, authMiddleware, validateMiddleware, servi
     serviceController.remove.bind(serviceController)
   );
 
+  /**
+   * POST /services/report/daily-service-stats
+   * @summary Export DailyServiceStats CSV
+   * @tags Service
+   * @security BearerAuth
+   * @param {object} request.body.required - Filter payload
+   * @example request - Example payload
+   * {
+   *   "serviceId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+   *   "startDate": "2025-12-01",
+   *   "endDate": "2025-12-31"
+   * }
+   * @returns {string} 200 - CSV content
+   * @returns {object} 400 - Bad Request
+   * @returns {object} 401 - Unauthorized
+   * @returns {object} 404 - Not Found
+   * @returns {object} 500 - Internal Server Error
+   */
+  router.post(
+    '/report/daily-service-stats',
+    authMiddleware.authorize(['ADMIN', 'USER']),
+    validateMiddleware.validate(serviceSchema.exportDailyServiceStatsSchema),
+    serviceController.exportDailyServiceStatsReport.bind(serviceController)
+  );
+
   return router;
 };

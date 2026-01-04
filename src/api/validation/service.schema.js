@@ -38,9 +38,31 @@ const idServiceSchema = Joi.object({
     .required(),
 }).required(); // Ensure object is not empty
 
+const exportDailyServiceStatsSchema = Joi.object({
+  serviceId: Joi.string()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .optional(),
+  startDate: Joi.date().iso().required(),
+  endDate: Joi.date().iso().optional(),
+})
+  .custom((value, helpers) => {
+    if (value.endDate) {
+      const start = new Date(value.startDate);
+      const maxEnd = new Date(start);
+      maxEnd.setMonth(maxEnd.getMonth() + 1);
+      const end = new Date(value.endDate);
+      if (end > maxEnd) {
+        return helpers.error('any.custom', { message: 'endDate must be within 1 month from startDate' });
+      }
+    }
+    return value;
+  })
+  .required();
+
 module.exports = {
   createServiceSchema,
   updateServiceSchema,
   getServiceSchema,
   idServiceSchema,
+  exportDailyServiceStatsSchema,
 };

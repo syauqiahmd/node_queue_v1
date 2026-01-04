@@ -18,6 +18,7 @@ describe('ServiceController', () => {
       update: jest.fn(),
       remove: jest.fn(),
       publicGetAll: jest.fn(),
+      getDailyServiceStats: jest.fn(),
     };
 
     mockBusinessException = {
@@ -26,6 +27,8 @@ describe('ServiceController', () => {
 
     mockIdentityHelper = {
       getCurrentUserId: jest.fn().mockReturnValue(1),
+      getCurrentUserRole: jest.fn().mockReturnValue('ADMIN'),
+      getCurrentUserOrganizationId: jest.fn().mockReturnValue('org-1'),
     };
 
     mockLogger = {
@@ -42,6 +45,8 @@ describe('ServiceController', () => {
     mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      setHeader: jest.fn(),
+      send: jest.fn(),
     };
 
     mockNext = jest.fn();
@@ -274,6 +279,158 @@ describe('ServiceController', () => {
           ])
         })
       }));
+    });
+  });
+
+  describe('exportDailyServiceStatsReport', () => {
+    it('should return CSV for ADMIN without org restriction', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('ADMIN');
+      const payload = {
+        serviceId: 's-1',
+        startDate: '2025-12-01',
+        endDate: '2025-12-31',
+      };
+      mockReq.body = payload;
+      const rows = [
+        {
+          date: new Date('2025-12-01'),
+          serviceId: 's-1',
+          organizationId: 'org-1',
+          totalTickets: 10,
+          resolvedTickets: 7,
+          ticketsInProgress: 3,
+          avgWaitTime: 5.5,
+          minWaitTime: 1.2,
+          maxWaitTime: 12.3,
+          medianWaitTime: 4.1,
+          peakHour: 11,
+          service: { name: 'Layanan A' },
+          organization: { name: 'Organisasi X' },
+        },
+        {
+          date: new Date('2025-12-02'),
+          serviceId: 's-1',
+          organizationId: 'org-1',
+          totalTickets: 8,
+          resolvedTickets: 6,
+          ticketsInProgress: 2,
+          avgWaitTime: 6.2,
+          minWaitTime: 2.0,
+          maxWaitTime: 10.0,
+          medianWaitTime: 5.0,
+          peakHour: 13,
+          service: { name: 'Layanan A' },
+          organization: { name: 'Organisasi X' },
+        },
+      ];
+      mockServiceService.getDailyServiceStats.mockResolvedValue(rows);
+
+      await serviceController.exportDailyServiceStatsReport(mockReq, mockRes, mockNext);
+
+      expect(mockServiceService.getDailyServiceStats).toHaveBeenCalledWith({
+        serviceId: 's-1',
+        startDate: '2025-12-01',
+        endDate: '2025-12-31',
+        organizationId: undefined,
+      });
+      expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Disposition',
+        'attachment; filename="daily_service_stats.csv"'
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      const expectedCsv =
+        [
+          'no,tanggal,organisasi,layanan,total_antrian,antrian_selesai,antrian_diproses,rata_rata_waktu_tunggu,waktu_tunggu_minimum,waktu_tunggu_maksimum,median_waktu_tunggu,jam_puncak',
+          '1,2025-12-01,Organisasi X,Layanan A,10,7,3,5.5,1.2,12.3,4.1,11',
+          '2,2025-12-02,Organisasi X,Layanan A,8,6,2,6.2,2,10,5,13',
+        ].join('\n') + '\n';
+      expect(mockRes.send).toHaveBeenCalledWith(expectedCsv);
+    });
+
+    it('should restrict by organization for USER', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('USER');
+      mockIdentityHelper.getCurrentUserOrganizationId.mockReturnValue('org-42');
+      const payload = {
+        startDate: '2025-12-01',
+        endDate: '2025-12-31',
+      };
+      mockReq.body = payload;
+      mockServiceService.getDailyServiceStats.mockResolvedValue([
+        {
+          date: new Date('2025-12-01'),
+          totalTickets: 1,
+          resolvedTickets: 1,
+          ticketsInProgress: 0,
+          avgWaitTime: 1,
+          minWaitTime: 1,
+          maxWaitTime: 1,
+          medianWaitTime: 1,
+          peakHour: 9,
+          service: { name: 'Layanan B' },
+          organization: { name: 'Organisasi Y' },
+        },
+      ]);
+
+      await serviceController.exportDailyServiceStatsReport(mockReq, mockRes, mockNext);
+
+      expect(mockServiceService.getDailyServiceStats).toHaveBeenCalledWith({
+        serviceId: undefined,
+        startDate: '2025-12-01',
+        endDate: '2025-12-31',
+        organizationId: 'org-42',
+      });
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.send).toHaveBeenCalled();
+    });
+
+    it('should throw NotFound when no data', async () => {
+      mockReq.body = { startDate: '2025-12-01' };
+      const error = new Error('Not found');
+      mockServiceService.getDailyServiceStats.mockResolvedValue([]);
+      mockBusinessException = {
+        NotFound: jest.fn(() => error),
+      };
+      // Recreate controller with updated businessException mock
+      serviceController = new (require('../../../src/api/controllers/serviceController'))({
+        serviceService: mockServiceService,
+        businessException: mockBusinessException,
+        identityHelper: mockIdentityHelper,
+        logger: mockLogger,
+      });
+
+      await serviceController.exportDailyServiceStatsReport(mockReq, mockRes, mockNext);
+
+      expect(mockBusinessException.NotFound).toHaveBeenCalledWith('DailyServiceStats');
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
+    it('should render empty names when relations missing', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('ADMIN');
+      mockReq.body = { startDate: '2025-12-15' };
+      mockServiceService.getDailyServiceStats.mockResolvedValue([
+        {
+          date: new Date('2025-12-15'),
+          totalTickets: 5,
+          resolvedTickets: 3,
+          ticketsInProgress: 2,
+          avgWaitTime: 4.5,
+          minWaitTime: 1.0,
+          maxWaitTime: 9.0,
+          medianWaitTime: 4.0,
+          peakHour: 10,
+          // service, organization omitted
+        },
+      ]);
+
+      await serviceController.exportDailyServiceStatsReport(mockReq, mockRes, mockNext);
+
+      const expectedCsv =
+        [
+          'no,tanggal,organisasi,layanan,total_antrian,antrian_selesai,antrian_diproses,rata_rata_waktu_tunggu,waktu_tunggu_minimum,waktu_tunggu_maksimum,median_waktu_tunggu,jam_puncak',
+          '1,2025-12-15,,,' + '5,3,2,4.5,1,9,4,10', // empty org and service
+        ].join('\n') + '\n';
+      expect(mockRes.send).toHaveBeenCalledWith(expectedCsv);
     });
   });
 });
