@@ -119,16 +119,32 @@ class ServiceController {
 
   async exportDailyServiceStatsReport(req, res, next) {
     try {
-      const { serviceId, startDate, endDate } = req.body;
+      const { serviceId, organizationId: orgFromBody, startDate, endDate } = req.body;
       const endDateFinal = endDate || startDate;
       this.logger.info('[ServiceController] Exporting DailyServiceStats CSV', {
         serviceId,
+        organizationId: orgFromBody,
         startDate,
         endDate: endDateFinal,
       });
       const role = this.identityHelper.getCurrentUserRole();
       const organizationId =
-        role === 'USER' ? this.identityHelper.getCurrentUserOrganizationId() : undefined;
+        role === 'USER' ? this.identityHelper.getCurrentUserOrganizationId() : orgFromBody;
+
+      if (role === 'USER') {
+        if (orgFromBody && orgFromBody !== organizationId) {
+          throw this.businessException.Forbidden('Insufficient permissions');
+        }
+        if (serviceId) {
+          const svc = await this.serviceService.getById(serviceId);
+          if (!svc) {
+            throw this.businessException.NotFound('Service');
+          }
+          if (svc.organization?.id !== organizationId) {
+            throw this.businessException.Forbidden('Insufficient permissions');
+          }
+        }
+      }
 
       const rows = await this.serviceService.getDailyServiceStats({
         serviceId,

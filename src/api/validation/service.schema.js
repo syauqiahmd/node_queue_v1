@@ -42,6 +42,9 @@ const exportDailyServiceStatsSchema = Joi.object({
   serviceId: Joi.string()
     .guid({ version: ['uuidv4', 'uuidv5'] })
     .optional(),
+  organizationId: Joi.string()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .optional(),
   startDate: Joi.date().iso().required(),
   endDate: Joi.date().iso().optional(),
 })

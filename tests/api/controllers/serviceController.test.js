@@ -23,6 +23,7 @@ describe('ServiceController', () => {
 
     mockBusinessException = {
       NotFound: jest.fn((msg) => new Error(`${msg} not found`)),
+      Forbidden: jest.fn((msg) => new Error(msg)),
     };
 
     mockIdentityHelper = {
@@ -390,6 +391,76 @@ describe('ServiceController', () => {
       });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.send).toHaveBeenCalled();
+    });
+
+    it('should accept organizationId for ADMIN', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('ADMIN');
+      mockReq.body = {
+        organizationId: 'org-99',
+        startDate: '2025-12-10',
+        endDate: '2025-12-12',
+      };
+      const rows = [
+        {
+          date: new Date('2025-12-10'),
+          totalTickets: 2,
+          resolvedTickets: 1,
+          ticketsInProgress: 1,
+          avgWaitTime: 4.2,
+          minWaitTime: 1.0,
+          maxWaitTime: 8.0,
+          medianWaitTime: 3.0,
+          peakHour: 10,
+          service: { name: 'Layanan D' },
+          organization: { name: 'Organisasi 99' },
+        },
+      ];
+      mockServiceService.getDailyServiceStats.mockResolvedValue(rows);
+
+      await serviceController.exportDailyServiceStatsReport(mockReq, mockRes, mockNext);
+
+      expect(mockServiceService.getDailyServiceStats).toHaveBeenCalledWith({
+        serviceId: undefined,
+        startDate: '2025-12-10',
+        endDate: '2025-12-12',
+        organizationId: 'org-99',
+      });
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.send).toHaveBeenCalled();
+    });
+
+    it('should forbid USER with mismatched organizationId', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('USER');
+      mockIdentityHelper.getCurrentUserOrganizationId.mockReturnValue('org-42');
+      mockReq.body = {
+        organizationId: 'org-99',
+        startDate: '2025-12-10',
+        endDate: '2025-12-12',
+      };
+
+      await serviceController.exportDailyServiceStatsReport(mockReq, mockRes, mockNext);
+
+      expect(mockBusinessException.Forbidden).toHaveBeenCalledWith('Insufficient permissions');
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('should forbid USER when serviceId not under their organization', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('USER');
+      mockIdentityHelper.getCurrentUserOrganizationId.mockReturnValue('org-42');
+      mockReq.body = {
+        serviceId: 's-foreign',
+        startDate: '2025-12-10',
+        endDate: '2025-12-12',
+      };
+      mockServiceService.getById.mockResolvedValue({
+        id: 's-foreign',
+        organization: { id: 'org-99' },
+      });
+
+      await serviceController.exportDailyServiceStatsReport(mockReq, mockRes, mockNext);
+
+      expect(mockBusinessException.Forbidden).toHaveBeenCalledWith('Insufficient permissions');
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should throw NotFound when no data', async () => {
