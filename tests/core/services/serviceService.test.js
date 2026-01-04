@@ -300,8 +300,8 @@ describe('ServiceService', () => {
           where: expect.objectContaining({
             serviceId: 's-1',
             date: expect.objectContaining({
-              gte: '2025-12-01',
-              lte: '2025-12-31',
+              gte: new Date('2025-12-01'),
+              lte: new Date('2025-12-31'),
             }),
           }),
           orderBy: { date: 'asc' },
@@ -328,8 +328,8 @@ describe('ServiceService', () => {
           where: expect.objectContaining({
             organizationId: 'org-42',
             date: expect.objectContaining({
-              gte: '2025-12-01',
-              lte: '2025-12-15',
+              gte: new Date('2025-12-01'),
+              lte: new Date('2025-12-15'),
             }),
           }),
         })
@@ -349,7 +349,7 @@ describe('ServiceService', () => {
         expect.objectContaining({
           where: expect.objectContaining({
             date: expect.objectContaining({
-              gte: '2025-12-01',
+              gte: new Date('2025-12-01'),
             }),
           }),
         })
