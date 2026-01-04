@@ -46,7 +46,10 @@ describe('CronController', () => {
         masterPassword: validMasterPassword,
       },
     };
-    mockRes = {};
+    mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
     mockNext = jest.fn();
   });
 
@@ -68,11 +71,11 @@ describe('CronController', () => {
       await cronController.triggerCron(mockReq, mockRes, mockNext);
 
       expect(mockQueueService.generateDailyStats).toHaveBeenCalledWith(date);
-      expect(mockResponseFormatter.success).toHaveBeenCalledWith(
-        mockRes,
-        expectedResult,
-        'Cron triggered successfully'
-      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: `Cron ${CRON_TYPES.PRE_CALCULATE} triggered successfully`,
+      });
     });
 
     it('should throw Forbidden error if master password is invalid', async () => {
@@ -101,11 +104,11 @@ describe('CronController', () => {
       await cronController.triggerCron(mockReq, mockRes, mockNext);
 
       expect(mockQueueService.cleanUpTicket).toHaveBeenCalledWith(new Date(date));
-      expect(mockResponseFormatter.success).toHaveBeenCalledWith(
-        mockRes,
-        expectedResult,
-        'Cron triggered successfully'
-      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: `Cron ${CRON_TYPES.HOUSEKEEPING_QUEUE_DATA} triggered successfully`,
+      });
     });
 
     it('should trigger HOUSEKEEPING_S3_FILES cron', async () => {
@@ -121,11 +124,11 @@ describe('CronController', () => {
       await cronController.triggerCron(mockReq, mockRes, mockNext);
 
       expect(mockQueueService.cleanUpS3Files).toHaveBeenCalledWith('sound-generated/2023-10-27');
-      expect(mockResponseFormatter.success).toHaveBeenCalledWith(
-        mockRes,
-        expectedResult,
-        'Cron triggered successfully'
-      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: `Cron ${CRON_TYPES.HOUSEKEEPING_S3_FILES} triggered successfully`,
+      });
     });
 
     it('should handle invalid cron type', async () => {

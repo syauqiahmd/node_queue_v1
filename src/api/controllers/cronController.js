@@ -17,23 +17,22 @@ class CronController {
       }
 
       const formattedDate = new Date(date).toISOString().split('T')[0];
-      let result;
 
       this.logger.info(`[CronController] Triggering manual cron: ${cronType} for date: ${formattedDate}`);
 
       switch (cronType) {
         case CRON_TYPES.PRE_CALCULATE:
-          result = await this.queueService.generateDailyStats(formattedDate);
+          await this.queueService.generateDailyStats(formattedDate);
           break;
 
         case CRON_TYPES.HOUSEKEEPING_QUEUE_DATA:
           // For queue data, we pass the date object directly
-          result = await this.queueService.cleanUpTicket(new Date(date));
+          await this.queueService.cleanUpTicket(new Date(date));
           break;
 
         case CRON_TYPES.HOUSEKEEPING_S3_FILES:
           const dirName = `sound-generated/${formattedDate}`;
-          result = await this.queueService.cleanUpS3Files(dirName);
+          await this.queueService.cleanUpS3Files(dirName);
           break;
 
         default:
