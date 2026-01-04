@@ -1,4 +1,11 @@
-const { BusinessError, NotFound, Unauthorized, ExpiredSession, unCalledQueue, BadRequest } = require('../../../src/infra/utils/businessException');
+const {
+  BusinessError,
+  NotFound,
+  Unauthorized,
+  ExpiredSession,
+  unCalledQueue,
+  BadRequest,
+} = require('../../../src/infra/utils/businessException');
 
 describe('BusinessException', () => {
   describe('BusinessError', () => {
@@ -17,7 +24,7 @@ describe('BusinessException', () => {
         code: 'TEST_CODE',
         message: 'Test message',
         statusCode: 418,
-        fields: { field: 'error' }
+        fields: { field: 'error' },
       });
       expect(err.code).toBe('TEST_CODE');
       expect(err.message).toBe('Test message');

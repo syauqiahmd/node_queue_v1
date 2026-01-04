@@ -70,7 +70,9 @@ class ServiceController {
         updatedBy: this.identityHelper.getCurrentUserId(),
       };
 
-      this.logger.info(`[ServiceController] Updating service: ${req.params.serviceId}`, { payload });
+      this.logger.info(`[ServiceController] Updating service: ${req.params.serviceId}`, {
+        payload,
+      });
 
       const data = await this.serviceService.update(req.params.serviceId, payload);
       return res.status(200).json({ success: true, data, message: 'Updated' });

@@ -4,7 +4,13 @@ const toTicketPrioritizedDTO = require('../dto/websocket/TicketPrioritizedDTO');
 const toTicketRecalledDTO = require('../dto/websocket/TicketRecalledDTO');
 
 class QueueService {
-  constructor({ prismaClient, businessException, googleTextToSpeechService, broadcastService, s3Client }) {
+  constructor({
+    prismaClient,
+    businessException,
+    googleTextToSpeechService,
+    broadcastService,
+    s3Client,
+  }) {
     this.prisma = prismaClient;
     this.businessException = businessException;
     this.googleTextToSpeechService = googleTextToSpeechService;
@@ -181,7 +187,11 @@ class QueueService {
 
       ticket = await this.prisma.ticket.update({
         where: { id: queueId },
-        data: { latestAssigneeCounterId: newCounterId, soundUrl, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) },
+        data: {
+          latestAssigneeCounterId: newCounterId,
+          soundUrl,
+          updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000),
+        },
         include: {
           service: { include: { organization: true } },
           latestAssigneeCounter: true,
@@ -356,7 +366,6 @@ class QueueService {
         })),
       });
     }
-
 
     return result;
   }

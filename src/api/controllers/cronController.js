@@ -17,8 +17,11 @@ class CronController {
       }
 
       const formattedDate = new Date(date).toISOString().split('T')[0];
+      const dirName = `sound-generated/${formattedDate}`;
 
-      this.logger.info(`[CronController] Triggering manual cron: ${cronType} for date: ${formattedDate}`);
+      this.logger.info(
+        `[CronController] Triggering manual cron: ${cronType} for date: ${formattedDate}`
+      );
 
       switch (cronType) {
         case CRON_TYPES.PRE_CALCULATE:
@@ -31,7 +34,6 @@ class CronController {
           break;
 
         case CRON_TYPES.HOUSEKEEPING_S3_FILES:
-          const dirName = `sound-generated/${formattedDate}`;
           await this.queueService.cleanUpS3Files(dirName);
           break;
 
@@ -39,7 +41,9 @@ class CronController {
           throw new Error('Invalid cron type');
       }
 
-      return res.status(200).json({ success: true, message: `Cron ${cronType} triggered successfully` });
+      return res
+        .status(200)
+        .json({ success: true, message: `Cron ${cronType} triggered successfully` });
     } catch (error) {
       this.logger.error('[CronController] Failed to trigger cron', error);
       next(error);

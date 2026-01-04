@@ -1,11 +1,7 @@
 const express = require('express');
 const cronSchema = require('../validation/cron.schema');
 
-module.exports = ({
-  cronController,
-  authMiddleware,
-  validateMiddleware,
-}) => {
+module.exports = ({ cronController, authMiddleware, validateMiddleware }) => {
   const router = express.Router();
 
   router.post(

@@ -37,11 +37,13 @@ describe('OrganizationService', () => {
 
       const result = await organizationService.getAll(payload);
 
-      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        skip: 0,
-        take: 10,
-        orderBy: { name: 'asc' },
-      }));
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 0,
+          take: 10,
+          orderBy: { name: 'asc' },
+        })
+      );
       expect(mockPrisma.organization.count).toHaveBeenCalled();
       expect(result).toEqual({ totalRecord: mockCount, data: mockOrgs });
     });
@@ -56,13 +58,17 @@ describe('OrganizationService', () => {
 
       const result = await organizationService.getAll(payload);
 
-      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        orderBy: { name: 'asc' },
-      }));
-      expect(mockPrisma.organization.findMany).not.toHaveBeenCalledWith(expect.objectContaining({
-        skip: expect.any(Number),
-        take: expect.any(Number),
-      }));
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { name: 'asc' },
+        })
+      );
+      expect(mockPrisma.organization.findMany).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: expect.any(Number),
+          take: expect.any(Number),
+        })
+      );
       expect(result).toEqual({ totalRecord: mockCount, data: mockOrgs });
     });
 
@@ -88,21 +94,31 @@ describe('OrganizationService', () => {
         isActive: true,
       };
 
-      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expectedWhere }));
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expectedWhere })
+      );
       expect(mockPrisma.organization.count).toHaveBeenCalledWith({ where: expectedWhere });
     });
 
     it('should handle boolean isActive filter "false"', async () => {
-      const payload = { isActive: 'false', sortBy: 'name', sortOrder: 'asc', page: 1, pageSize: 10 };
+      const payload = {
+        isActive: 'false',
+        sortBy: 'name',
+        sortOrder: 'asc',
+        page: 1,
+        pageSize: 10,
+      };
 
       mockPrisma.organization.findMany.mockResolvedValue([]);
       mockPrisma.organization.count.mockResolvedValue(0);
 
       await organizationService.getAll(payload);
 
-      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        where: expect.objectContaining({ isActive: false })
-      }));
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ isActive: false }),
+        })
+      );
     });
   });
 
@@ -165,29 +181,31 @@ describe('OrganizationService', () => {
   describe('getAllWithService', () => {
     it('should return organizations with mapped services', async () => {
       const payload = { isActive: 'true' };
-      const mockOrgs = [{
-        id: 'org-1',
-        name: 'Org 1',
-        fullName: 'Organization 1',
-        logoUrl: 'https://logo.url',
-        services: [
-          { id: 'svc-1', name: 'Service 1', prefix: 'A' }
-        ]
-      }];
+      const mockOrgs = [
+        {
+          id: 'org-1',
+          name: 'Org 1',
+          fullName: 'Organization 1',
+          logoUrl: 'https://logo.url',
+          services: [{ id: 'svc-1', name: 'Service 1', prefix: 'A' }],
+        },
+      ];
 
       mockPrisma.organization.findMany.mockResolvedValue(mockOrgs);
 
       const result = await organizationService.getAllWithService(payload);
 
-      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        where: { isActive: true },
-        select: expect.objectContaining({
-          services: expect.objectContaining({
-            where: { isActive: true }
-          })
-        }),
-        orderBy: { name: 'desc' }
-      }));
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { isActive: true },
+          select: expect.objectContaining({
+            services: expect.objectContaining({
+              where: { isActive: true },
+            }),
+          }),
+          orderBy: { name: 'desc' },
+        })
+      );
 
       // Verify DTO mapping
       expect(result).toHaveLength(1);
@@ -202,14 +220,16 @@ describe('OrganizationService', () => {
 
       await organizationService.getAllWithService(payload);
 
-      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        where: { isActive: false },
-        select: expect.objectContaining({
-          services: expect.objectContaining({
-            where: { isActive: false }
-          })
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { isActive: false },
+          select: expect.objectContaining({
+            services: expect.objectContaining({
+              where: { isActive: false },
+            }),
+          }),
         })
-      }));
+      );
     });
 
     it('should handle missing isActive filter in getAllWithService', async () => {
@@ -218,14 +238,16 @@ describe('OrganizationService', () => {
 
       await organizationService.getAllWithService(payload);
 
-      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        where: { isActive: undefined },
-        select: expect.objectContaining({
-          services: expect.objectContaining({
-            where: { isActive: undefined }
-          })
+      expect(mockPrisma.organization.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { isActive: undefined },
+          select: expect.objectContaining({
+            services: expect.objectContaining({
+              where: { isActive: undefined },
+            }),
+          }),
         })
-      }));
+      );
     });
   });
 });

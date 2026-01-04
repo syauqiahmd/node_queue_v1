@@ -36,12 +36,14 @@ describe('CounterService', () => {
 
       const result = await counterService.getAll(payload);
 
-      expect(mockPrisma.counter.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        skip: 0,
-        take: 10,
-        orderBy: { counterNumber: 'asc' },
-        include: { service: { include: { organization: true } } },
-      }));
+      expect(mockPrisma.counter.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 0,
+          take: 10,
+          orderBy: { counterNumber: 'asc' },
+          include: { service: { include: { organization: true } } },
+        })
+      );
       expect(mockPrisma.counter.count).toHaveBeenCalled();
       expect(result).toEqual({ totalRecord: mockCount, data: mockCounters });
     });
@@ -56,14 +58,18 @@ describe('CounterService', () => {
 
       const result = await counterService.getAll(payload);
 
-      expect(mockPrisma.counter.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        orderBy: { counterNumber: 'asc' },
-        include: { service: { include: { organization: true } } },
-      }));
-      expect(mockPrisma.counter.findMany).not.toHaveBeenCalledWith(expect.objectContaining({
-        skip: expect.any(Number),
-        take: expect.any(Number),
-      }));
+      expect(mockPrisma.counter.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { counterNumber: 'asc' },
+          include: { service: { include: { organization: true } } },
+        })
+      );
+      expect(mockPrisma.counter.findMany).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: expect.any(Number),
+          take: expect.any(Number),
+        })
+      );
       expect(result).toEqual({ totalRecord: mockCount, data: mockCounters });
     });
 
@@ -89,22 +95,32 @@ describe('CounterService', () => {
         isActive: true,
       };
 
-      expect(mockPrisma.counter.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expectedWhere }));
+      expect(mockPrisma.counter.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expectedWhere })
+      );
       expect(mockPrisma.counter.count).toHaveBeenCalledWith({ where: expectedWhere });
     });
 
     it('should handle boolean isActive filter "false"', async () => {
-        const payload = { isActive: 'false', sortBy: 'counterNumber', sortOrder: 'asc', page: 1, pageSize: 10 };
-        
-        mockPrisma.counter.findMany.mockResolvedValue([]);
-        mockPrisma.counter.count.mockResolvedValue(0);
-  
-        await counterService.getAll(payload);
-  
-        expect(mockPrisma.counter.findMany).toHaveBeenCalledWith(expect.objectContaining({
-          where: expect.objectContaining({ isActive: false })
-        }));
-      });
+      const payload = {
+        isActive: 'false',
+        sortBy: 'counterNumber',
+        sortOrder: 'asc',
+        page: 1,
+        pageSize: 10,
+      };
+
+      mockPrisma.counter.findMany.mockResolvedValue([]);
+      mockPrisma.counter.count.mockResolvedValue(0);
+
+      await counterService.getAll(payload);
+
+      expect(mockPrisma.counter.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ isActive: false }),
+        })
+      );
+    });
   });
 
   describe('getById', () => {

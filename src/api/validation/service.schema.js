@@ -52,7 +52,9 @@ const exportDailyServiceStatsSchema = Joi.object({
       maxEnd.setMonth(maxEnd.getMonth() + 1);
       const end = new Date(value.endDate);
       if (end > maxEnd) {
-        return helpers.error('any.custom', { message: 'endDate must be within 1 month from startDate' });
+        return helpers.error('any.custom', {
+          message: 'endDate must be within 1 month from startDate',
+        });
       }
     }
     return value;

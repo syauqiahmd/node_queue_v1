@@ -29,17 +29,19 @@ describe('RateLimiterMiddleware', () => {
 
   describe('constructor', () => {
     it('should initialize rate limiter with default values', () => {
-      expect(rateLimit).toHaveBeenCalledWith(expect.objectContaining({
-        windowMs: expect.any(Number),
-        max: expect.any(Number),
-        legacyHeaders: false,
-        message: expect.objectContaining({
-          success: false,
-          error: expect.objectContaining({
-            code: 'TOO_MANY_REQUESTS',
+      expect(rateLimit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          windowMs: expect.any(Number),
+          max: expect.any(Number),
+          legacyHeaders: false,
+          message: expect.objectContaining({
+            success: false,
+            error: expect.objectContaining({
+              code: 'TOO_MANY_REQUESTS',
+            }),
           }),
-        }),
-      }));
+        })
+      );
     });
   });
 

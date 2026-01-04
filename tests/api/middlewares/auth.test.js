@@ -90,7 +90,9 @@ describe('AuthMiddleware', () => {
       mockReq.headers.authorization = 'Bearer expired-token';
       const error = new Error('Token expired');
       error.name = 'TokenExpiredError';
-      mockAuthUtils.verifyToken.mockImplementation(() => { throw error; });
+      mockAuthUtils.verifyToken.mockImplementation(() => {
+        throw error;
+      });
 
       await authMiddleware.authenticateToken(mockReq, mockRes, mockNext);
 
@@ -102,7 +104,9 @@ describe('AuthMiddleware', () => {
       mockReq.headers.authorization = 'Bearer invalid-token';
       const error = new Error('Invalid token');
       error.name = 'JsonWebTokenError';
-      mockAuthUtils.verifyToken.mockImplementation(() => { throw error; });
+      mockAuthUtils.verifyToken.mockImplementation(() => {
+        throw error;
+      });
 
       await authMiddleware.authenticateToken(mockReq, mockRes, mockNext);
 

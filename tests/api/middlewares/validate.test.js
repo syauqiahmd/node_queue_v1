@@ -75,10 +75,10 @@ describe('ValidateMiddleware', () => {
         'string.max',
         'any.unknown',
         'any.only',
-        'number.min'
+        'number.min',
       ];
 
-      knownTypes.forEach(type => {
+      knownTypes.forEach((type) => {
         const err = { type, message: 'Specific error message' };
         const msg = validateMiddleware.generateJoiErrorMessage(err);
         expect(msg).toBe('Specific error message');

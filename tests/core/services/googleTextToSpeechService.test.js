@@ -49,15 +49,17 @@ describe('GoogleTextToSpeechService', () => {
 
       const result = await googleTextToSpeechService.generateSound(text, queueId);
 
-      expect(mockSynthesizeSpeech).toHaveBeenCalledWith(expect.objectContaining({
-        input: { text },
-        voice: { languageCode: 'id-ID', ssmlGender: 'NEUTRAL' },
-        audioConfig: { audioEncoding: 'MP3', speakingRate: 0.75 },
-      }));
+      expect(mockSynthesizeSpeech).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: { text },
+          voice: { languageCode: 'id-ID', ssmlGender: 'NEUTRAL' },
+          audioConfig: { audioEncoding: 'MP3', speakingRate: 0.75 },
+        })
+      );
 
       expect(mockS3Client.uploadFile).toHaveBeenCalledWith(
         Buffer.from(mockAudioContent, 'binary'),
-        expect.stringContaining(`sound-generated/`),
+        expect.stringContaining('sound-generated/'),
         'audio/mpeg',
         expect.any(Number)
       );
@@ -85,9 +87,11 @@ describe('GoogleTextToSpeechService', () => {
 
       await googleTextToSpeechService.generateSound(undefined, queueId);
 
-      expect(mockSynthesizeSpeech).toHaveBeenCalledWith(expect.objectContaining({
-        input: { text: '' }
-      }));
+      expect(mockSynthesizeSpeech).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: { text: '' },
+        })
+      );
     });
   });
 });

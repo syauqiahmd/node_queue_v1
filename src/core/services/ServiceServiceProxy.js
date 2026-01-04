@@ -75,7 +75,7 @@ class ServiceServiceProxy {
     await this.cacheService.invalidate('organization:');
     return result;
   }
-  
+
   async getDailyServiceStats(payload) {
     const cacheKey = `${this.cacheKeyPrefix}dailyStats:${JSON.stringify(payload)}`;
     const cachedData = await this.cacheService.get(cacheKey);

@@ -76,12 +76,13 @@ describe('TicketController', () => {
         totalWaitingQueue: 2,
       };
 
-      expect(mockTicketService.generateQueueNumberAndCreateTicket).toHaveBeenCalledWith(mockReq.body);
-      expect(mockBroadcastService.emit).toHaveBeenCalledWith(
-        'new-ticket',
-        expectedResponseData,
-        ['service-s-1', 'monitor-room']
+      expect(mockTicketService.generateQueueNumberAndCreateTicket).toHaveBeenCalledWith(
+        mockReq.body
       );
+      expect(mockBroadcastService.emit).toHaveBeenCalledWith('new-ticket', expectedResponseData, [
+        'service-s-1',
+        'monitor-room',
+      ]);
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
