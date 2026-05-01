@@ -14,3 +14,4 @@ credentials.json
 coverage
 src/infra/config
 
+.DS_Store
