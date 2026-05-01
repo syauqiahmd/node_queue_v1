@@ -45,7 +45,7 @@ class QueueController {
       }
 
       if (action === 'retry') {
-        const recalledTicket = await this.queueService.recallTicket(queueId, counterId);
+        const recalledTicket = await this.queueService.recallTicket(queueId, counterId, req.user);
         return res
           .status(200)
           .json({ success: true, data: recalledTicket, message: 'Ticket recalled' });
@@ -60,7 +60,11 @@ class QueueController {
   async callNextQueue(req, res, next) {
     try {
       const { serviceId, counterId } = req.body;
-      const data = await this.queueService.callNextQueue({ serviceId, counterId });
+      const data = await this.queueService.callNextQueue({
+        serviceId,
+        counterId,
+        caller: req.user,
+      });
 
       // TODO:
       // add broadcast to all counters by serviceId

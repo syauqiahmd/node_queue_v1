@@ -70,7 +70,7 @@ class QueueService {
   }
 
   async callNextQueue(payload) {
-    const { serviceId, counterId } = payload;
+    const { serviceId, counterId, caller } = payload;
     const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
     today.setUTCHours(0, 0, 0, 0);
 
@@ -153,14 +153,14 @@ class QueueService {
     const rooms = [`service-${updatedTicket.serviceId}`, 'monitor-room'];
     this.broadcastService.emit(
       'ticket:called',
-      toTicketCalledDTO({ ...finalTicket, soundUrl }),
+      toTicketCalledDTO({ ...finalTicket, soundUrl }, caller),
       rooms
     );
 
     return finalTicket;
   }
 
-  async recallTicket(queueId, newCounterId) {
+  async recallTicket(queueId, newCounterId, caller) {
     let ticket = await this.prisma.ticket.findUnique({
       where: { id: queueId },
       include: {
@@ -201,7 +201,7 @@ class QueueService {
 
     const rooms = [`service-${ticket.serviceId}`, 'monitor-room'];
     this.broadcastService.emit('ticket:recalled', toTicketRecalledDTO(ticket), rooms);
-    this.broadcastService.emit('ticket:called', toTicketCalledDTO(ticket), rooms);
+    this.broadcastService.emit('ticket:called', toTicketCalledDTO(ticket, caller), rooms);
 
     return ticket;
   }

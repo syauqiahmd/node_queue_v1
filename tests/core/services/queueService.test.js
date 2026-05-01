@@ -145,7 +145,7 @@ describe('QueueService', () => {
 
   describe('callNextQueue', () => {
     it('should call the next priority ticket if available', async () => {
-      const payload = { serviceId: 'service-1', counterId: 'counter-1' };
+      const payload = { serviceId: 'service-1', counterId: 'counter-1', caller: { fullName: 'Ahmad Syauqi', userName: 'syauqi' } };
 
       mockPrisma.counter.findUnique.mockResolvedValue({ id: 'counter-1', counterNumber: 1 });
 
@@ -191,7 +191,7 @@ describe('QueueService', () => {
     });
 
     it('should call normal ticket if no priority ticket', async () => {
-      const payload = { serviceId: 'service-1', counterId: 'counter-1' };
+      const payload = { serviceId: 'service-1', counterId: 'counter-1', caller: { fullName: 'Ahmad Syauqi' } };
 
       mockPrisma.counter.findUnique.mockResolvedValue({ id: 'counter-1', counterNumber: 1 });
 
@@ -215,7 +215,7 @@ describe('QueueService', () => {
     });
 
     it('should throw if no ticket found', async () => {
-      const payload = { serviceId: 'service-1', counterId: 'counter-1' };
+      const payload = { serviceId: 'service-1', counterId: 'counter-1', caller: null };
       mockPrisma.counter.findUnique.mockResolvedValue({ id: 'counter-1' });
       mockPrisma.$queryRaw.mockResolvedValue([]); // Both return empty
 
@@ -223,7 +223,7 @@ describe('QueueService', () => {
     });
 
     it('should throw if counter not found', async () => {
-      const payload = { serviceId: 'service-1', counterId: 'counter-1' };
+      const payload = { serviceId: 'service-1', counterId: 'counter-1', caller: null };
       mockPrisma.counter.findUnique.mockResolvedValue(null);
 
       await expect(queueService.callNextQueue(payload)).rejects.toThrow('Counter not found');
@@ -231,6 +231,8 @@ describe('QueueService', () => {
   });
 
   describe('recallTicket', () => {
+    const mockCaller = { fullName: 'Ahmad Syauqi', userName: 'syauqi' };
+
     it('should recall ticket and generate new sound if counter changed', async () => {
       const queueId = 'ticket-1';
       const newCounterId = 'counter-2';
@@ -256,7 +258,7 @@ describe('QueueService', () => {
         service: { name: 'Service 1', organization: { id: 'org-1', name: 'Org 1' } },
       });
 
-      await queueService.recallTicket(queueId, newCounterId);
+      await queueService.recallTicket(queueId, newCounterId, mockCaller);
 
       expect(mockGoogleTextToSpeechService.invalidateCache).toHaveBeenCalledWith(queueId);
       expect(mockGoogleTextToSpeechService.generateSound).toHaveBeenCalled();
@@ -268,7 +270,7 @@ describe('QueueService', () => {
       const queueId = 'ticket-1';
       mockPrisma.ticket.findUnique.mockResolvedValue(null);
 
-      await expect(queueService.recallTicket(queueId, 'counter-2')).rejects.toThrow(
+      await expect(queueService.recallTicket(queueId, 'counter-2', mockCaller)).rejects.toThrow(
         'ticket not found'
       );
     });
@@ -283,7 +285,7 @@ describe('QueueService', () => {
       });
       mockPrisma.counter.findUnique.mockResolvedValue(null);
 
-      await expect(queueService.recallTicket(queueId, newCounterId)).rejects.toThrow(
+      await expect(queueService.recallTicket(queueId, newCounterId, mockCaller)).rejects.toThrow(
         'new counter not found'
       );
     });
@@ -304,7 +306,7 @@ describe('QueueService', () => {
 
       mockPrisma.ticket.findUnique.mockResolvedValue(mockTicket);
 
-      await queueService.recallTicket(queueId, sameCounterId);
+      await queueService.recallTicket(queueId, sameCounterId, mockCaller);
 
       expect(mockGoogleTextToSpeechService.generateSound).not.toHaveBeenCalled();
       expect(mockPrisma.ticket.update).not.toHaveBeenCalled();

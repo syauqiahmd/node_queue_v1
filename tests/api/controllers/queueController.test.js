@@ -39,6 +39,7 @@ describe('QueueController', () => {
       params: {},
       query: {},
       body: {},
+      user: { id: 'user-1', fullName: 'Ahmad Syauqi', userName: 'syauqi' },
     };
 
     mockRes = {
@@ -128,14 +129,14 @@ describe('QueueController', () => {
       });
     });
 
-    it('should recall ticket if action is retry', async () => {
+    it('should recall ticket if action is retry and pass caller from req.user', async () => {
       mockReq.body = { action: 'retry', queueId: 'q-1', counterId: 'c-1' };
       const recalledTicket = { id: 'q-1' };
       mockQueueService.recallTicket.mockResolvedValue(recalledTicket);
 
       await queueController.actionQueueById(mockReq, mockRes, mockNext);
 
-      expect(mockQueueService.recallTicket).toHaveBeenCalledWith('q-1', 'c-1');
+      expect(mockQueueService.recallTicket).toHaveBeenCalledWith('q-1', 'c-1', mockReq.user);
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
@@ -165,7 +166,7 @@ describe('QueueController', () => {
   });
 
   describe('callNextQueue', () => {
-    it('should call next queue', async () => {
+    it('should call next queue and pass caller from req.user', async () => {
       mockReq.body = { serviceId: 's-1', counterId: 'c-1' };
       const data = { id: 'q-1' };
       mockQueueService.callNextQueue.mockResolvedValue(data);
@@ -175,6 +176,7 @@ describe('QueueController', () => {
       expect(mockQueueService.callNextQueue).toHaveBeenCalledWith({
         serviceId: 's-1',
         counterId: 'c-1',
+        caller: mockReq.user,
       });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
