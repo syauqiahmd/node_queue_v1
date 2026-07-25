@@ -8,9 +8,13 @@ module.exports = ({
   authController,
   serviceController,
   organizationController,
+  visitorController,
+  visitorHistoryController,
   validateMiddleware,
   serviceSchema,
   generalSchema,
+  visitorSchema,
+  visitorHistorySchema,
 }) => {
   const router = express.Router();
   const rateLimiter = new RateLimiterMiddleware();
@@ -163,6 +167,69 @@ module.exports = ({
     '/queues',
     validateMiddleware.validate(generalSchema.emptySchema, 'query'),
     queueController.getCallingQueue.bind(queueController)
+  );
+
+  /**
+   * POST /public/visitors
+   * @summary Upsert visitor by phone number
+   * @tags #Public
+   * @param {object} request.body.required - Visitor data
+   * @example request - example payload
+   * {
+   *   "name": "John Doe",
+   *   "phoneNumber": "08123456789",
+   *   "email": "john@example.com"
+   * }
+   * @returns {object} 200 - Success response
+   * @returns {object} 400 - Bad Request
+   * @returns {object} 500 - Internal Server Error
+   * @example response - 200 - Example success response
+   * {
+   *   "success": true,
+   *   "data": {
+   *     "id": "uuid",
+   *     "name": "John Doe",
+   *     "phoneNumber": "6281234567890",
+   *     "email": "john@example.com"
+   *   },
+   *   "message": "Success"
+   * }
+   */
+  router.post(
+    '/visitors',
+    validateMiddleware.validate(visitorSchema.upsertVisitorSchema),
+    visitorController.upsert.bind(visitorController)
+  );
+
+  /**
+   * POST /public/visitor-histories
+   * @summary Record a visitor's visit to an organization
+   * @tags #Public
+   * @param {object} request.body.required - Visitor history data
+   * @example request - example payload
+   * {
+   *   "visitorId": "123123-1234-1234-1234-123456789012",
+   *   "organizationId": "223123-1234-1234-1234-123456789012"
+   * }
+   * @returns {object} 201 - Created response
+   * @returns {object} 400 - Bad Request
+   * @returns {object} 500 - Internal Server Error
+   * @example response - 201 - Example created response
+   * {
+   *   "success": true,
+   *   "data": {
+   *     "id": "uuid",
+   *     "visitorId": "123123-1234-1234-1234-123456789012",
+   *     "organizationId": "223123-1234-1234-1234-123456789012",
+   *     "visitDate": "2026-07-17T00:00:00.000Z"
+   *   },
+   *   "message": "Created"
+   * }
+   */
+  router.post(
+    '/visitor-histories',
+    validateMiddleware.validate(visitorHistorySchema.createVisitorHistorySchema),
+    visitorHistoryController.create.bind(visitorHistoryController)
   );
 
   return router;

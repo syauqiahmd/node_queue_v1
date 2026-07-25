@@ -9,6 +9,8 @@ module.exports = ({
   userController,
   authController,
   cronController,
+  visitorController,
+  visitorHistoryController,
   validateMiddleware,
   counterSchema,
   organizationSchema,
@@ -16,6 +18,8 @@ module.exports = ({
   queueSchema,
   serviceSchema,
   userSchema,
+  visitorSchema,
+  visitorHistorySchema,
   authMiddleware,
 }) => {
   const router = Router();
@@ -27,10 +31,14 @@ module.exports = ({
     authController,
     serviceController,
     organizationController,
+    visitorController,
+    visitorHistoryController,
     validateMiddleware,
     serviceSchema,
     generalSchema,
     queueSchema,
+    visitorSchema,
+    visitorHistorySchema,
   });
   router.use('/public', publicRoutes);
 
@@ -86,6 +94,22 @@ module.exports = ({
     validateMiddleware,
   });
   router.use('/cron', authMiddleware.authenticateToken, cronRoutes);
+
+  const visitorRoutes = require('./routes/visitorRoutes')({
+    visitorController,
+    authMiddleware,
+    validateMiddleware,
+    visitorSchema,
+  });
+  router.use('/visitors', authMiddleware.authenticateToken, visitorRoutes);
+
+  const visitorHistoryRoutes = require('./routes/visitorHistoryRoutes')({
+    visitorHistoryController,
+    authMiddleware,
+    validateMiddleware,
+    visitorHistorySchema,
+  });
+  router.use('/visitor-histories', authMiddleware.authenticateToken, visitorHistoryRoutes);
 
   return router;
 };

@@ -11,6 +11,8 @@ const generalSchema = require('./api/validation/general.schema');
 const queueSchema = require('./api/validation/queue.schema');
 const serviceSchema = require('./api/validation/service.schema');
 const userSchema = require('./api/validation/user.schema');
+const visitorSchema = require('./api/validation/visitor.schema');
+const visitorHistorySchema = require('./api/validation/visitorHistory.schema');
 
 // Create the container
 const container = createContainer();
@@ -91,6 +93,10 @@ container.register({
   queueController: asClass(require('./api/controllers/queueController')).singleton(),
   serviceController: asClass(require('./api/controllers/serviceController')).singleton(),
   userController: asClass(require('./api/controllers/userController')).singleton(),
+  visitorController: asClass(require('./api/controllers/visitorController')).singleton(),
+  visitorHistoryController: asClass(
+    require('./api/controllers/visitorHistoryController')
+  ).singleton(),
 
   // Register businessException explicitly
   businessException: asValue(businessException),
@@ -124,6 +130,9 @@ container.register({
   userServiceReal: asClass(require('./core/services/userService')).singleton(),
   userService: asClass(require('./core/services/UserServiceProxy')).singleton(),
 
+  // Register VisitorService (no proxy - internal list APIs read directly from DB)
+  visitorService: asClass(require('./core/services/visitorService')).singleton(),
+
   queueService: asClass(require('./core/services/queueService')).singleton(),
   queueResponse: asClass(require('./core/dto/queueResponse')).singleton(),
 
@@ -138,6 +147,9 @@ container.register({
   // Register TicketService (no proxy for transactional data)
   ticketService: asClass(require('./core/services/ticketService')).singleton(),
 
+  // Register VisitorHistoryService (no proxy - insert-only log data)
+  visitorHistoryService: asClass(require('./core/services/visitorHistoryService')).singleton(),
+
   // Explicitly register all schemas
   counterSchema: asValue(counterSchema),
   organizationSchema: asValue(organizationSchema),
@@ -145,6 +157,8 @@ container.register({
   queueSchema: asValue(queueSchema),
   serviceSchema: asValue(serviceSchema),
   userSchema: asValue(userSchema),
+  visitorSchema: asValue(visitorSchema),
+  visitorHistorySchema: asValue(visitorHistorySchema),
 });
 
 const MessageBroker = require('./infra/messageBroker/MessageBroker');

@@ -28,6 +28,7 @@ model Organization {
   services  Service[]
   users     UserOrganization[]
   dailyStats DailyServiceStats[]
+  visitorHistories VisitorHistory[]
 }
 
 
@@ -121,6 +122,36 @@ model Ticket {
   @@unique([serviceId, queueNumber, queueDate])
   @@index([serviceId, isCall, isPriority, createdAt])
   @@index([isResolved, createdAt])
+}
+
+model Visitor {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  phoneNumber String   @unique @db.VarChar(15) @map("phone_number")
+  email       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  createdBy   String   @default("-1") @map("created_by")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  updatedBy   String?  @map("updated_by")
+
+  histories   VisitorHistory[]
+
+  @@index([createdAt])
+}
+
+model VisitorHistory {
+  id             String   @id @default(uuid()) @db.Uuid
+  visitorId      String   @db.Uuid @map("visitor_id")
+  organizationId String   @db.Uuid @map("organization_id")
+  visitDate      DateTime @db.Date @map("visit_date")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  visitor        Visitor      @relation(fields: [visitorId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([visitorId, visitDate])
+  @@index([organizationId, visitDate])
+  @@index([organizationId, createdAt])
 }
 
 model DailyServiceStats {
