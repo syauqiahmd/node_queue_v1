@@ -13,6 +13,7 @@ describe('VisitorHistoryController', () => {
     mockVisitorHistoryService = {
       create: jest.fn(),
       getAll: jest.fn(),
+      getReport: jest.fn(),
     };
 
     mockIdentityHelper = {
@@ -22,6 +23,7 @@ describe('VisitorHistoryController', () => {
 
     mockBusinessException = {
       Forbidden: jest.fn((msg) => new Error(msg)),
+      NotFound: jest.fn((msg) => new Error(`${msg} not found`)),
     };
 
     mockReq = {
@@ -33,6 +35,8 @@ describe('VisitorHistoryController', () => {
     mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      setHeader: jest.fn(),
+      send: jest.fn(),
     };
 
     mockNext = jest.fn();
@@ -130,6 +134,86 @@ describe('VisitorHistoryController', () => {
       mockVisitorHistoryService.create.mockRejectedValue(error);
 
       await visitorHistoryController.create(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('exportReport', () => {
+    const rows = [
+      {
+        visitor: { name: 'John Doe', phoneNumber: '6281234567890', email: 'john@test.com' },
+        organization: { name: 'Main Branch' },
+        visitDate: '2026-07-01T00:00:00.000Z',
+        createdAt: '2026-07-01T10:00:00.000Z',
+      },
+    ];
+
+    it('should let ADMIN export without forcing an organizationId', async () => {
+      mockReq.body = { startDate: '2026-07-01' };
+      mockVisitorHistoryService.getReport.mockResolvedValue(rows);
+
+      await visitorHistoryController.exportReport(mockReq, mockRes, mockNext);
+
+      expect(mockVisitorHistoryService.getReport).toHaveBeenCalledWith({
+        organizationId: undefined,
+        startDate: '2026-07-01',
+        endDate: '2026-07-01',
+      });
+      expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Disposition',
+        'attachment; filename=laporan_riwayat_kunjungan_2026-07-01_2026-07-01.csv'
+      );
+      expect(mockRes.send).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'John Doe,6281234567890,john@test.com,Main Branch,2026-07-01,2026-07-01'
+        )
+      );
+    });
+
+    it('should force USER role to their own organizationId', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('USER');
+      mockIdentityHelper.getCurrentUserOrganizationId.mockReturnValue('user-org-1');
+      mockReq.body = { startDate: '2026-07-01' };
+      mockVisitorHistoryService.getReport.mockResolvedValue(rows);
+
+      await visitorHistoryController.exportReport(mockReq, mockRes, mockNext);
+
+      expect(mockVisitorHistoryService.getReport).toHaveBeenCalledWith(
+        expect.objectContaining({ organizationId: 'user-org-1' })
+      );
+    });
+
+    it('should reject a USER passing a mismatched organizationId with Forbidden', async () => {
+      mockIdentityHelper.getCurrentUserRole.mockReturnValue('USER');
+      mockIdentityHelper.getCurrentUserOrganizationId.mockReturnValue('user-org-1');
+      mockReq.body = { startDate: '2026-07-01', organizationId: 'someone-elses-org' };
+
+      await visitorHistoryController.exportReport(mockReq, mockRes, mockNext);
+
+      expect(mockBusinessException.Forbidden).toHaveBeenCalledWith('Insufficient permissions');
+      expect(mockVisitorHistoryService.getReport).not.toHaveBeenCalled();
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('should throw NotFound when there are no matching rows', async () => {
+      mockReq.body = { startDate: '2026-07-01' };
+      mockVisitorHistoryService.getReport.mockResolvedValue([]);
+
+      await visitorHistoryController.exportReport(mockReq, mockRes, mockNext);
+
+      expect(mockBusinessException.NotFound).toHaveBeenCalledWith('VisitorHistory');
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockRes.send).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors', async () => {
+      mockReq.body = { startDate: '2026-07-01' };
+      const error = new Error('Service error');
+      mockVisitorHistoryService.getReport.mockRejectedValue(error);
+
+      await visitorHistoryController.exportReport(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(error);
     });

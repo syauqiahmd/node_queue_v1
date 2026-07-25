@@ -123,6 +123,79 @@ describe('VisitorHistoryService', () => {
     });
   });
 
+  describe('getReport', () => {
+    it('should filter by visitDate date range and order by createdAt asc', async () => {
+      const payload = { startDate: '2026-07-01', endDate: '2026-07-31' };
+      const mockRows = [{ id: 'history-1' }];
+      mockPrisma.visitorHistory.findMany.mockResolvedValue(mockRows);
+
+      const result = await visitorHistoryService.getReport(payload);
+
+      expect(mockPrisma.visitorHistory.findMany).toHaveBeenCalledWith({
+        where: expect.objectContaining({
+          visitDate: {
+            gte: new Date('2026-07-01'),
+            lte: new Date('2026-07-31'),
+          },
+        }),
+        orderBy: { createdAt: 'asc' },
+        include: {
+          visitor: { select: { id: true, name: true, phoneNumber: true, email: true } },
+          organization: { select: { id: true, name: true, fullName: true } },
+        },
+      });
+      expect(result).toEqual(mockRows);
+    });
+
+    it('should leave lte undefined when endDate is not provided', async () => {
+      mockPrisma.visitorHistory.findMany.mockResolvedValue([]);
+
+      await visitorHistoryService.getReport({ startDate: '2026-07-01' });
+
+      expect(mockPrisma.visitorHistory.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            visitDate: { gte: new Date('2026-07-01'), lte: undefined },
+          }),
+        })
+      );
+    });
+
+    it('should apply visitorId, organizationId, and joined visitor/organization filters', async () => {
+      const payload = {
+        visitorId: 'visitor-1',
+        organizationId: 'org-1',
+        name: 'John',
+        phoneNumber: '6281',
+        email: 'john@',
+        organizationName: 'Main',
+        organizationFullName: 'Main Branch',
+        startDate: '2026-07-01',
+      };
+      mockPrisma.visitorHistory.findMany.mockResolvedValue([]);
+
+      await visitorHistoryService.getReport(payload);
+
+      expect(mockPrisma.visitorHistory.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            visitorId: 'visitor-1',
+            organizationId: 'org-1',
+            visitor: {
+              name: { contains: 'John', mode: 'insensitive' },
+              phoneNumber: { contains: '6281', mode: 'insensitive' },
+              email: { contains: 'john@', mode: 'insensitive' },
+            },
+            organization: {
+              name: { contains: 'Main', mode: 'insensitive' },
+              fullName: { contains: 'Main Branch', mode: 'insensitive' },
+            },
+          }),
+        })
+      );
+    });
+  });
+
   describe('create', () => {
     it('should record the visit with a GMT+8 day-truncated visitDate and timestamp createdAt', async () => {
       const visitorId = 'visitor-1';

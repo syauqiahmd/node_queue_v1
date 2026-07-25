@@ -48,6 +48,63 @@ class VisitorHistoryController {
       next(err);
     }
   }
+
+  async exportReport(req, res, next) {
+    try {
+      const { startDate, endDate, organizationId: orgFromBody, ...filters } = req.body;
+      const endDateFinal = endDate || startDate;
+
+      const role = this.identityHelper.getCurrentUserRole();
+      const organizationId =
+        role === 'USER' ? this.identityHelper.getCurrentUserOrganizationId() : orgFromBody;
+
+      if (role === 'USER' && orgFromBody && orgFromBody !== organizationId) {
+        throw this.businessException.Forbidden('Insufficient permissions');
+      }
+
+      const rows = await this.visitorHistoryService.getReport({
+        ...filters,
+        organizationId,
+        startDate,
+        endDate: endDateFinal,
+      });
+      if (!rows || rows.length === 0) {
+        throw this.businessException.NotFound('VisitorHistory');
+      }
+
+      const header = [
+        'no',
+        'nama_pengunjung',
+        'nomor_hp',
+        'email',
+        'organisasi',
+        'tanggal_kunjungan',
+        'tanggal_tercatat',
+      ].join(',');
+
+      const dataLines = rows
+        .map((r, i) =>
+          [
+            i + 1,
+            r.visitor?.name || '',
+            r.visitor?.phoneNumber || '',
+            r.visitor?.email || '',
+            r.organization?.name || '',
+            new Date(r.visitDate).toISOString().split('T')[0],
+            new Date(r.createdAt).toISOString().split('T')[0],
+          ].join(',')
+        )
+        .join('\n');
+
+      const csv = `${header}\n${dataLines}\n`;
+      const filename = `laporan_riwayat_kunjungan_${startDate}_${endDateFinal}.csv`;
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+      return res.status(200).send(csv);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = VisitorHistoryController;

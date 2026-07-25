@@ -36,6 +36,10 @@ const createApp = (container) => {
       }
     },
     credentials: true,
+    // Without this, browsers block JS from reading Content-Disposition on cross-origin
+    // responses, so CSV report downloads (report.js/visitor.js/visitorHistory.js stores)
+    // silently fall back to their generic default filename instead of the real one.
+    exposedHeaders: ['Content-Disposition'],
   };
 
   app.use(cors(corsOptions));
