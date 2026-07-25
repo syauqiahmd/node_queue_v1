@@ -26,5 +26,29 @@ module.exports = ({ visitorController, authMiddleware, validateMiddleware, visit
     visitorController.getAll.bind(visitorController)
   );
 
+  /**
+   * POST /visitors/report
+   * @summary Export visitor master data as CSV (ADMIN only), ordered by Registered At
+   * @tags Visitor
+   * @security BearerAuth
+   * @param {object} request.body.required - Filter payload
+   * @example request - Example payload
+   * {
+   *   "startDate": "2026-07-01",
+   *   "endDate": "2026-07-31"
+   * }
+   * @returns {string} 200 - CSV content
+   * @returns {object} 400 - Bad Request
+   * @returns {object} 401 - Unauthorized
+   * @returns {object} 404 - Not Found
+   * @returns {object} 500 - Internal Server Error
+   */
+  router.post(
+    '/report',
+    authMiddleware.authorize(['ADMIN']),
+    validateMiddleware.validate(visitorSchema.exportVisitorReportSchema),
+    visitorController.exportReport.bind(visitorController)
+  );
+
   return router;
 };

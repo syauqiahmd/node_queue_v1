@@ -36,5 +36,30 @@ module.exports = ({
     visitorHistoryController.getAll.bind(visitorHistoryController)
   );
 
+  /**
+   * POST /visitor-histories/report
+   * @summary Export visitor history as CSV (ADMIN sees all organizations; USER is scoped to their own), ordered by Recorded At
+   * @tags VisitorHistory
+   * @security BearerAuth
+   * @param {object} request.body.required - Filter payload
+   * @example request - Example payload
+   * {
+   *   "startDate": "2026-07-01",
+   *   "endDate": "2026-07-31"
+   * }
+   * @returns {string} 200 - CSV content
+   * @returns {object} 400 - Bad Request
+   * @returns {object} 401 - Unauthorized
+   * @returns {object} 403 - Forbidden
+   * @returns {object} 404 - Not Found
+   * @returns {object} 500 - Internal Server Error
+   */
+  router.post(
+    '/report',
+    authMiddleware.authorize(['ADMIN', 'USER']),
+    validateMiddleware.validate(visitorHistorySchema.exportVisitorHistoryReportSchema),
+    visitorHistoryController.exportReport.bind(visitorHistoryController)
+  );
+
   return router;
 };

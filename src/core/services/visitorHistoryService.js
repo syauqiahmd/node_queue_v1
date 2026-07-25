@@ -58,6 +58,55 @@ class VisitorHistoryService {
     return { totalRecord: count, data };
   }
 
+  async getReport({
+    visitorId,
+    name,
+    phoneNumber,
+    email,
+    organizationId,
+    organizationName,
+    organizationFullName,
+    startDate,
+    endDate,
+  }) {
+    const where = {
+      visitorId: visitorId || undefined,
+      organizationId: organizationId || undefined,
+      visitor:
+        name || phoneNumber || email
+          ? {
+              name: name ? { contains: name, mode: 'insensitive' } : undefined,
+              phoneNumber: phoneNumber ? { contains: phoneNumber, mode: 'insensitive' } : undefined,
+              email: email ? { contains: email, mode: 'insensitive' } : undefined,
+            }
+          : undefined,
+      organization:
+        organizationName || organizationFullName
+          ? {
+              name: organizationName
+                ? { contains: organizationName, mode: 'insensitive' }
+                : undefined,
+              fullName: organizationFullName
+                ? { contains: organizationFullName, mode: 'insensitive' }
+                : undefined,
+            }
+          : undefined,
+      visitDate: {
+        gte: new Date(startDate),
+        lte: endDate ? new Date(endDate) : undefined,
+      },
+    };
+
+    return this.prisma.visitorHistory.findMany({
+      where,
+      orderBy: { createdAt: 'asc' },
+      include: {
+        visitor: { select: { id: true, name: true, phoneNumber: true, email: true } },
+        organization: { select: { id: true, name: true, fullName: true } },
+      },
+    });
+  }
+
   async create(data) {
     // Create a timestamp in GMT+8 (UTC+8), matching TicketService's queueDate handling
     const timeStamp = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
