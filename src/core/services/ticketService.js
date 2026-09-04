@@ -1,4 +1,5 @@
 const toTicketCreatedDTO = require('../dto/websocket/TicketCreatedDTO');
+const { nowInAppTz, todayInAppTz } = require('../utils/date');
 
 class TicketService {
   constructor({ prismaClient, businessException, broadcastService }) {
@@ -12,9 +13,7 @@ class TicketService {
     updatedBy = null,
     latestAssigneeCounterId = null,
   }) {
-    // Create a date in GMT+8 (UTC+8)
-    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
-    today.setUTCHours(0, 0, 0, 0);
+    const today = todayInAppTz();
 
     const service = await this.prisma.service.findUnique({
       where: { id: serviceId },
@@ -51,7 +50,7 @@ class TicketService {
       totalWaitingQueue.totalRecords = totalWaitingQueueByServiceId;
 
       const nextQueueNumber = lastTicket ? lastTicket.queueNumber + 1 : 1;
-      const timeStamp = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+      const timeStamp = nowInAppTz();
 
       return tx.ticket.create({
         data: {

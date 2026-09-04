@@ -1,3 +1,5 @@
+const { nowInAppTz } = require('../utils/date');
+
 class VisitorHistoryService {
   constructor({ prismaClient }) {
     this.prisma = prismaClient;
@@ -108,8 +110,8 @@ class VisitorHistoryService {
   }
 
   async create(data) {
-    // Create a timestamp in GMT+8 (UTC+8), matching TicketService's queueDate handling
-    const timeStamp = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    // Matches TicketService's queueDate handling
+    const timeStamp = nowInAppTz();
     const visitDate = new Date(timeStamp);
     visitDate.setUTCHours(0, 0, 0, 0);
 

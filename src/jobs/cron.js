@@ -1,6 +1,7 @@
 require('dotenv').config();
 const cron = require('node-cron');
 const container = require('../container');
+const { nowInAppTz } = require('../core/utils/date');
 const logger = container.resolve('logger');
 
 const queueService = container.resolve('queueService');
@@ -13,7 +14,7 @@ const HOUSEKEEPING_TIME_S3_FILES = process.env.HOUSEKEEPING_TIME_S3_FILES || '0 
 cron.schedule(PRE_CALCULATE_TIME, async () => {
   logger.info('[CRON] Running daily report generation...');
   try {
-    const date = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    const date = nowInAppTz();
     const formatedDate = date.toISOString().split('T')[0];
     const result = await queueService.generateDailyStats(formatedDate);
     if (result) {
@@ -31,8 +32,8 @@ cron.schedule(PRE_CALCULATE_TIME, async () => {
 cron.schedule(HOUSEKEEPING_TIME_QUEUE_DATA, async () => {
   logger.info('[CRON] Running housekeeping queue data tasks...');
   try {
-    const now = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
-    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const now = nowInAppTz();
+    const startOfCurrentMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     const result = await queueService.cleanUpTicket(startOfCurrentMonth);
     logger.info(
       `[CRON] Housekeeping queue data task completed successfully. Deleted ${result.count} tickets.`
@@ -46,9 +47,9 @@ cron.schedule(HOUSEKEEPING_TIME_S3_FILES, async () => {
   logger.info('[CRON] Running housekeeping S3 files tasks...');
   let dirName = '';
   try {
-    const now = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    const now = nowInAppTz();
     const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 
     dirName = `sound-generated/${yesterday.toISOString().split('T')[0]}`;
 
