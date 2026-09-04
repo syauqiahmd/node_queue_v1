@@ -1,3 +1,5 @@
+const { nowInAppTz } = require('../utils/date');
+
 /**
  * @implements {IVisitorService}
  */
@@ -64,9 +66,9 @@ class VisitorService {
 
   async upsertByPhoneNumber(data) {
     const phoneNumber = this.phoneNormalizer.normalize(data.phoneNumber);
-    // Create a timestamp in GMT+8 (UTC+8), matching TicketService/VisitorHistoryService so
-    // "Registered At" and "Recorded At" land on the same calendar day for the same real moment.
-    const timeStamp = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
+    // Matches TicketService/VisitorHistoryService so "Registered At" and "Recorded At"
+    // land on the same calendar day for the same real moment.
+    const timeStamp = nowInAppTz();
 
     return this.prisma.visitor.upsert({
       where: { phoneNumber },

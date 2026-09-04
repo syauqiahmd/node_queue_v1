@@ -2,6 +2,7 @@ const toTicketCalledDTO = require('../dto/websocket/TicketCalledDTO');
 const toTicketResolvedDTO = require('../dto/websocket/TicketResolvedDTO');
 const toTicketPrioritizedDTO = require('../dto/websocket/TicketPrioritizedDTO');
 const toTicketRecalledDTO = require('../dto/websocket/TicketRecalledDTO');
+const { nowInAppTz, todayInAppTz } = require('../utils/date');
 
 class QueueService {
   constructor({
@@ -30,8 +31,7 @@ class QueueService {
   }
 
   async getQueueListByServiceId(serviceId, { counterId, status }) {
-    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
-    today.setUTCHours(0, 0, 0, 0);
+    const today = todayInAppTz();
 
     const where = {
       serviceId,
@@ -51,8 +51,7 @@ class QueueService {
   }
 
   async getTotalQueueByServiceId(serviceId, status = null) {
-    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
-    today.setUTCHours(0, 0, 0, 0);
+    const today = todayInAppTz();
     const where = {
       serviceId,
       isCall: false,
@@ -71,8 +70,7 @@ class QueueService {
 
   async callNextQueue(payload) {
     const { serviceId, counterId, caller } = payload;
-    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
-    today.setUTCHours(0, 0, 0, 0);
+    const today = todayInAppTz();
 
     const updatedTicket = await this.prisma.$transaction(async (tx) => {
       const existingCounter = await tx.counter.findUnique({ where: { id: counterId } });
@@ -111,14 +109,14 @@ class QueueService {
         throw this.businessException.NotFound('queue');
       }
 
-      const updatedTime = new Date(Date.now() + 8 * 60 * 60 * 1000); // Set update time (GMT+8)
+      const updatedTime = nowInAppTz();
       const updated = await tx.ticket.update({
         where: { id: selectedId },
         data: {
           isCall: true,
-          calledAt: updatedTime, // Set call time (GMT+8)
+          calledAt: updatedTime,
           latestAssigneeCounterId: counterId,
-          updatedAt: updatedTime, // Set update time (GMT+8)
+          updatedAt: updatedTime,
         },
         include: {
           service: { include: { organization: true } },
@@ -138,7 +136,7 @@ class QueueService {
     // Update the ticket with the sound URL
     const finalTicket = await this.prisma.ticket.update({
       where: { id: updatedTicket.id },
-      data: { soundUrl, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) },
+      data: { soundUrl, updatedAt: nowInAppTz() },
       include: {
         service: {
           include: {
@@ -190,7 +188,7 @@ class QueueService {
         data: {
           latestAssigneeCounterId: newCounterId,
           soundUrl,
-          updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000),
+          updatedAt: nowInAppTz(),
         },
         include: {
           service: { include: { organization: true } },
@@ -207,8 +205,7 @@ class QueueService {
   }
 
   async getCurrentQueueDetailById(id) {
-    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
-    today.setHours(0, 0, 0, 0); // Set to start of the day
+    const today = todayInAppTz();
 
     return await this.prisma.ticket.findUnique({
       where: {
@@ -235,11 +232,11 @@ class QueueService {
       throw this.businessException.NotFound('ticket');
     }
 
-    const updateData = { ...payload, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) };
+    const updateData = { ...payload, updatedAt: nowInAppTz() };
 
     // Set resolvedAt if ticket is being resolved
     if (payload.isResolved && !currentTicket.isResolved) {
-      updateData.resolvedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+      updateData.resolvedAt = nowInAppTz();
     }
 
     const updatedTicket = await this.prisma.ticket.update({
@@ -264,8 +261,7 @@ class QueueService {
   }
 
   async getCallingQueue() {
-    const today = new Date(Date.now() + 8 * 60 * 60 * 1000); // GMT+8
-    today.setHours(0, 0, 0, 0); // Set to start of the day
+    const today = todayInAppTz();
 
     const where = {
       isCall: true,
@@ -308,7 +304,7 @@ class QueueService {
 
     const updatedTicket = await this.prisma.ticket.update({
       where: { id: queueId },
-      data: { isPriority: true, updatedAt: new Date(Date.now() + 8 * 60 * 60 * 1000) },
+      data: { isPriority: true, updatedAt: nowInAppTz() },
     });
 
     // Broadcast the event
@@ -357,7 +353,7 @@ class QueueService {
     let result = null;
 
     if (dailyStatsData && dailyStatsData.length > 0) {
-      const timestamp = new Date(Date.now() + 8 * 60 * 60 * 1000);
+      const timestamp = nowInAppTz();
       result = await this.prisma.dailyServiceStats.createMany({
         data: dailyStatsData.map((item) => ({
           ...item,
