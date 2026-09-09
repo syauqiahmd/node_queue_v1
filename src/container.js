@@ -10,6 +10,7 @@ const organizationSchema = require('./api/validation/organization.schema');
 const generalSchema = require('./api/validation/general.schema');
 const queueSchema = require('./api/validation/queue.schema');
 const serviceSchema = require('./api/validation/service.schema');
+const ticketSchema = require('./api/validation/ticket.schema');
 const userSchema = require('./api/validation/user.schema');
 const visitorSchema = require('./api/validation/visitor.schema');
 const visitorHistorySchema = require('./api/validation/visitorHistory.schema');
@@ -157,6 +158,7 @@ container.register({
   generalSchema: asValue(generalSchema),
   queueSchema: asValue(queueSchema),
   serviceSchema: asValue(serviceSchema),
+  ticketSchema: asValue(ticketSchema),
   userSchema: asValue(userSchema),
   visitorSchema: asValue(visitorSchema),
   visitorHistorySchema: asValue(visitorHistorySchema),

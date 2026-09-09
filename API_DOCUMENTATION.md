@@ -200,6 +200,122 @@ These endpoints are for service-to-service calls only — no user JWT is involve
     ```
   - `401 Unauthorized`: missing or invalid `X-Service-Key`
 
+#### `GET /private/services`
+
+- **Summary:** Get services list (same as `GET /public/services`)
+- **Tags:** #Private
+- **Security:** `X-Service-Key` header
+- **Responses:**
+  - `200 OK`
+  - `401 Unauthorized`
+  - `500 Internal Server Error`
+
+#### `GET /private/queues`
+
+- **Summary:** Get current calling queue (same as `GET /public/queues`)
+- **Tags:** #Private
+- **Security:** `X-Service-Key` header
+- **Responses:**
+  - `200 OK`
+  - `401 Unauthorized`
+  - `500 Internal Server Error`
+
+#### `POST /private/visitors`
+
+- **Summary:** Upsert visitor by phone number (same as `POST /public/visitors`)
+- **Tags:** #Private
+- **Security:** `X-Service-Key` header
+- **Request Body:**
+  ```json
+  {
+    "name": "John Doe",
+    "phoneNumber": "08123456789",
+    "email": "john@example.com"
+  }
+  ```
+- **Responses:**
+  - `200 OK`
+  - `400 Bad Request`
+  - `401 Unauthorized`
+  - `500 Internal Server Error`
+
+#### `POST /private/tickets`
+
+- **Summary:** Create ticket data (same as `POST /public/tickets`)
+- **Tags:** #Private
+- **Security:** `X-Service-Key` header
+- **Request Body:**
+  ```json
+  {
+    "serviceId": "123123-1234-1234-1234-123456789012"
+  }
+  ```
+- **Responses:**
+  - `201 Created`
+  - `400 Bad Request`
+  - `401 Unauthorized`
+  - `500 Internal Server Error`
+
+#### `GET /private/queues/{serviceId}/summary`
+
+- **Summary:** Get total queue by serviceId — same data as `GET /queues/{serviceId}/summary`, but for service callers instead of ADMIN/USER-authenticated humans
+- **Tags:** #Private
+- **Security:** `X-Service-Key` header
+- **Path Parameters:**
+  | Name | Type | Required | Description |
+  | :---------- | :------- | :------- | :---------- |
+  | `serviceId` | `string` | Yes | Service ID (UUID) |
+- **Query Parameters:**
+  | Name | Type | Required | Description |
+  | :------- | :------- | :------- | :---------------------------- |
+  | `status` | `string` | No | `in-progress` or `completed` |
+- **Responses:**
+  - `200 OK`
+  - `401 Unauthorized`
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+#### `GET /private/tickets/{ticketId}/position`
+
+- **Summary:** Get a ticket's position in its service's queue
+- **Description:** Tells the caller where a specific ticket currently stands in line for its service. This accounts for priority tickets — `queueService.callNextQueue` always serves every waiting priority ticket (oldest first) before touching a non-priority one, so a non-priority ticket counts *all* waiting priority tickets as ahead of it, regardless of when they were created; a priority ticket only counts earlier priority tickets as ahead.
+
+  `status` is one of:
+  - `waiting` — not yet called, `peopleAhead`/`queueRank` are meaningful.
+  - `calling` — currently being served at a counter.
+  - `resolved` — already completed.
+
+  When `status` is not `waiting`, `peopleAhead` and `queueRank` are `null` — there's no "position" once you've been called or resolved.
+
+  - `peopleAhead` — count of tickets that will be served before this one. **0-indexed**: `0` means you're next up.
+  - `queueRank` — the same thing 1-indexed (`peopleAhead + 1`), i.e. "you're #4 in line."
+  - `totalWaiting` — everyone currently waiting for this service today, including this ticket.
+- **Tags:** #Private
+- **Security:** `X-Service-Key` header
+- **Path Parameters:**
+  | Name | Type | Required | Description |
+  | :--------- | :------- | :------- | :---------- |
+  | `ticketId` | `string` | Yes | Ticket ID (UUID), returned by `POST /private/tickets` |
+- **Responses:**
+  - `200 OK`:
+    ```json
+    {
+      "success": true,
+      "data": {
+        "ticketId": "123123-1234-1234-1234-123456789012",
+        "serviceId": "223123-1234-1234-1234-123456789012",
+        "queueNumber": "A-005",
+        "status": "waiting",
+        "peopleAhead": 3,
+        "queueRank": 4,
+        "totalWaiting": 12
+      }
+    }
+    ```
+  - `401 Unauthorized`
+  - `404 Not Found`: ticket does not exist
+  - `500 Internal Server Error`
+
 ---
 
 ### Auth Routes (`/auth`)

@@ -26,6 +26,16 @@ class TicketController {
       next(err);
     }
   }
+
+  async getPosition(req, res, next) {
+    try {
+      const { ticketId } = req.params;
+      const data = await this.ticketService.getQueuePosition(ticketId);
+      return res.status(200).json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = TicketController;

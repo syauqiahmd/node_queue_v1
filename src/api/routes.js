@@ -18,6 +18,7 @@ module.exports = ({
   generalSchema,
   queueSchema,
   serviceSchema,
+  ticketSchema,
   userSchema,
   visitorSchema,
   visitorHistorySchema,
@@ -45,7 +46,19 @@ module.exports = ({
   router.use('/public', publicRoutes);
 
   // Private routes (service-to-service, authenticated via X-Service-Key header)
-  const privateRoutes = require('./routes/privateRoutes')({ privateController });
+  const privateRoutes = require('./routes/privateRoutes')({
+    privateController,
+    serviceController,
+    queueController,
+    visitorController,
+    ticketController,
+    validateMiddleware,
+    generalSchema,
+    serviceSchema,
+    queueSchema,
+    ticketSchema,
+    visitorSchema,
+  });
   router.use('/private', apiKeyAuth.authenticateService, privateRoutes);
 
   // Protected routes
