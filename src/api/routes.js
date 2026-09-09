@@ -24,6 +24,8 @@ module.exports = ({
   visitorHistorySchema,
   authMiddleware,
   apiKeyAuth,
+  publicRateLimiter,
+  originCheck,
 }) => {
   const router = Router();
 
@@ -42,6 +44,8 @@ module.exports = ({
     queueSchema,
     visitorSchema,
     visitorHistorySchema,
+    publicRateLimiter,
+    originCheck,
   });
   router.use('/public', publicRoutes);
 

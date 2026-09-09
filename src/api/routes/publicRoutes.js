@@ -1,7 +1,5 @@
 const express = require('express');
 
-const RateLimiterMiddleware = require('../middlewares/rateLimiter');
-
 module.exports = ({
   ticketController,
   queueController,
@@ -15,10 +13,15 @@ module.exports = ({
   generalSchema,
   visitorSchema,
   visitorHistorySchema,
+  publicRateLimiter,
+  originCheck,
 }) => {
   const router = express.Router();
-  const rateLimiter = new RateLimiterMiddleware();
-  router.use(rateLimiter.methodBasedLimiter);
+  // Tighter, dedicated limit for this anonymous surface (replaces the old
+  // ad-hoc RateLimiterMiddleware instance that duplicated the global limiter).
+  router.use(publicRateLimiter.methodBasedLimiter);
+  // Soft anti-abuse check on writes - see originCheck.js for what this does and doesn't guarantee.
+  router.use(originCheck.enforceForWrites);
 
   /**
    * POST /public/login

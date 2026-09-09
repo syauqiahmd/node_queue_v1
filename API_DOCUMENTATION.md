@@ -6,7 +6,10 @@ This document provides a static overview of the API endpoints available in the N
 
 ### Public Routes (`/public`)
 
-These endpoints are accessible without authentication.
+These endpoints are accessible without authentication. Two lightweight anti-abuse checks apply to write requests (`POST`/`PUT`/`PATCH`/`DELETE`) on this surface only - `GET` requests are unaffected by either:
+
+- **Origin/Referer allowlist:** the request's `Origin` header (or `Referer` if `Origin` is absent) must match an entry in `CORS_ORIGIN`, or be `localhost`/`127.0.0.1`. A missing or non-matching value gets `403 Forbidden` ("Request origin not allowed"). This is a soft mitigation, not a hard security boundary - both headers can be forged by a caller that chooses to. It exists to stop a service from casually reusing the open `/public` write endpoints instead of going through the authenticated `/private` routes, not to guarantee only browsers can call them. Note: a spoofed `Origin` that isn't in `CORS_ORIGIN` is actually rejected earlier, by the global CORS middleware in `app.js`, before this check even runs.
+- **Tighter rate limit:** writes here are capped via `PUBLIC_RATE_LIMIT_WINDOW`/`PUBLIC_RATE_LIMIT_MAX` (default: 10 requests/minute per IP), separate from and stricter than the app-wide default (`RATE_LIMIT_WINDOW`/`RATE_LIMIT_MAX`), since this surface is anonymous. Exceeding it returns `429 Too Many Requests`.
 
 #### `POST /public/login`
 
