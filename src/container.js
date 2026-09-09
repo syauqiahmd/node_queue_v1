@@ -97,6 +97,7 @@ container.register({
   visitorHistoryController: asClass(
     require('./api/controllers/visitorHistoryController')
   ).singleton(),
+  privateController: asClass(require('./api/controllers/privateController')).singleton(),
 
   // Register businessException explicitly
   businessException: asValue(businessException),

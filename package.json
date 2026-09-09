@@ -16,7 +16,8 @@
     "postinstall": "npm run generate",
     "prepare": "husky",
     "lint": "npx eslint .",
-    "lint-fix": "npx eslint . --fix"
+    "lint-fix": "npx eslint . --fix",
+    "generate:service-key": "node scripts/generateServiceKey.js"
   },
   "keywords": [],
   "author": "",

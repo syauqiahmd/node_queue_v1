@@ -12,6 +12,11 @@ module.exports = {
       type: 'http',
       scheme: 'bearer',
     },
+    ServiceApiKey: {
+      type: 'apiKey',
+      in: 'header',
+      name: 'X-Service-Key',
+    },
   },
   servers: [
     {

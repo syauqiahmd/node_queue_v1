@@ -180,6 +180,28 @@ These endpoints are accessible without authentication.
 
 ---
 
+### Private Routes (`/private`)
+
+These endpoints are for service-to-service calls only — no user JWT is involved. Every request must include an `X-Service-Key` header matching one of the values configured in the `SERVICE_API_KEYS` env var (format: `serviceName:key,...`). Generate a new key with `npm run generate:service-key -- <serviceName>`. Regular browser/user traffic must never call these routes or hold these keys.
+
+#### `GET /private/ping`
+
+- **Summary:** Verify service-to-service authentication
+- **Tags:** #Private
+- **Security:** `X-Service-Key` header
+- **Responses:**
+  - `200 OK`:
+    ```json
+    {
+      "success": true,
+      "message": "pong",
+      "data": { "service": "exampleService" }
+    }
+    ```
+  - `401 Unauthorized`: missing or invalid `X-Service-Key`
+
+---
+
 ### Auth Routes (`/auth`)
 
 These endpoints require authentication.

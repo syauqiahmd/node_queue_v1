@@ -11,6 +11,7 @@ module.exports = ({
   cronController,
   visitorController,
   visitorHistoryController,
+  privateController,
   validateMiddleware,
   counterSchema,
   organizationSchema,
@@ -21,6 +22,7 @@ module.exports = ({
   visitorSchema,
   visitorHistorySchema,
   authMiddleware,
+  apiKeyAuth,
 }) => {
   const router = Router();
 
@@ -41,6 +43,10 @@ module.exports = ({
     visitorHistorySchema,
   });
   router.use('/public', publicRoutes);
+
+  // Private routes (service-to-service, authenticated via X-Service-Key header)
+  const privateRoutes = require('./routes/privateRoutes')({ privateController });
+  router.use('/private', apiKeyAuth.authenticateService, privateRoutes);
 
   // Protected routes
   const counterRoutes = require('./routes/counterRoutes')({
