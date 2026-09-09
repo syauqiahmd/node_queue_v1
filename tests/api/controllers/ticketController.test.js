@@ -11,6 +11,7 @@ describe('TicketController', () => {
   beforeEach(() => {
     mockTicketService = {
       generateQueueNumberAndCreateTicket: jest.fn(),
+      getQueuePosition: jest.fn(),
     };
 
     mockBroadcastService = {
@@ -95,6 +96,37 @@ describe('TicketController', () => {
       mockTicketService.generateQueueNumberAndCreateTicket.mockRejectedValue(new Error('Error'));
 
       await ticketController.create(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
+  });
+
+  describe('getPosition', () => {
+    it('should return the ticket position data', async () => {
+      mockReq.params = { ticketId: 'ticket-1' };
+      const positionData = {
+        ticketId: 'ticket-1',
+        serviceId: 's-1',
+        queueNumber: 'A-005',
+        status: 'waiting',
+        peopleAhead: 3,
+        queueRank: 4,
+        totalWaiting: 12,
+      };
+      mockTicketService.getQueuePosition.mockResolvedValue(positionData);
+
+      await ticketController.getPosition(mockReq, mockRes, mockNext);
+
+      expect(mockTicketService.getQueuePosition).toHaveBeenCalledWith('ticket-1');
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: positionData });
+    });
+
+    it('should handle errors', async () => {
+      mockReq.params = { ticketId: 'ticket-1' };
+      mockTicketService.getQueuePosition.mockRejectedValue(new Error('Ticket not found'));
+
+      await ticketController.getPosition(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });

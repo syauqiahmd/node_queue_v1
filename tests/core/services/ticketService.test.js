@@ -14,6 +14,7 @@ describe('TicketService', () => {
       },
       ticket: {
         findFirst: jest.fn(),
+        findUnique: jest.fn(),
         count: jest.fn(),
         create: jest.fn(),
       },
@@ -183,6 +184,92 @@ describe('TicketService', () => {
 
       expect(mockBusinessException.NotFound).toHaveBeenCalledWith('Service');
       expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getQueuePosition', () => {
+    const baseTicket = {
+      id: 'ticket-1',
+      serviceId: 'service-1',
+      queueDate: new Date('2026-01-01T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T08:00:00.000Z'),
+      prefix: 'A',
+      queueNumber: 5,
+      isCall: false,
+      isResolved: false,
+      isPriority: false,
+    };
+
+    it('should throw NotFound if ticket does not exist', async () => {
+      mockPrisma.ticket.findUnique.mockResolvedValue(null);
+
+      await expect(ticketService.getQueuePosition('missing-id')).rejects.toThrow(
+        'Ticket not found'
+      );
+      expect(mockBusinessException.NotFound).toHaveBeenCalledWith('Ticket');
+    });
+
+    it('should count priority tickets ahead + earlier normal tickets when ticket is normal', async () => {
+      mockPrisma.ticket.findUnique.mockResolvedValue({ ...baseTicket, isPriority: false });
+      mockPrisma.ticket.count
+        .mockResolvedValueOnce(2) // priorityAhead
+        .mockResolvedValueOnce(3) // normalAhead
+        .mockResolvedValueOnce(12); // totalWaiting
+
+      const result = await ticketService.getQueuePosition('ticket-1');
+
+      expect(result).toEqual({
+        ticketId: 'ticket-1',
+        serviceId: 'service-1',
+        queueNumber: 'A-005',
+        status: 'waiting',
+        peopleAhead: 5,
+        queueRank: 6,
+        totalWaiting: 12,
+      });
+    });
+
+    it('should only count earlier priority tickets when ticket itself is priority', async () => {
+      mockPrisma.ticket.findUnique.mockResolvedValue({ ...baseTicket, isPriority: true });
+      mockPrisma.ticket.count
+        .mockResolvedValueOnce(1) // priorityAhead (earlier priority tickets)
+        .mockResolvedValueOnce(4); // totalWaiting
+
+      const result = await ticketService.getQueuePosition('ticket-1');
+
+      expect(result.peopleAhead).toBe(1);
+      expect(result.queueRank).toBe(2);
+      expect(mockPrisma.ticket.count).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return calling status with no position when ticket is already called', async () => {
+      mockPrisma.ticket.findUnique.mockResolvedValue({
+        ...baseTicket,
+        isCall: true,
+      });
+      mockPrisma.ticket.count.mockResolvedValueOnce(8); // totalWaiting
+
+      const result = await ticketService.getQueuePosition('ticket-1');
+
+      expect(result.status).toBe('calling');
+      expect(result.peopleAhead).toBeNull();
+      expect(result.queueRank).toBeNull();
+      expect(result.totalWaiting).toBe(8);
+    });
+
+    it('should return resolved status with no position when ticket is resolved', async () => {
+      mockPrisma.ticket.findUnique.mockResolvedValue({
+        ...baseTicket,
+        isCall: true,
+        isResolved: true,
+      });
+      mockPrisma.ticket.count.mockResolvedValueOnce(6); // totalWaiting
+
+      const result = await ticketService.getQueuePosition('ticket-1');
+
+      expect(result.status).toBe('resolved');
+      expect(result.peopleAhead).toBeNull();
+      expect(result.queueRank).toBeNull();
     });
   });
 });
