@@ -3,6 +3,7 @@ const toTicketResolvedDTO = require('../dto/websocket/TicketResolvedDTO');
 const toTicketPrioritizedDTO = require('../dto/websocket/TicketPrioritizedDTO');
 const toTicketRecalledDTO = require('../dto/websocket/TicketRecalledDTO');
 const { nowInAppTz, todayInAppTz } = require('../utils/date');
+const { logTicketEvent, secondsBetween } = require('../utils/ticketEvents');
 
 class QueueService {
   constructor({
@@ -11,7 +12,9 @@ class QueueService {
     googleTextToSpeechService,
     broadcastService,
     s3Client,
+    logger,
   }) {
+    this.logger = logger;
     this.prisma = prismaClient;
     this.businessException = businessException;
     this.googleTextToSpeechService = googleTextToSpeechService;
@@ -154,6 +157,9 @@ class QueueService {
       toTicketCalledDTO({ ...finalTicket, soundUrl }, caller),
       rooms
     );
+    logTicketEvent(this.logger, 'called', finalTicket, {
+      waitSeconds: secondsBetween(finalTicket.createdAt, finalTicket.calledAt),
+    });
 
     return finalTicket;
   }
@@ -200,6 +206,7 @@ class QueueService {
     const rooms = [`service-${ticket.serviceId}`, 'monitor-room'];
     this.broadcastService.emit('ticket:recalled', toTicketRecalledDTO(ticket), rooms);
     this.broadcastService.emit('ticket:called', toTicketCalledDTO(ticket, caller), rooms);
+    logTicketEvent(this.logger, 'recalled', ticket);
 
     return ticket;
   }
@@ -256,6 +263,17 @@ class QueueService {
       const rooms = [`service-${updatedTicket.serviceId}`, 'monitor-room'];
       this.broadcastService.emit('ticket:resolved', toTicketResolvedDTO(updatedTicket), rooms);
     }
+    if (updateData.resolvedAt) {
+      logTicketEvent(
+        this.logger,
+        'resolved',
+        { ...updatedTicket, latestAssigneeCounter: currentTicket.latestAssigneeCounter },
+        {
+          serviceSeconds: secondsBetween(updatedTicket.calledAt, updatedTicket.resolvedAt),
+          totalSeconds: secondsBetween(updatedTicket.createdAt, updatedTicket.resolvedAt),
+        }
+      );
+    }
 
     return updatedTicket;
   }
@@ -310,6 +328,7 @@ class QueueService {
     // Broadcast the event
     const rooms = [`service-${updatedTicket.serviceId}`];
     this.broadcastService.emit('ticket:prioritized', toTicketPrioritizedDTO(updatedTicket), rooms);
+    logTicketEvent(this.logger, 'prioritized', updatedTicket);
 
     return updatedTicket;
   }
