@@ -1,236 +1,200 @@
 {
-  "uid": "qms-overview",
-  "title": "QMS Overview",
-  "tags": [
-    "node_queue",
-    "qms"
-  ],
-  "timezone": "browser",
-  "refresh": "1m",
-  "schemaVersion": 39,
+  "description": "One-screen view of the QMS stack on qms-vps: services, API, server, DB/Redis, errors.",
   "editable": true,
   "graphTooltip": 1,
-  "time": {
-    "from": "now-6h",
-    "to": "now"
-  },
-  "description": "One-screen view of the QMS stack on qms-vps: services, API, server, DB/Redis, errors.",
+  "id": 2920879882981376,
   "links": [
     {
-      "type": "link",
+      "icon": "external link",
+      "targetBlank": false,
       "title": "\ud83d\udda5\ufe0f Linux server",
-      "url": "/connections/infrastructure/linux-node",
-      "targetBlank": false,
-      "icon": "external link",
-      "tooltip": "\ud83d\udda5\ufe0f Linux server"
+      "tooltip": "\ud83d\udda5\ufe0f Linux server",
+      "type": "link",
+      "url": "/connections/infrastructure/linux-node"
     },
     {
-      "type": "link",
+      "icon": "external link",
+      "targetBlank": false,
       "title": "\ud83c\udf10 Frontend (Faro)",
-      "url": "/a/grafana-kowalski-app/apps",
-      "targetBlank": false,
-      "icon": "external link",
-      "tooltip": "\ud83c\udf10 Frontend (Faro)"
+      "tooltip": "\ud83c\udf10 Frontend (Faro)",
+      "type": "link",
+      "url": "/a/grafana-kowalski-app/apps"
     },
     {
-      "type": "link",
+      "icon": "external link",
+      "targetBlank": false,
       "title": "\ud83d\udd14 Alert rules",
-      "url": "/alerting/list?search=namespace:node_queue",
-      "targetBlank": false,
-      "icon": "external link",
-      "tooltip": "\ud83d\udd14 Alert rules"
+      "tooltip": "\ud83d\udd14 Alert rules",
+      "type": "link",
+      "url": "/alerting/list?search=namespace:node_queue"
     },
     {
-      "type": "link",
+      "icon": "external link",
+      "targetBlank": false,
       "title": "\ud83e\uddea Uptime checks",
-      "url": "/a/grafana-synthetic-monitoring-app/checks",
-      "targetBlank": false,
-      "icon": "external link",
-      "tooltip": "\ud83e\uddea Uptime checks"
+      "tooltip": "\ud83e\uddea Uptime checks",
+      "type": "link",
+      "url": "/a/grafana-synthetic-monitoring-app/checks"
     },
     {
-      "type": "link",
+      "icon": "external link",
+      "targetBlank": false,
       "title": "\ud83d\udcdc API logs",
-      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22grafanacloud-logs%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22node_queue%5C%22%2C%20service%3D%5C%22node-queue-api%5C%22%7D%22%2C%22queryType%22%3A%22range%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22grafanacloud-logs%22%7D%2C%22editorMode%22%3A%22code%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D",
-      "targetBlank": false,
-      "icon": "external link",
-      "tooltip": "\ud83d\udcdc API logs"
+      "tooltip": "\ud83d\udcdc API logs",
+      "type": "link",
+      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22grafanacloud-logs%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22node_queue%5C%22%2C%20service%3D%5C%22node-queue-api%5C%22%7D%22%2C%22queryType%22%3A%22range%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22grafanacloud-logs%22%7D%2C%22editorMode%22%3A%22code%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D"
     },
     {
-      "type": "link",
+      "icon": "external link",
+      "targetBlank": false,
       "title": "\ud83d\udcdc All errors",
-      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22grafanacloud-logs%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D~%5C%22node_queue%7Cpm2%5C%22%2C%20level%3D~%5C%22error%7Cwarn%7C%5C%22%7D%20%21~%20%60AWS%20SDK%20for%20JavaScript%7CSDK%20releases%20are%20limited%7Ca%5C%5C.co/cUPnyil%7Cnode%20--trace-warnings%60%20%21~%20%60%5E%5C%5Cs%2A%24%60%22%2C%22queryType%22%3A%22range%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22grafanacloud-logs%22%7D%2C%22editorMode%22%3A%22code%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D",
-      "targetBlank": false,
-      "icon": "external link",
-      "tooltip": "\ud83d\udcdc All errors"
+      "tooltip": "\ud83d\udcdc All errors",
+      "type": "link",
+      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22grafanacloud-logs%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D~%5C%22node_queue%7Cpm2%5C%22%2C%20level%3D~%5C%22error%7Cwarn%7C%5C%22%7D%20%21~%20%60AWS%20SDK%20for%20JavaScript%7CSDK%20releases%20are%20limited%7Ca%5C%5C.co/cUPnyil%7Cnode%20--trace-warnings%60%20%21~%20%60%5E%5C%5Cs%2A%24%60%22%2C%22queryType%22%3A%22range%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22grafanacloud-logs%22%7D%2C%22editorMode%22%3A%22code%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D"
     },
     {
-      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
       "title": "\ud83d\udcd6 Runbook",
-      "url": "https://github.com/syauqiahmd/node_queue_v1/blob/main/docs/MONITORING.md",
-      "targetBlank": true,
-      "icon": "external link",
-      "tooltip": "\ud83d\udcd6 Runbook"
+      "tooltip": "\ud83d\udcd6 Runbook",
+      "type": "link",
+      "url": "https://github.com/syauqiahmd/node_queue_v1/blob/main/docs/MONITORING.md"
     },
     {
-      "type": "link",
-      "title": "\ud83d\udcbe Backup & restore",
-      "url": "https://github.com/syauqiahmd/node_queue_v1/blob/main/docs/BACKUP.md",
-      "targetBlank": true,
       "icon": "external link",
-      "tooltip": "\ud83d\udcbe Backup & restore"
+      "targetBlank": false,
+      "title": "\ud83d\udcb3 Billing/Usage",
+      "tooltip": "\ud83d\udcb3 Billing/Usage",
+      "type": "link",
+      "url": "/d/43e7152f-be74-4ac8-b0f2-f5f39b3a5b97/billing-usage"
+    },
+    {
+      "icon": "external link",
+      "targetBlank": true,
+      "title": "\ud83d\udcbe Backup & restore",
+      "tooltip": "\ud83d\udcbe Backup & restore",
+      "type": "link",
+      "url": "https://github.com/syauqiahmd/node_queue_v1/blob/main/docs/BACKUP.md"
     }
   ],
   "panels": [
     {
-      "id": 1,
-      "type": "row",
-      "title": "Status",
       "collapsed": false,
       "gridPos": {
-        "x": 0,
-        "y": 0,
+        "h": 1,
         "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 2,
-      "type": "stat",
-      "title": "Services",
-      "description": "1 = running, 0 = no process. Source: Alloy process exporter.",
-      "gridPos": {
         "x": 0,
-        "y": 1,
+        "y": 0
+      },
+      "id": 1,
+      "panels": [],
+      "title": "Status",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "description": "1 = running, 0 = no process. Source: Alloy process exporter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
         "w": 14,
-        "h": 4
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
+          "editorMode": "code",
           "expr": "clamp_max(namedprocess_namegroup_num_procs{groupname=~\"node-queue-.*|qms-mpp-ui|postgres|redis-server|nginx\"}, 1)",
+          "instant": true,
           "legendFormat": "{{groupname}}",
-          "editorMode": "code",
-          "instant": true,
-          "range": false
+          "range": false,
+          "refId": "A"
         }
       ],
+      "title": "Services",
+      "type": "stat"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "1": {
-                  "text": "UP",
-                  "color": "green"
-                },
-                "0": {
-                  "text": "DOWN",
-                  "color": "red"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "textMode": "value_and_name",
-        "justifyMode": "center",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "auto"
-      }
-    },
-    {
-      "id": 3,
-      "type": "stat",
-      "title": "Postgres \u00b7 Redis reachable",
       "description": "",
-      "gridPos": {
-        "x": 14,
-        "y": 1,
-        "w": 4,
-        "h": 4
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-prom"
-          },
-          "expr": "pg_up",
-          "legendFormat": "Postgres",
-          "editorMode": "code",
-          "instant": true,
-          "range": false
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-prom"
-          },
-          "expr": "redis_up",
-          "legendFormat": "Redis",
-          "editorMode": "code",
-          "instant": true,
-          "range": false
-        }
-      ],
-      "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-prom"
-      },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
-              "type": "value",
               "options": {
-                "1": {
-                  "text": "UP",
-                  "color": "green"
-                },
                 "0": {
-                  "text": "DOWN",
-                  "color": "red"
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
                 }
-              }
+              },
+              "type": "value"
             }
           ],
           "thresholds": {
@@ -245,18 +209,22 @@
                 "value": 1
               }
             ]
-          },
-          "color": {
-            "mode": "thresholds"
           }
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 14,
+        "y": 1
+      },
+      "id": 3,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
-        "textMode": "value_and_name",
         "justifyMode": "center",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -264,41 +232,49 @@
           "fields": "",
           "values": false
         },
-        "orientation": "auto"
-      }
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "Last DB backup",
-      "description": "Time since the last successful nightly backup (02:30 WITA). Red after 26h. See docs/BACKUP.md.",
-      "gridPos": {
-        "x": 18,
-        "y": 1,
-        "w": 6,
-        "h": 4
+        "textMode": "value_and_name"
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "time() - node_queue_db_backup_last_success_timestamp_seconds",
-          "legendFormat": "age",
           "editorMode": "code",
+          "expr": "pg_up",
           "instant": true,
-          "range": false
+          "legendFormat": "Postgres",
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "redis_up",
+          "instant": true,
+          "legendFormat": "Redis",
+          "range": false,
+          "refId": "B"
         }
       ],
+      "title": "Postgres \u00b7 Redis reachable",
+      "type": "stat"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
+      "description": "Time since the last successful nightly backup (02:30 WITA). Red after 26h. See docs/BACKUP.md.",
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -316,79 +292,1207 @@
               }
             ]
           },
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1
+          "unit": "s"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 4,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
-        "textMode": "value",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
           "fields": "",
           "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "time() - node_queue_db_backup_last_success_timestamp_seconds",
+          "instant": true,
+          "legendFormat": "age",
+          "range": false,
+          "refId": "A"
         }
-      }
+      ],
+      "title": "Last DB backup",
+      "type": "stat"
     },
     {
-      "id": 5,
-      "type": "row",
-      "title": "API (node-queue-api)",
       "collapsed": false,
       "gridPos": {
-        "x": 0,
-        "y": 5,
+        "h": 1,
         "w": 24,
-        "h": 1
+        "x": 0,
+        "y": 5
       },
-      "panels": []
+      "id": 27,
+      "panels": [],
+      "title": "Queue activity (today)",
+      "type": "row"
     },
     {
-      "id": 6,
-      "type": "timeseries",
-      "title": "Requests / min by route",
-      "description": "From the access log; route = Express route pattern.",
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Tickets taken today (kiosk, public site and service-to-service).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
       "gridPos": {
+        "h": 4,
+        "w": 4,
         "x": 0,
-        "y": 6,
-        "w": 8,
-        "h": 8
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 28,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "loki",
             "uid": "grafanacloud-logs"
           },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:created\" [$__range])) or vector(0)",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Tickets created",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "First calls today (recalls excluded).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 29,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "(sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:called\" [$__range])) or vector(0)) - (sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:recalled\" [$__range])) or vector(0))",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Called",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Tickets marked done today.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 30,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:resolved\" [$__range])) or vector(0)",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Resolved",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Created today minus called today \u2248 people currently waiting.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 31,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "(sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:created\" [$__range])) or vector(0)) - ((sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:called\" [$__range])) or vector(0)) - (sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:recalled\" [$__range])) or vector(0)))",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Still waiting",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Ticket called again (customer did not show up / moved counter).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 32,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:recalled\" [$__range])) or vector(0)",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Recalls",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Tickets moved to priority today.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 33,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=\"ticket:prioritized\" [$__range])) or vector(0)",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Prioritized",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Created, resolved and recalled tickets per hour.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "lineWidth": 1,
+            "showPoints": "never"
+          },
+          "decimals": 0,
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ticket:created"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Created"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ticket:resolved"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Resolved"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ticket:recalled"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Recalled"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 34,
+      "interval": "1h",
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum by (eventName) (count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Broadcast event\" | json | eventName=~\"ticket:(created|resolved|recalled)\" [1h]))",
+          "legendFormat": "{{eventName}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Ticket activity per hour",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Average and 90th percentile wait, per 30 minutes. Available once feat/ticket-event-metrics is deployed.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "always",
+            "spanNulls": true
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "id": 35,
+      "interval": "30m",
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "avg_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: called\" | json | unwrap waitSeconds | __error__=\"\" [30m])",
+          "legendFormat": "average",
+          "queryType": "range",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "quantile_over_time(0.9, {job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: called\" | json | unwrap waitSeconds | __error__=\"\" [30m])",
+          "legendFormat": "90% waited less than",
+          "queryType": "range",
+          "refId": "B"
+        }
+      ],
+      "title": "Wait time (created \u2192 called)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Created \u2192 called, today. Available once feat/ticket-event-metrics is deployed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": null,
+          "noValue": "\u2013",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 900
+              },
+              {
+                "color": "red",
+                "value": 1800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 18
+      },
+      "hideTimeOverride": true,
+      "id": 36,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "avg_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: called\" | json | unwrap waitSeconds | __error__=\"\" [$__range])",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Average wait",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "90th percentile wait today. Available once feat/ticket-event-metrics is deployed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": null,
+          "noValue": "\u2013",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 900
+              },
+              {
+                "color": "red",
+                "value": 1800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 18
+      },
+      "hideTimeOverride": true,
+      "id": 37,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "quantile_over_time(0.9, {job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: called\" | json | unwrap waitSeconds | __error__=\"\" [$__range])",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "90% waited less than",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Called \u2192 resolved, today. Available once feat/ticket-event-metrics is deployed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "decimals": null,
+          "noValue": "\u2013",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 18
+      },
+      "hideTimeOverride": true,
+      "id": 38,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "avg_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: resolved\" | json | unwrap serviceSeconds | __error__=\"\" [$__range])",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Average serving time",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Most people waiting (one service) when someone took a ticket. Available once feat/ticket-event-metrics is deployed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "noValue": "\u2013",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 18
+      },
+      "hideTimeOverride": true,
+      "id": 39,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "max_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: created\" | json | unwrap waitingCount | __error__=\"\" [$__range])",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Longest queue today",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Tickets created today per service. Available once feat/ticket-event-metrics is deployed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 22
+      },
+      "hideTimeOverride": true,
+      "id": 40,
+      "options": {
+        "displayMode": "gradient",
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum by (serviceName) (count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: created\" | json [$__range]))",
+          "legendFormat": "{{serviceName}}",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Tickets by service",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Created \u2192 called, today, per service. Available once feat/ticket-event-metrics is deployed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 900
+              },
+              {
+                "color": "red",
+                "value": 1800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 22
+      },
+      "hideTimeOverride": true,
+      "id": 41,
+      "options": {
+        "displayMode": "gradient",
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "avg_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: called\" | json | unwrap waitSeconds | __error__=\"\" [$__range]) by (serviceName)",
+          "legendFormat": "{{serviceName}}",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Average wait by service",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "Tickets resolved today per counter. Available once feat/ticket-event-metrics is deployed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 22
+      },
+      "hideTimeOverride": true,
+      "id": 42,
+      "options": {
+        "displayMode": "gradient",
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum by (counterNumber) (count_over_time({job=\"node_queue\", service=\"node-queue-api\"} |= \"Ticket event: resolved\" | json [$__range]))",
+          "legendFormat": "Counter {{counterNumber}}",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "now/d",
+      "title": "Served per counter",
+      "type": "bargauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 5,
+      "panels": [],
+      "title": "API (node-queue-api)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "description": "From the access log; route = Express route pattern.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 31
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
           "expr": "sum by (route) (count_over_time({job=\"node_queue\", service=\"node-queue-api\"} | json | context=\"HTTP\" | label_format route=`{{ if .route }}{{ .route }}{{ else }}(unmatched){{ end }}` [1m]))",
           "legendFormat": "{{route}}",
-          "editorMode": "code",
-          "queryType": "range"
+          "queryType": "range",
+          "refId": "A"
         }
       ],
+      "title": "Requests / min by route",
+      "type": "timeseries"
+    },
+    {
       "datasource": {
         "type": "loki",
         "uid": "grafanacloud-logs"
       },
+      "description": "95th percentile of durationMs over 5 minutes.",
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
             "lineWidth": 1,
             "showPoints": "never"
-          }
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 31
+      },
+      "id": 7,
       "options": {
         "legend": {
           "displayMode": "list",
@@ -399,97 +1503,38 @@
           "mode": "multi",
           "sort": "desc"
         }
-      }
-    },
-    {
-      "id": 7,
-      "type": "timeseries",
-      "title": "p95 response time by route",
-      "description": "95th percentile of durationMs over 5 minutes.",
-      "gridPos": {
-        "x": 8,
-        "y": 6,
-        "w": 8,
-        "h": 8
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "loki",
             "uid": "grafanacloud-logs"
           },
+          "editorMode": "code",
           "expr": "quantile_over_time(0.95, {job=\"node_queue\", service=\"node-queue-api\"} | json | context=\"HTTP\" | label_format route=`{{ if .route }}{{ .route }}{{ else }}(unmatched){{ end }}` | unwrap durationMs [5m]) by (route)",
           "legendFormat": "{{route}}",
-          "editorMode": "code",
-          "queryType": "range"
+          "queryType": "range",
+          "refId": "A"
         }
       ],
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ms",
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineWidth": 1,
-            "showPoints": "never"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
+      "title": "p95 response time by route",
+      "type": "timeseries"
     },
     {
-      "id": 8,
-      "type": "timeseries",
-      "title": "Responses by status code",
-      "description": "Per minute. 5xx = server errors (alerting above 5 in 5 min).",
-      "gridPos": {
-        "x": 16,
-        "y": 6,
-        "w": 8,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
-          },
-          "expr": "sum by (statusCode) (count_over_time({job=\"node_queue\", service=\"node-queue-api\"} | json | context=\"HTTP\" | label_format route=`{{ if .route }}{{ .route }}{{ else }}(unmatched){{ end }}` [1m]))",
-          "legendFormat": "{{statusCode}}",
-          "editorMode": "code",
-          "queryType": "range"
-        }
-      ],
       "datasource": {
         "type": "loki",
         "uid": "grafanacloud-logs"
       },
+      "description": "Per minute. 5xx = server errors (alerting above 5 in 5 min).",
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
             "lineWidth": 1,
             "showPoints": "never"
-          }
+          },
+          "unit": "short"
         },
         "overrides": [
           {
@@ -501,8 +1546,8 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
+                  "fixedColor": "red",
+                  "mode": "fixed"
                 }
               }
             ]
@@ -516,8 +1561,8 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
+                  "fixedColor": "orange",
+                  "mode": "fixed"
                 }
               }
             ]
@@ -531,14 +1576,21 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
+                  "fixedColor": "green",
+                  "mode": "fixed"
                 }
               }
             ]
           }
         ]
       },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 31
+      },
+      "id": 8,
       "options": {
         "legend": {
           "displayMode": "list",
@@ -549,56 +1601,113 @@
           "mode": "multi",
           "sort": "desc"
         }
-      }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum by (statusCode) (count_over_time({job=\"node_queue\", service=\"node-queue-api\"} | json | context=\"HTTP\" | label_format route=`{{ if .route }}{{ .route }}{{ else }}(unmatched){{ end }}` [1m]))",
+          "legendFormat": "{{statusCode}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Responses by status code",
+      "type": "timeseries"
     },
     {
-      "id": 9,
-      "type": "row",
-      "title": "Server (qms-vps)",
       "collapsed": false,
       "gridPos": {
-        "x": 0,
-        "y": 14,
+        "h": 1,
         "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 10,
-      "type": "gauge",
-      "title": "CPU",
-      "description": "",
-      "gridPos": {
         "x": 0,
-        "y": 15,
+        "y": 39
+      },
+      "id": 9,
+      "panels": [],
+      "title": "Server (qms-vps)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
         "w": 4,
-        "h": 8
+        "x": 0,
+        "y": 40
+      },
+      "id": 10,
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdMarkers": true
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
+          "editorMode": "code",
           "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{job=\"integrations/node_exporter\", mode=\"idle\"}[5m])))",
+          "instant": true,
           "legendFormat": "CPU",
-          "editorMode": "code",
-          "instant": true,
-          "range": false
+          "range": false,
+          "refId": "A"
         }
       ],
+      "title": "CPU",
+      "type": "gauge"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
           "decimals": 0,
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -615,122 +1724,56 @@
                 "value": 85
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdMarkers": true
-      }
-    },
-    {
-      "id": 11,
-      "type": "gauge",
-      "title": "Memory used",
-      "description": "",
       "gridPos": {
+        "h": 8,
+        "w": 4,
         "x": 4,
-        "y": 15,
-        "w": 4,
-        "h": 8
+        "y": 40
+      },
+      "id": 11,
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdMarkers": true
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
+          "editorMode": "code",
           "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"integrations/node_exporter\"} / node_memory_MemTotal_bytes{job=\"integrations/node_exporter\"})",
+          "instant": true,
           "legendFormat": "Memory used",
-          "editorMode": "code",
-          "instant": true,
-          "range": false
+          "range": false,
+          "refId": "A"
         }
       ],
+      "title": "Memory used",
+      "type": "gauge"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 85
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdMarkers": true
-      }
-    },
-    {
-      "id": 12,
-      "type": "gauge",
-      "title": "Disk used (/)",
       "description": "",
-      "gridPos": {
-        "x": 8,
-        "y": 15,
-        "w": 4,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-prom"
-          },
-          "expr": "100 * (1 - node_filesystem_avail_bytes{job=\"integrations/node_exporter\", mountpoint=\"/\"} / node_filesystem_size_bytes{job=\"integrations/node_exporter\", mountpoint=\"/\"})",
-          "legendFormat": "Disk used (/)",
-          "editorMode": "code",
-          "instant": true,
-          "range": false
-        }
-      ],
-      "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-prom"
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
           "decimals": 0,
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -747,10 +1790,18 @@
                 "value": 85
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 8,
+        "y": 40
+      },
+      "id": 12,
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -760,40 +1811,32 @@
           "values": false
         },
         "showThresholdMarkers": true
-      }
-    },
-    {
-      "id": 13,
-      "type": "timeseries",
-      "title": "Memory per service",
-      "description": "Resident memory per process group. The VPS has 2 GB.",
-      "gridPos": {
-        "x": 12,
-        "y": 15,
-        "w": 12,
-        "h": 8
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "namedprocess_namegroup_memory_bytes{memtype=\"resident\"}",
-          "legendFormat": "{{groupname}}",
           "editorMode": "code",
-          "instant": false,
-          "range": true
+          "expr": "100 * (1 - node_filesystem_avail_bytes{job=\"integrations/node_exporter\", mountpoint=\"/\"} / node_filesystem_size_bytes{job=\"integrations/node_exporter\", mountpoint=\"/\"})",
+          "instant": true,
+          "legendFormat": "Disk used (/)",
+          "range": false,
+          "refId": "A"
         }
       ],
+      "title": "Disk used (/)",
+      "type": "gauge"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
+      "description": "Resident memory per process group. The VPS has 2 GB.",
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 15,
@@ -802,18 +1845,26 @@
             "stacking": {
               "mode": "normal"
             }
-          }
+          },
+          "unit": "bytes"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "id": 13,
       "options": {
         "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
           "calcs": [
             "lastNotNull"
           ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
           "sortBy": "Last *",
           "sortDesc": true
         },
@@ -821,49 +1872,49 @@
           "mode": "multi",
           "sort": "desc"
         }
-      }
-    },
-    {
-      "id": 14,
-      "type": "timeseries",
-      "title": "CPU per service",
-      "description": "100% = one full CPU core (the VPS has 2).",
-      "gridPos": {
-        "x": 0,
-        "y": 23,
-        "w": 12,
-        "h": 7
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "sum by (groupname) (rate(namedprocess_namegroup_cpu_seconds_total[5m]))",
-          "legendFormat": "{{groupname}}",
           "editorMode": "code",
+          "expr": "namedprocess_namegroup_memory_bytes{memtype=\"resident\"}",
           "instant": false,
-          "range": true
+          "legendFormat": "{{groupname}}",
+          "range": true,
+          "refId": "A"
         }
       ],
+      "title": "Memory per service",
+      "type": "timeseries"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
+      "description": "100% = one full CPU core (the VPS has 2).",
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 0,
             "lineWidth": 1,
             "showPoints": "never"
-          }
+          },
+          "unit": "percentunit"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "id": 14,
       "options": {
         "legend": {
           "displayMode": "list",
@@ -874,39 +1925,36 @@
           "mode": "multi",
           "sort": "desc"
         }
-      }
-    },
-    {
-      "id": 15,
-      "type": "stat",
-      "title": "Restarts (last 24h)",
-      "description": "Deploys count as one restart. Many restarts = crash loop.",
-      "gridPos": {
-        "x": 12,
-        "y": 23,
-        "w": 12,
-        "h": 7
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "changes(namedprocess_namegroup_oldest_start_time_seconds{groupname=~\"node-queue-.*|qms-mpp-ui|postgres|redis-server|nginx\"}[24h])",
-          "legendFormat": "{{groupname}}",
           "editorMode": "code",
-          "instant": true,
-          "range": false
+          "expr": "sum by (groupname) (rate(namedprocess_namegroup_cpu_seconds_total[5m]))",
+          "instant": false,
+          "legendFormat": "{{groupname}}",
+          "range": true,
+          "refId": "A"
         }
       ],
+      "title": "CPU per service",
+      "type": "timeseries"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
+      "description": "Deploys count as one restart. Many restarts = crash loop.",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -923,72 +1971,67 @@
                 "value": 6
               }
             ]
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0
+          }
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "id": 15,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
-        "textMode": "value_and_name",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
           "fields": "",
           "values": false
-        }
-      }
-    },
-    {
-      "id": 16,
-      "type": "row",
-      "title": "Postgres & Redis",
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 30,
-        "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 17,
-      "type": "timeseries",
-      "title": "Postgres connections (qms_prod)",
-      "description": "",
-      "gridPos": {
-        "x": 0,
-        "y": 31,
-        "w": 8,
-        "h": 7
+        },
+        "textMode": "value_and_name"
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "sum by (state) (pg_stat_activity_count{datname=\"qms_prod\"})",
-          "legendFormat": "{{state}}",
           "editorMode": "code",
-          "instant": false,
-          "range": true
+          "expr": "changes(namedprocess_namegroup_oldest_start_time_seconds{groupname=~\"node-queue-.*|qms-mpp-ui|postgres|redis-server|nginx\"}[24h])",
+          "instant": true,
+          "legendFormat": "{{groupname}}",
+          "range": false,
+          "refId": "A"
         }
       ],
+      "title": "Restarts (last 24h)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 55
+      },
+      "id": 16,
+      "panels": [],
+      "title": "Postgres & Redis",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -997,47 +2040,55 @@
             "stacking": {
               "mode": "normal"
             }
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
-      "options": {}
-    },
-    {
-      "id": 18,
-      "type": "stat",
-      "title": "Database size",
-      "description": "",
       "gridPos": {
-        "x": 8,
-        "y": 31,
-        "w": 4,
-        "h": 7
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 56
       },
+      "id": 17,
+      "options": {},
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "pg_database_size_bytes{datname=\"qms_prod\"}",
-          "legendFormat": "qms_prod",
           "editorMode": "code",
-          "instant": true,
-          "range": false
+          "expr": "sum by (state) (pg_stat_activity_count{datname=\"qms_prod\"})",
+          "instant": false,
+          "legendFormat": "{{state}}",
+          "range": true,
+          "refId": "A"
         }
       ],
+      "title": "Postgres connections (qms_prod)",
+      "type": "timeseries"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "unit": "bytes"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 8,
+        "y": 56
+      },
+      "id": 18,
       "options": {
         "colorMode": "none",
         "graphMode": "area",
@@ -1048,58 +2099,39 @@
           "fields": "",
           "values": false
         }
-      }
-    },
-    {
-      "id": 19,
-      "type": "timeseries",
-      "title": "Redis memory \u00b7 clients",
-      "description": "",
-      "gridPos": {
-        "x": 12,
-        "y": 31,
-        "w": 12,
-        "h": 7
       },
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "redis_memory_used_bytes",
-          "legendFormat": "memory",
           "editorMode": "code",
-          "instant": false,
-          "range": true
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-prom"
-          },
-          "expr": "redis_connected_clients",
-          "legendFormat": "clients",
-          "editorMode": "code",
-          "instant": false,
-          "range": true
+          "expr": "pg_database_size_bytes{datname=\"qms_prod\"}",
+          "instant": true,
+          "legendFormat": "qms_prod",
+          "range": false,
+          "refId": "A"
         }
       ],
+      "title": "Database size",
+      "type": "stat"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 0,
             "lineWidth": 1,
             "showPoints": "never"
-          }
+          },
+          "unit": "bytes"
         },
         "overrides": [
           {
@@ -1120,107 +2152,365 @@
           }
         ]
       },
-      "options": {}
-    },
-    {
-      "id": 20,
-      "type": "row",
-      "title": "Logs",
-      "collapsed": false,
       "gridPos": {
-        "x": 0,
-        "y": 38,
-        "w": 24,
-        "h": 1
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 56
       },
-      "panels": []
-    },
-    {
-      "id": 21,
-      "type": "timeseries",
-      "title": "nginx 5xx by domain",
-      "description": "502 = nginx could not reach the app (service down).",
-      "gridPos": {
-        "x": 0,
-        "y": 39,
-        "w": 8,
-        "h": 10
-      },
+      "id": 19,
+      "options": {},
       "targets": [
         {
-          "refId": "A",
           "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
           },
-          "expr": "sum by (host) (count_over_time({job=\"nginx\", stream=\"access\"} | json | status >= 500 [5m]))",
-          "legendFormat": "{{host}}",
           "editorMode": "code",
-          "queryType": "range"
+          "expr": "redis_memory_used_bytes",
+          "instant": false,
+          "legendFormat": "memory",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "redis_connected_clients",
+          "instant": false,
+          "legendFormat": "clients",
+          "range": true,
+          "refId": "B"
         }
       ],
+      "title": "Redis memory \u00b7 clients",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "id": 20,
+      "panels": [],
+      "title": "Logs",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "loki",
         "uid": "grafanacloud-logs"
       },
+      "description": "502 = nginx could not reach the app (service down).",
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
           "custom": {
             "drawStyle": "bars",
             "fillOpacity": 60,
             "lineWidth": 1,
             "showPoints": "never"
           },
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
-          }
+          "unit": "short"
         },
         "overrides": []
       },
-      "options": {}
-    },
-    {
-      "id": 22,
-      "type": "logs",
-      "title": "Recent errors & warnings (all services)",
-      "description": "App errors/warnings (winston) plus raw PM2 stderr. Phone numbers, emails and tokens are masked.",
       "gridPos": {
-        "x": 8,
-        "y": 39,
-        "w": 16,
-        "h": 10
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 64
       },
+      "id": 21,
+      "options": {},
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "loki",
             "uid": "grafanacloud-logs"
           },
-          "expr": "{job=~\"node_queue|pm2\", level=~\"error|warn|\"} !~ `AWS SDK for JavaScript|SDK releases are limited|a\\.co/cUPnyil|node --trace-warnings` !~ `^\\s*$` | json | line_format `{{ if .message }}[{{ .service }}] {{ .message }}{{ with .error_message }} \u2014 {{ . }}{{ end }}{{ else }}{{ __line__ }}{{ end }}`",
-          "legendFormat": "",
           "editorMode": "code",
-          "queryType": "range"
+          "expr": "sum by (host) (count_over_time({job=\"nginx\", stream=\"access\"} | json | status >= 500 [5m]))",
+          "legendFormat": "{{host}}",
+          "queryType": "range",
+          "refId": "A"
         }
       ],
+      "title": "nginx 5xx by domain",
+      "type": "timeseries"
+    },
+    {
       "datasource": {
         "type": "loki",
         "uid": "grafanacloud-logs"
       },
+      "description": "App errors/warnings (winston) plus raw PM2 stderr. Phone numbers, emails and tokens are masked.",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
       },
+      "gridPos": {
+        "h": 10,
+        "w": 16,
+        "x": 8,
+        "y": 64
+      },
+      "id": 22,
       "options": {
-        "showTime": true,
-        "wrapLogMessage": true,
-        "sortOrder": "Descending",
+        "dedupStrategy": "none",
         "enableLogDetails": true,
         "prettifyLogMessage": false,
-        "dedupStrategy": "none"
-      }
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "{job=~\"node_queue|pm2\", level=~\"error|warn|\"} !~ `AWS SDK for JavaScript|SDK releases are limited|a\\.co/cUPnyil|node --trace-warnings` !~ `^\\s*$` | json | line_format `{{ if .message }}[{{ .service }}] {{ .message }}{{ with .error_message }} \u2014 {{ . }}{{ end }}{{ else }}{{ __line__ }}{{ end }}`",
+          "legendFormat": "",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent errors & warnings (all services)",
+      "type": "logs"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 74
+      },
+      "id": 23,
+      "panels": [],
+      "title": "Grafana Cloud usage (free tier, this month)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-usage"
+      },
+      "description": "Month-to-date usage as % of what the Free tier includes (from your account's own billing counters). Orange from 70%, red from 90%.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 16,
+        "x": 0,
+        "y": 75
+      },
+      "id": 24,
+      "options": {
+        "displayMode": "gradient",
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-usage"
+          },
+          "editorMode": "code",
+          "expr": "100 * max(grafanacloud_org_metrics_billable_series) / max(grafanacloud_org_metrics_included_series)",
+          "instant": true,
+          "legendFormat": "Metric series",
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-usage"
+          },
+          "editorMode": "code",
+          "expr": "100 * max(grafanacloud_org_logs_usage) / max(grafanacloud_org_logs_included_usage)",
+          "instant": true,
+          "legendFormat": "Logs (GB)",
+          "range": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-usage"
+          },
+          "editorMode": "code",
+          "expr": "100 * max(grafanacloud_org_fe_o11y_billable_sessions) / max(grafanacloud_org_fe_o11y_included_sessions)",
+          "instant": true,
+          "legendFormat": "Frontend sessions",
+          "range": false,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-usage"
+          },
+          "editorMode": "code",
+          "expr": "100 * max(grafanacloud_org_sm_billable_check_executions) / max(grafanacloud_org_sm_included_check_executions)",
+          "instant": true,
+          "legendFormat": "Uptime check executions",
+          "range": false,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-usage"
+          },
+          "editorMode": "code",
+          "expr": "100 * max(grafanacloud_org_grafana_billable_users) / max(grafanacloud_org_grafana_included_users)",
+          "instant": true,
+          "legendFormat": "Grafana users",
+          "range": false,
+          "refId": "E"
+        }
+      ],
+      "title": "Free quota used",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-usage"
+      },
+      "description": "Sum of overage across products. 0 = everything is within the Free tier. Details: GrafanaCloud \u2192 Billing/Usage dashboard.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "green",
+                  "text": "None \u2713"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.0001
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 75
+      },
+      "id": 25,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-usage"
+          },
+          "editorMode": "code",
+          "expr": "max(grafanacloud_org_metrics_overage) + max(grafanacloud_org_logs_overage) + max(grafanacloud_org_fe_o11y_overage) + max(grafanacloud_org_sm_overage) + max(grafanacloud_org_grafana_overage) + max(grafanacloud_org_traces_overage)",
+          "instant": true,
+          "legendFormat": "overage",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Overage (would be billed)",
+      "type": "stat"
     }
-  ]
+  ],
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "tags": [
+    "node_queue",
+    "qms"
+  ],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "QMS Overview",
+  "uid": "qms-overview",
+  "version": 9
 }
