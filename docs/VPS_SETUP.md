@@ -442,6 +442,46 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
+### Keep nginx starting when DNS is briefly unavailable
+
+Never put a **hostname** directly in `proxy_pass` (e.g. `proxy_pass https://is3.cloudhost.id/;`).
+nginx resolves it at start-up, and if DNS is unavailable at that moment the whole nginx refuses
+to start — every domain goes down. This happened on 1 Aug, 27 Aug and 1 Oct 2026:
+unattended-upgrades restarted nginx and `systemd-resolved` at the same time (~06:30), nginx failed
+with `host not found in upstream`, and the sites stayed down until a manual reboot.
+
+Resolve the host per request instead (UI site, `location /audio/`):
+
+```nginx
+location /audio/ {
+  resolver 127.0.0.53 1.1.1.1 valid=300s ipv6=off;
+  resolver_timeout 5s;
+  set $s3_upstream is3.cloudhost.id;
+
+  # must stay before the rewrite: "rewrite ... break" stops later rewrite rules
+  if ($request_method = OPTIONS) { return 204; }
+
+  rewrite ^/audio/(.*)$ /$1 break;
+  proxy_pass https://$s3_upstream;
+  proxy_set_header Host is3.cloudhost.id;
+  # ... Range / buffering / CORS headers as before
+}
+```
+
+And let systemd retry nginx if it ever fails to start (`/etc/systemd/system/nginx.service.d/restart.conf`):
+
+```ini
+[Unit]
+StartLimitIntervalSec=0
+
+[Service]
+Restart=on-failure
+RestartSec=10s
+```
+
+`sudo systemctl daemon-reload` after adding it. To check a config would survive a DNS outage:
+`sudo unshare -n nginx -t` (runs the config test with no network).
+
 ### SSL Certificate Setup (Let's Encrypt)
 
 ```bash

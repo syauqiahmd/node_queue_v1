@@ -12,6 +12,7 @@ the queries to build dashboards and alerts from.
 | Host (`qms-vps`) | CPU, memory, disk, network | Alloy `prometheus.exporter.unix` | `{job="integrations/node_exporter"}` (metrics) |
 | PostgreSQL | Up, connections by state, database size, transactions, deadlocks, cache hits, locks | Alloy `prometheus.exporter.postgres` (read-only `grafana_monitor` role) | `pg_*` |
 | Redis | Up, memory, clients, hits/misses, evictions, commands/s | Alloy `prometheus.exporter.redis` | `redis_*` |
+| DB backup log | Each backup run's output (`~/backups/node_queue/backup.log`) | Alloy, exact-path file (ACL: traverse on the folder, read on this file only — not the dumps); config in [`monitoring/backup_log.alloy`](./monitoring/backup_log.alloy) | `{job="backup"}` |
 | DB backups | Last success time, size, S3 upload — see [BACKUP.md](./BACKUP.md) | `scripts/backupDb.js` writes a textfile Alloy reads | `node_queue_db_backup_*` |
 | Processes | CPU, memory, restarts per service: `node-queue-api`, `node-queue-cron`, `node-queue-websocket`, `qms-mpp-ui`, `pm2-daemon`, `postgres`, `redis-server`, `nginx`, `alloy` | Alloy `prometheus.exporter.process` | `namedprocess_namegroup_*{groupname="..."}` |
 | App logs | winston JSON from all 3 services (`error`, `warn`, `info`; `debug` is not shipped) | Alloy tails `logs/{error,warn,info}/*.log` | `{job="node_queue", service="node-queue-api"}` |
@@ -200,6 +201,16 @@ logged by the API:
 ```logql
 sum(count_over_time({job="node_queue", level="error"} |~ "(?i)s3|text.?to.?speech|tts" [15m]))
 ```
+
+### Alerts in Grafana
+
+The rules below live in Grafana in the **node_queue** folder (group `node_queue`, evaluated every
+minute) and notify the Telegram contact point. Each rule has a templated `summary` (with the
+current value), an `action` annotation (next step) and a `logs_query` annotation (LogQL) that the
+template turns into a **📜 Logs** link to Grafana Explore, covering 15 min before the alert. Telegram messages use the template in
+[`monitoring/telegram-alert.tmpl`](./monitoring/telegram-alert.tmpl) (Alerting → Contact points →
+Notification templates `qms-telegram`; contact point message
+`{{ template "qms.telegram.message" . }}`, parse mode HTML).
 
 ### Suggested alerts
 

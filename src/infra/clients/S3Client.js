@@ -1,3 +1,6 @@
+// The v2 SDK prints a maintenance-mode notice to stderr every time a process loads it, which
+// shows up as error noise in the PM2 logs Grafana collects. Keep it quiet.
+process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE ??= '1';
 const AWS = require('aws-sdk');
 
 class S3Client {
