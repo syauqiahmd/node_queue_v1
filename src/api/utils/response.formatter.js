@@ -15,7 +15,7 @@ class ResponseFormatter {
     } else {
       response.data = data;
     }
-    this.logger.info(`response: ${JSON.stringify(response)}`, {
+    this.logger.debug(`response: ${JSON.stringify(response)}`, {
       context: '[SUCCESS]',
       statusCode,
     });
@@ -42,11 +42,11 @@ class ResponseFormatter {
     if (fields) {
       errorBody.error.fields = fields;
     }
-    this.logger.error(`response: ${JSON.stringify(errorBody)}`, {
+    // The error itself is logged by the error handler; this only traces the response body.
+    this.logger.debug(`response: ${JSON.stringify(errorBody)}`, {
       context: '[ERROR]',
       statusCode,
       errorCode: code,
-      errorMessage: message,
     });
     return res.status(statusCode).json(errorBody);
   };

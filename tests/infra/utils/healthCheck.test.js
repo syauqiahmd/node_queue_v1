@@ -158,3 +158,58 @@ describe('HealthCheck', () => {
     });
   });
 });
+
+describe('HealthCheck.getStatus', () => {
+  let healthCheck;
+  let mockPrismaClient;
+  let mockRedisClient;
+  let mockLogger;
+
+  beforeEach(() => {
+    mockPrismaClient = { $queryRaw: jest.fn().mockResolvedValue([{ 1: 1 }]) };
+    mockRedisClient = { ping: jest.fn().mockResolvedValue('PONG') };
+    mockLogger = { info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+    jest.spyOn(process, 'exit').mockImplementation(() => {});
+
+    healthCheck = new HealthCheck({
+      prismaClient: mockPrismaClient,
+      redisClient: mockRedisClient,
+      s3Client: {},
+      logger: mockLogger,
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('reports healthy when database and redis respond', async () => {
+    await expect(healthCheck.getStatus()).resolves.toEqual({
+      healthy: true,
+      checks: { database: 'up', redis: 'up' },
+    });
+  });
+
+  it('reports a failing dependency as down without exiting', async () => {
+    mockRedisClient.ping.mockRejectedValue(new Error('Redis client not connected'));
+
+    await expect(healthCheck.getStatus()).resolves.toEqual({
+      healthy: false,
+      checks: { database: 'up', redis: 'down' },
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Health check failed: redis',
+      expect.objectContaining({ error: expect.any(Error) })
+    );
+    expect(process.exit).not.toHaveBeenCalled();
+  });
+
+  it('reports a dependency that hangs past the timeout as down', async () => {
+    mockPrismaClient.$queryRaw.mockReturnValue(new Promise(() => {}));
+
+    await expect(healthCheck.getStatus(20)).resolves.toEqual({
+      healthy: false,
+      checks: { database: 'down', redis: 'up' },
+    });
+  });
+});

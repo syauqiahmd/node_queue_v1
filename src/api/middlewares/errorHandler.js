@@ -43,8 +43,6 @@ class ErrorHandlerMiddleware {
       return _next();
     }
 
-    this.logger.error('ErrorHandler:', err);
-
     let code = 'INTERNAL_SERVER_ERROR';
     let message = 'Something went wrong';
     let statusCode = 500;
@@ -73,6 +71,19 @@ class ErrorHandlerMiddleware {
       message = err.message || 'Business logic error';
       statusCode = err.statusCode || 400;
       fields = err.fields || null;
+    }
+
+    // Log once per error: client errors (4xx) are warnings, only server errors (5xx) are errors.
+    if (statusCode >= 500) {
+      // Nested under `error` so only name/message/code/stack are logged, not extra properties
+      // such as body-parser's raw `body` (which can contain passwords).
+      this.logger.error(`ErrorHandler: ${err.message}`, { error: err, statusCode });
+    } else {
+      this.logger.warn(`ErrorHandler: ${code} - ${message}`, {
+        statusCode,
+        errorCode: code,
+        fields,
+      });
     }
 
     return this.responseFormatter.errorResponse(res, {

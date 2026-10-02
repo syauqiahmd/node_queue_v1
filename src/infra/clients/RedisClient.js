@@ -1,5 +1,9 @@
 const { createClient } = require('redis');
 
+// Keys like auth:token:<jwt> contain credentials; never write them to logs verbatim.
+const maskKey = (key) =>
+  typeof key === 'string' ? key.replace(/^(auth:token:).+$/, '$1***') : key;
+
 class RedisClient {
   constructor({ logger }) {
     this.logger = logger;
@@ -55,9 +59,22 @@ class RedisClient {
     return this.connected;
   }
 
+  async ping() {
+    if (!this.connected) {
+      throw new Error('Redis client not connected');
+    }
+    return this.client.ping();
+  }
+
+  async disconnect() {
+    if (this.client.isOpen) {
+      await this.client.quit();
+    }
+  }
+
   async get(key) {
     if (!this.connected) {
-      this.logger.warn('[REDIS] Attempted GET on disconnected client', { key });
+      this.logger.warn('[REDIS] Attempted GET on disconnected client', { key: maskKey(key) });
       throw new Error('Redis client not connected');
     }
     return this.client.get(key);
@@ -65,7 +82,7 @@ class RedisClient {
 
   async set(key, value, options) {
     if (!this.connected) {
-      this.logger.warn('[REDIS] Attempted SET on disconnected client', { key });
+      this.logger.warn('[REDIS] Attempted SET on disconnected client', { key: maskKey(key) });
       throw new Error('Redis client not connected');
     }
     return this.client.set(key, value, options);
@@ -73,7 +90,7 @@ class RedisClient {
 
   async del(key) {
     if (!this.connected) {
-      this.logger.warn('[REDIS] Attempted DEL on disconnected client', { key });
+      this.logger.warn('[REDIS] Attempted DEL on disconnected client', { key: maskKey(key) });
       throw new Error('Redis client not connected');
     }
     return this.client.del(key);

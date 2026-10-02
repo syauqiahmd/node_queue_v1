@@ -50,16 +50,18 @@ const createApp = (container) => {
   const requestIdMiddleware = container.resolve('requestId').requestIdMiddleware; // Resolve the method
   const loggerContext = container.resolve('loggerContext').loggerContext; // Resolve the method
   const asyncContextRunner = container.resolve('asyncContextRunner').run; // Resolve the method
+  const accessLog = container.resolve('accessLog').accessLog; // Resolve the method
   const mainRouter = container.resolve('mainRouter');
 
   expressJSDocSwagger(app)(swaggerOptions);
 
   app.use(asyncContextRunner);
   app.use(requestIdMiddleware);
+  app.use(loggerContext);
+  app.use(accessLog);
   app.use(rateLimiter);
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.use(loggerContext);
 
   app.use('/api/v1', mainRouter);
 

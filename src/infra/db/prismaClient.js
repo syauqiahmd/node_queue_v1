@@ -10,11 +10,23 @@ const prisma = new PrismaClient({
   ],
 });
 
+const SLOW_QUERY_MS = Number(process.env.PRISMA_SLOW_QUERY_MS) || 500;
+
 prisma.$on('query', (e) => {
   if (process.env.NODE_ENV !== 'production') {
     logger.debug(`[Prisma Query] ${e.query}`, {
       duration: `${e.duration}ms`,
       params: e.params,
+      target: e.target,
+    });
+  }
+  // Surface slow queries in every environment. Params are omitted since they may hold
+  // personal data (phone numbers, emails).
+  if (e.duration >= SLOW_QUERY_MS) {
+    logger.warn(`[Prisma Slow Query] ${e.duration}ms`, {
+      context: 'Prisma',
+      durationMs: e.duration,
+      query: e.query,
       target: e.target,
     });
   }

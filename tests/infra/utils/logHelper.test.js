@@ -77,9 +77,10 @@ describe('Logger Helper', () => {
 
     // Check if the last call to Console was with no arguments or empty object
     // Wait, winston.transports.Console() call in the else block has no args.
+    // Production console only echoes warnings and errors (PM2 already persists stdout).
     const consoleCalls = winston.transports.Console.mock.calls;
     const productionCall = consoleCalls[consoleCalls.length - 1];
-    expect(productionCall).toEqual([]);
+    expect(productionCall).toEqual([{ level: 'warn' }]);
 
     process.env.NODE_ENV = originalEnv;
   });
@@ -108,16 +109,18 @@ describe('Logger Helper', () => {
     expect(loggerInstance.debug).toHaveBeenCalledWith('Debug message', undefined);
   });
 
-  it('should include transactionId and requestContext in log info', () => {
-    // Find the call to winston.format that passes a function
-    const transformCall = winston.format.mock.calls.find((call) => typeof call[0] === 'function');
-    expect(transformCall).toBeDefined();
-    const transformFn = transformCall[0];
+  const findFormat = (name) =>
+    winston.format.mock.calls.map((call) => call[0]).find((fn) => fn.toString().includes(name));
+
+  it('should include transactionId, requestContext and userId in log info', () => {
+    const transformFn = findFormat('asyncLocalStorage.getStore');
+    expect(transformFn).toBeDefined();
 
     // Mock store
     const store = new Map();
     store.set('transactionId', 'tx-123');
     store.set('requestContext', { method: 'GET', path: '/test' });
+    store.set('user', { id: 42 });
     mockStore.get.mockImplementation((key) => store.get(key));
     require('../../../src/infra/utils/asyncContext').asyncLocalStorage.getStore.mockReturnValue(
       mockStore
@@ -128,11 +131,83 @@ describe('Logger Helper', () => {
 
     expect(result.transactionId).toBe('tx-123');
     expect(result.requestContext).toEqual({ method: 'GET', path: '/test' });
+    expect(result.userId).toBe(42);
+  });
+
+  it('should tag every entry with the service name from SERVICE_NAME', () => {
+    const transformFn = findFormat('asyncLocalStorage.getStore');
+    require('../../../src/infra/utils/asyncContext').asyncLocalStorage.getStore.mockReturnValue(
+      null
+    );
+    const original = process.env.SERVICE_NAME;
+    process.env.SERVICE_NAME = 'node-queue-cron';
+
+    expect(transformFn({}).service).toBe('node-queue-cron');
+
+    process.env.SERVICE_NAME = original;
+    if (original === undefined) {
+      delete process.env.SERVICE_NAME;
+    }
+  });
+
+  it('should not override explicitly passed transactionId', () => {
+    const transformFn = findFormat('asyncLocalStorage.getStore');
+    mockStore.get.mockImplementation((key) => (key === 'transactionId' ? 'tx-store' : undefined));
+    require('../../../src/infra/utils/asyncContext').asyncLocalStorage.getStore.mockReturnValue(
+      mockStore
+    );
+
+    const result = transformFn({ transactionId: 'tx-explicit' });
+
+    expect(result.transactionId).toBe('tx-explicit');
+  });
+
+  it('should serialize errors nested in meta so message and stack are kept', () => {
+    const transformFn = findFormat('serializeError');
+    expect(transformFn).toBeDefined();
+
+    const error = new Error('boom');
+    error.code = 'ECONNREFUSED';
+    const result = transformFn({ message: 'failed', error, context: 'X' });
+
+    expect(result.error).toEqual({
+      name: 'Error',
+      message: 'boom',
+      code: 'ECONNREFUSED',
+      stack: error.stack,
+    });
+    expect(result.context).toBe('X');
+  });
+
+  it('should redact personal data and credentials without touching the caller object', () => {
+    const redactFn = findFormat('redact(');
+    expect(redactFn).toBeDefined();
+
+    const live = { phoneNumber: '6281234567890' };
+    const result = redactFn({
+      level: 'warn',
+      message: 'lookup 081234567890',
+      data: live,
+      password: 'hunter2',
+    });
+
+    expect(result.message).toBe('lookup 0812*****890');
+    expect(result.data).toEqual({ phoneNumber: '6281******890' });
+    expect(result.password).toBe('[REDACTED]');
+    expect(live.phoneNumber).toBe('6281234567890');
+  });
+
+  it('should only pass entries of its own level to each level file', () => {
+    // First level transport created is 'error'
+    const levelFilter = findFormat('info.level === level');
+    const errorInfo = { level: 'error', message: 'x' };
+
+    expect(levelFilter(errorInfo)).toBe(errorInfo);
+    expect(levelFilter({ level: 'warn', message: 'x' })).toBe(false);
   });
 
   it('should not include transactionId and requestContext if no store', () => {
-    const transformCall = winston.format.mock.calls.find((call) => typeof call[0] === 'function');
-    const transformFn = transformCall[0];
+    const transformFn = findFormat('asyncLocalStorage.getStore');
 
     require('../../../src/infra/utils/asyncContext').asyncLocalStorage.getStore.mockReturnValue(
       null
@@ -189,7 +264,8 @@ describe('Logger Helper', () => {
       timestamp: '2023-01-01',
       level: 'info',
       message: 'Test message',
-      requestContext: { method: 'GET', path: '/test', userId: 'user-1' },
+      requestContext: { method: 'GET', path: '/test' },
+      userId: 'user-1',
     });
     expect(log4).toBe('2023-01-01 info: [GET /test] [User:user-1] Test message');
 

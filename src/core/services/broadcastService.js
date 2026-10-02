@@ -25,12 +25,16 @@ class BroadcastService {
 
     try {
       io.to(rooms).emit(eventName, data);
-      this.logger.info('Broadcast event sent successfully', { rooms, eventName });
+      this.logger.info('Broadcast event sent successfully', {
+        rooms,
+        eventName,
+        ticketId: data?.id,
+      });
       if (this.messageBroker) {
         this.messageBroker.publish('websocket', { event: eventName, data });
       }
     } catch (err) {
-      this.logger.error('Error during broadcasting event', { error: err.message, eventName });
+      this.logger.error('Error during broadcasting event', { error: err, eventName });
     }
   }
 }

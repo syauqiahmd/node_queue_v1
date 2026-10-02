@@ -82,6 +82,26 @@ describe('RequestIdMiddleware', () => {
       // No property added to string primitive
     });
 
+    it('should reuse a valid incoming x-transaction-id', () => {
+      mockReq.headers['x-transaction-id'] = 'caller-trace-1234';
+      requestIdMiddleware.requestIdMiddleware(mockReq, mockRes, mockNext);
+
+      expect(uuid.v4).not.toHaveBeenCalled();
+      expect(mockReq.transactionId).toBe('caller-trace-1234');
+      expect(mockRes.setHeader).toHaveBeenCalledWith('x-transaction-id', 'caller-trace-1234');
+    });
+
+    it.each([
+      ['too short', 'abc'],
+      ['unsafe characters', 'abc12345\nFAKE LOG LINE'],
+      ['too long', 'a'.repeat(129)],
+    ])('should ignore an incoming x-transaction-id that is %s', (_, incomingId) => {
+      mockReq.headers['x-transaction-id'] = incomingId;
+      requestIdMiddleware.requestIdMiddleware(mockReq, mockRes, mockNext);
+
+      expect(mockReq.transactionId).toBe('test-uuid');
+    });
+
     it('should set user in async context if req.user exists', () => {
       mockReq.user = { id: 1 };
       requestIdMiddleware.requestIdMiddleware(mockReq, mockRes, mockNext);

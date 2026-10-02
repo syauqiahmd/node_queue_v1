@@ -190,14 +190,37 @@ pm2 save
 
 ### Log Rotation Settings
 
-```bash
-pm2 install pm2-logrotate
-pm2 set pm2-logrotate:max_size 10M
-pm2 set pm2-logrotate:retain 14
-pm2 set pm2-logrotate:compress true
-pm2 set pm2-logrotate:dateFormat YYYY-MM-DD_HH-mm-ss
-pm2 set pm2-logrotate:rotateInterval '0 0 * * *'   # daily
-pm2 restart pm2-logrotate
+Both log sources keep the **last 30 days**. This uses the system `logrotate` (already run daily by
+`logrotate.timer`) and cron instead of the `pm2-logrotate` module, which would be one more Node
+process on a 2 GB box.
+
+**PM2 stdout/stderr** (`~/.pm2/logs`) - `/etc/logrotate.d/pm2-<user>`:
+
+```
+/home/<user>/.pm2/logs/*.log {
+    su <user> <user>
+    daily
+    rotate 30
+    maxage 30
+    dateext
+    dateformat -%Y-%m-%d
+    compress
+    delaycompress
+    copytruncate   # PM2 keeps the file open, so copy then truncate instead of moving it
+    missingok
+    notifempty
+}
+```
+
+Check it with `sudo logrotate -d /etc/logrotate.d/pm2-<user>` (dry run).
+
+**App log files** (`<app>/logs/{error,warn,info,debug}`) - winston deletes files older than 30 days
+itself (`maxFiles` in `log.helper.js`), but that only covers files tracked by the process that
+created them, and the API, cron and websocket processes share these folders. A daily cron job is
+the reliable backstop (`crontab -e`):
+
+```
+15 3 * * * find /home/<user>/sites/node_queue_v1/logs -type f \( -name "*.log" -o -name "*.log.gz" \) -mtime +30 -delete  # node_queue: keep 30 days of app logs
 ```
 
 ## 4. Nginx Configuration

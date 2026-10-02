@@ -1,13 +1,21 @@
 const { v4: uuidv4 } = require('uuid');
 const asyncContext = require('../../infra/utils/asyncContext');
 
+// Accept a caller-supplied ID (e.g. from a service-to-service caller) so one request can be
+// followed across systems. Restricted to safe characters so it can't inject into logs.
+const VALID_TRANSACTION_ID = /^[A-Za-z0-9._:-]{8,128}$/;
+
 class RequestIdMiddleware {
   constructor({ asyncContext }) {
     this.asyncLocalStorage = asyncContext.asyncLocalStorage;
   }
 
   requestIdMiddleware = (req, res, next) => {
-    const transactionId = uuidv4();
+    const incomingId = req.headers['x-transaction-id'];
+    const transactionId =
+      typeof incomingId === 'string' && VALID_TRANSACTION_ID.test(incomingId)
+        ? incomingId
+        : uuidv4();
     req.transactionId = transactionId;
     req.headers['x-transaction-id'] = transactionId;
 

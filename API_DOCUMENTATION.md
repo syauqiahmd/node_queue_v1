@@ -4,6 +4,28 @@ This document provides a static overview of the API endpoints available in the N
 
 ---
 
+### Health (`/health`)
+
+#### `GET /health`
+
+- **Summary:** Readiness probe for uptime monitors. Checks the database and Redis (2s timeout each). No authentication, not rate limited.
+- **Responses:**
+  - `200 OK`: all dependencies are up.
+    ```json
+    {
+      "success": true,
+      "data": {
+        "status": "ok",
+        "checks": { "database": "up", "redis": "up" },
+        "uptimeSeconds": 3600
+      },
+      "transactionId": "..."
+    }
+    ```
+  - `503 Service Unavailable`: one or more dependencies are down. Same shape with `"success": false`, `"status": "degraded"`, and the failing check set to `"down"`.
+
+---
+
 ### Public Routes (`/public`)
 
 These endpoints are accessible without authentication. Two lightweight anti-abuse checks apply to write requests (`POST`/`PUT`/`PATCH`/`DELETE`) on this surface only - `GET` requests are unaffected by either:
