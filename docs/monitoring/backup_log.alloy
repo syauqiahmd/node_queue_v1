@@ -1,0 +1,17 @@
+
+// ---- DB backup run log (scripts/backupDb.js via cron) ------------------------------
+// Exact path, no glob: Alloy only has traverse (x) on the folder, which also holds the
+// database dumps, plus read on this one file.
+local.file_match "db_backup" {
+  path_targets = [{
+    "__path__" = "/home/syauqiahmd/backups/node_queue/backup.log",
+    "job"      = "backup",
+  }]
+  sync_period = "60s"
+}
+
+loki.source.file "db_backup" {
+  targets       = local.file_match.db_backup.targets
+  forward_to    = [loki.process.redact.receiver]
+  tail_from_end = false
+}

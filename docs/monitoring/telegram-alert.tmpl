@@ -1,0 +1,30 @@
+{{ define "qms.logs_url" -}}
+{{- $q := .Annotations.logs_query | reReplaceAll `\\` `\\` | reReplaceAll `"` `\"` -}}
+{{- $to := "now" -}}{{- if eq .Status "resolved" }}{{ $to = printf "%d" (.EndsAt.Add 300000000000).UnixMilli }}{{ end -}}
+https://goldbobcat1333.grafana.net/explore?schemaVersion=1&amp;orgId=1&amp;panes={{ printf `{"a":{"datasource":"grafanacloud-logs","queries":[{"refId":"A","expr":"%s","queryType":"range","datasource":{"type":"loki","uid":"grafanacloud-logs"},"editorMode":"code"}],"range":{"from":"%d","to":"%s"}}}` $q (.StartsAt.Add -900000000000).UnixMilli $to | urlquery }}
+{{- end }}
+
+{{ define "qms.telegram.alert" }}
+{{- if eq .Status "firing" -}}
+{{ if eq .Labels.severity "critical" }}🔴{{ else if eq .Labels.severity "warning" }}🟠{{ else }}🔵{{ end }} <b>{{ .Labels.alertname | reReplaceAll "&" "&amp;" | reReplaceAll "<" "&lt;" | reReplaceAll ">" "&gt;" }}</b>{{ with .Labels.groupname }} · <code>{{ . }}</code>{{ end }}
+{{ with .Annotations.summary }}📝 {{ . | reReplaceAll "&" "&amp;" | reReplaceAll "<" "&lt;" | reReplaceAll ">" "&gt;" }}
+{{ end }}{{ with .Annotations.action }}💡 {{ . | reReplaceAll "&" "&amp;" | reReplaceAll "<" "&lt;" | reReplaceAll ">" "&gt;" }}
+{{ end }}🕒 Since {{ .StartsAt | tz "Asia/Makassar" | date "02 Jan 15:04" }} WITA{{ with .Labels.severity }} · {{ . | toUpper }}{{ end }}
+{{- else -}}
+🟢 <b>{{ .Labels.alertname | reReplaceAll "&" "&amp;" | reReplaceAll "<" "&lt;" | reReplaceAll ">" "&gt;" }}</b>{{ with .Labels.groupname }} · <code>{{ . }}</code>{{ end }} — back to normal
+🕒 {{ .StartsAt | tz "Asia/Makassar" | date "15:04" }} → {{ .EndsAt | tz "Asia/Makassar" | date "15:04" }} WITA{{ if eq .Annotations.grafana_state_reason "RuleDeleted" }} · rule removed{{ end }}
+{{- end }}
+🔗 {{ if .Annotations.logs_query }}📜 <a href="{{ template "qms.logs_url" . }}">Logs</a> · {{ end }}<a href="{{ .GeneratorURL | reReplaceAll "&" "&amp;" }}">Grafana</a>{{ if eq .Status "firing" }} · <a href="{{ .SilenceURL | reReplaceAll "&" "&amp;" }}">Silence</a>{{ end }}{{ with .Annotations.runbook_url }} · <a href="{{ . | reReplaceAll "&" "&amp;" }}">Runbook</a>{{ end }}
+{{ end }}
+
+{{ define "qms.telegram.message" }}
+{{- if .Alerts.Firing -}}
+🚨 <b>QMS · {{ len .Alerts.Firing }} alert{{ if gt (len .Alerts.Firing) 1 }}s{{ end }} firing</b>
+{{ range .Alerts.Firing }}
+{{ template "qms.telegram.alert" . }}{{ end }}{{ end }}
+{{- if .Alerts.Resolved }}{{ if .Alerts.Firing }}
+{{ end -}}
+✅ <b>QMS · {{ len .Alerts.Resolved }} resolved</b>
+{{ range .Alerts.Resolved }}
+{{ template "qms.telegram.alert" . }}{{ end }}{{ end }}
+{{- end }}
