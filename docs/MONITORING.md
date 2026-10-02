@@ -10,6 +10,9 @@ the queries to build dashboards and alerts from.
 | Source | What | How it gets to Grafana | Query with |
 | --- | --- | --- | --- |
 | Host (`qms-vps`) | CPU, memory, disk, network | Alloy `prometheus.exporter.unix` | `{job="integrations/node_exporter"}` (metrics) |
+| PostgreSQL | Up, connections by state, database size, transactions, deadlocks, cache hits, locks | Alloy `prometheus.exporter.postgres` (read-only `grafana_monitor` role) | `pg_*` |
+| Redis | Up, memory, clients, hits/misses, evictions, commands/s | Alloy `prometheus.exporter.redis` | `redis_*` |
+| DB backups | Last success time, size, S3 upload — see [BACKUP.md](./BACKUP.md) | `scripts/backupDb.js` writes a textfile Alloy reads | `node_queue_db_backup_*` |
 | Processes | CPU, memory, restarts per service: `node-queue-api`, `node-queue-cron`, `node-queue-websocket`, `qms-mpp-ui`, `pm2-daemon`, `postgres`, `redis-server`, `nginx`, `alloy` | Alloy `prometheus.exporter.process` | `namedprocess_namegroup_*{groupname="..."}` |
 | App logs | winston JSON from all 3 services (`error`, `warn`, `info`; `debug` is not shipped) | Alloy tails `logs/{error,warn,info}/*.log` | `{job="node_queue", service="node-queue-api"}` |
 | PM2 stderr | Crashes before the logger starts, raw stack traces | Alloy tails `~/.pm2/logs/node-queue-*-error-*.log` | `{job="pm2", service="..."}` |
@@ -59,7 +62,8 @@ Alloy runs as the `alloy` systemd service (apt package from `apt.grafana.com`).
 | File | Purpose |
 | --- | --- |
 | `/etc/alloy/config.alloy` | Grafana-generated blocks (remote_write, loki.write, alloy self-check) + [`monitoring/node-exporter.alloy`](./monitoring/node-exporter.alloy) + [`monitoring/node_queue_observability.alloy`](./monitoring/node_queue_observability.alloy) |
-| `/etc/default/alloy` | `GCLOUD_RW_API_KEY=...` (root only, `600`) |
+| `/etc/default/alloy` | `GCLOUD_RW_API_KEY=...`, `POSTGRES_MONITOR_DSN=...` (root only, `600`) |
+| [`monitoring/db_exporters.alloy`](./monitoring/db_exporters.alloy) | Postgres + Redis collectors (appended to `config.alloy`) |
 | `/etc/nginx/conf.d/observability_log.conf` | JSON access log, see [`monitoring/nginx-observability_log.conf`](./monitoring/nginx-observability_log.conf) |
 
 File access for the `alloy` user is granted with ACLs, not group membership, so it can read the log
@@ -83,7 +87,16 @@ curl -s localhost:12345/metrics | grep -E "^loki_write_sent_entries_total|sample
 ```
 
 Alloy's UI is on `127.0.0.1:12345` only (use `ssh -L 12345:localhost:12345` to view it).
-Resource use: ~220 MB RSS, ~400 metric series.
+Resource use: ~235 MB RSS, ~1,500 metric series.
+
+Postgres monitoring role (statistics only — `SELECT` on app tables is denied):
+
+```sql
+CREATE ROLE grafana_monitor LOGIN PASSWORD '<random>' CONNECTION LIMIT 3;
+GRANT pg_monitor TO grafana_monitor;
+```
+
+`POSTGRES_MONITOR_DSN=postgresql://grafana_monitor:<password>@127.0.0.1:5432/qms_prod?sslmode=disable`
 
 ---
 
@@ -156,6 +169,36 @@ node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes
 
 # Root disk used (fraction)
 1 - node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}
+
+# Hours since the last successful DB backup
+(time() - node_queue_db_backup_last_success_timestamp_seconds) / 3600
+
+# Postgres / Redis up
+pg_up
+redis_up
+
+# Postgres connections by state (max_connections is 100 by default)
+sum by (state) (pg_stat_activity_count{datname="qms_prod"})
+
+# Postgres longest running transaction (seconds)
+max(pg_stat_activity_max_tx_duration{datname="qms_prod"})
+
+# Postgres deadlocks
+increase(pg_stat_database_deadlocks{datname="qms_prod"}[1h])
+
+# Redis memory used (MB) and evictions
+redis_memory_used_bytes / 1024 / 1024
+rate(redis_evicted_keys_total[5m])
+
+# TLS certificate days left (from Synthetic Monitoring checks)
+(probe_ssl_earliest_cert_expiry - time()) / 86400
+```
+
+External services (S3, Google Text-to-Speech) have no metrics of their own; their failures are
+logged by the API:
+
+```logql
+sum(count_over_time({job="node_queue", level="error"} |~ "(?i)s3|text.?to.?speech|tts" [15m]))
 ```
 
 ### Suggested alerts
@@ -168,4 +211,10 @@ node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes
 | API 5xx | 5xx count `> 5` in 5m | 5m |
 | Daily stats cron missed | cron query `== 0` | — (evaluate hourly) |
 | Low memory | available `< 0.15` | 10m |
+| DB backup missed | hours since last backup `> 26` | — |
+| DB backup failed | `node_queue_db_backup_success == 0` | 0m |
+| Postgres / Redis down | `pg_up == 0` / `redis_up == 0` | 2m |
+| Long transaction | longest transaction `> 300` s | 5m |
+| TLS certificate expiring | days left `< 14` | 1h |
+| S3 / TTS failing | external-service error count `> 3` in 15m | 0m |
 | Disk filling | used `> 0.8` | 30m |
