@@ -107,7 +107,7 @@ describe('BroadcastService', () => {
       broadcastService.emit(eventName, data, rooms);
 
       expect(mockLogger.error).toHaveBeenCalledWith('Error during broadcasting event', {
-        error: error.message,
+        error,
         eventName,
       });
     });

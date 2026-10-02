@@ -301,3 +301,5 @@ All errors follow the same envelope, `success: false`:
 | `INTERNAL_SERVER_ERROR` | 500    | Unexpected server error                         |
 
 `transactionId` is safe to include when reporting an issue — it correlates to this app's server-side logs.
+
+To trace a request across both systems, send your own correlation ID in an `X-Transaction-Id` request header (8–128 characters: letters, digits, `.`, `_`, `:`, `-`). It is then used as the `transactionId` in the response and in this app's logs. If the header is missing or invalid, a new ID is generated as before.

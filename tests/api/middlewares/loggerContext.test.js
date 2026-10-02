@@ -39,6 +39,16 @@ describe('LoggerContextMiddleware', () => {
   });
 
   describe('loggerContext', () => {
+    it('should drop the query string from the path so filters with personal data are not logged', () => {
+      mockReq.originalUrl = '/api/v1/visitors?phoneNumber=081234567890&email=a@b.co';
+      loggerContextMiddleware.loggerContext(mockReq, mockRes, mockNext);
+
+      expect(mockStore.set).toHaveBeenCalledWith(
+        'requestContext',
+        expect.objectContaining({ path: '/api/v1/visitors' })
+      );
+    });
+
     it('should set request context in store if store exists', () => {
       loggerContextMiddleware.loggerContext(mockReq, mockRes, mockNext);
 

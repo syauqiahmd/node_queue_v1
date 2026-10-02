@@ -55,4 +55,33 @@ describe('PublicRateLimiterMiddleware', () => {
       expect(mockNext).toHaveBeenCalled();
     });
   });
+
+  describe('handler', () => {
+    it('logs the blocked request and sends the configured 429 response', () => {
+      const mockLogger = { warn: jest.fn() };
+      rateLimit.mockClear();
+      new PublicRateLimiterMiddleware({ logger: mockLogger });
+      const { handler, message } = rateLimit.mock.calls[0][0];
+      const req = { method: 'POST', originalUrl: '/api/v1/x?y=1', ip: '1.2.3.4' };
+      const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+
+      handler(req, res, jest.fn(), { statusCode: 429, message });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith('Rate limit exceeded', {
+        context: 'RateLimiter',
+        limiter: 'public',
+        method: 'POST',
+        path: '/api/v1/x',
+        ip: '1.2.3.4',
+      });
+      expect(res.status).toHaveBeenCalledWith(429);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        error: {
+          code: 'TOO_MANY_REQUESTS',
+          message: 'Too many requests. Please try again later.',
+        },
+      });
+    });
+  });
 });

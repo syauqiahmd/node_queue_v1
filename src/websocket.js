@@ -1,8 +1,14 @@
+// Identifies this process in logs; the API, cron and websocket services share log files.
+process.env.SERVICE_NAME ??= 'node-queue-websocket';
 require('dotenv').config();
 const WebSocketServer = require('./infra/webSocket/WebSocketServer');
 const WebSocketGateway = require('./infra/webSocket/WebSocketGateway');
 const MessageBroker = require('./infra/messageBroker/MessageBroker');
 const logger = require('./infra/utils/log.helper');
+const { registerProcessHandlers } = require('./infra/lifecycle/processHandlers');
+
+// Signals are handled by shutdown() below; this only adds crash logging.
+registerProcessHandlers({ logger, name: 'websocket' });
 
 const webSocketGateway = new WebSocketGateway();
 const messageBroker = new MessageBroker({
@@ -11,7 +17,10 @@ const messageBroker = new MessageBroker({
   password: process.env.REDIS_PASSWORD,
 });
 
-const webSocketServer = new WebSocketServer(process.env.WEBSOCKET_PORT, webSocketGateway);
+const webSocketServer = new WebSocketServer(process.env.WEBSOCKET_PORT, webSocketGateway, {
+  // Events reach this service through Redis pub/sub, so it is only useful while subscribed.
+  getChecks: () => ({ redis: messageBroker.subscriber.isReady ? 'up' : 'down' }),
+});
 webSocketGateway.webSocketServer = webSocketServer;
 
 messageBroker.subscribe('websocket', ({ event, data }) => {

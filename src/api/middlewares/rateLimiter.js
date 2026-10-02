@@ -1,7 +1,8 @@
 const rateLimit = require('express-rate-limit');
 
 class RateLimiterMiddleware {
-  constructor() {
+  constructor({ logger } = {}) {
+    this.logger = logger;
     this.limiter = rateLimit({
       windowMs: (process.env.RATE_LIMIT_WINDOW || 1) * 60 * 1000, // 15 minutes
       max: process.env.RATE_LIMIT_MAX || 1, // per IP
@@ -13,6 +14,18 @@ class RateLimiterMiddleware {
           code: 'TOO_MANY_REQUESTS',
           message: 'Too many requests. Please try again later.',
         },
+      },
+      // Same response as express-rate-limit's default handler, plus a log line so blocked
+      // requests are visible.
+      handler: (req, res, next, options) => {
+        this.logger?.warn('Rate limit exceeded', {
+          context: 'RateLimiter',
+          limiter: 'global',
+          method: req.method,
+          path: req.originalUrl.split('?')[0],
+          ip: req.ip,
+        });
+        res.status(options.statusCode).send(options.message);
       },
     });
   }

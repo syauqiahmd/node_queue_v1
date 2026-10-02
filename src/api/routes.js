@@ -12,6 +12,7 @@ module.exports = ({
   visitorController,
   visitorHistoryController,
   privateController,
+  healthController,
   validateMiddleware,
   counterSchema,
   organizationSchema,
@@ -28,6 +29,35 @@ module.exports = ({
   originCheck,
 }) => {
   const router = Router();
+
+  /**
+   * GET /health
+   * @summary Liveness/readiness probe for uptime monitors (checks database and Redis)
+   * @tags #Health
+   * @returns {object} 200 - All dependencies are up
+   * @returns {object} 503 - One or more dependencies are down
+   * @example response - 200 - Healthy
+   * {
+   *   "success": true,
+   *   "data": {
+   *     "status": "ok",
+   *     "checks": { "database": "up", "redis": "up" },
+   *     "uptimeSeconds": 3600
+   *   },
+   *   "transactionId": "3f1c..."
+   * }
+   * @example response - 503 - Degraded
+   * {
+   *   "success": false,
+   *   "data": {
+   *     "status": "degraded",
+   *     "checks": { "database": "up", "redis": "down" },
+   *     "uptimeSeconds": 3600
+   *   },
+   *   "transactionId": "3f1c..."
+   * }
+   */
+  router.get('/health', healthController.check);
 
   // Public routes
   const publicRoutes = require('./routes/publicRoutes')({

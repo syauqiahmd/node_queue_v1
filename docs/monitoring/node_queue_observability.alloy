@@ -1,0 +1,165 @@
+
+// ===================================================================================
+// node_queue observability: per-process metrics + logs. Managed by hand, documented in
+// docs/MONITORING.md of the node_queue repo. Forwards to the remote_write / loki.write
+// blocks defined at the top of this file.
+// ===================================================================================
+
+// ---- Per-process CPU / memory / restarts ------------------------------------------
+prometheus.exporter.process "node_queue" {
+  track_children = false
+
+  matcher {
+    name    = "node-queue-api"
+    cmdline = [`node_queue_v1/src/server\.js`]
+  }
+  matcher {
+    name    = "node-queue-cron"
+    cmdline = [`node_queue_v1/src/jobs/cron\.js`]
+  }
+  matcher {
+    name    = "node-queue-websocket"
+    cmdline = [`node_queue_v1/src/websocket\.js`]
+  }
+  matcher {
+    name    = "qms-mpp-ui"
+    cmdline = [`pm2/lib/API/Serve\.js`]
+  }
+  matcher {
+    name    = "pm2-daemon"
+    cmdline = [`^PM2 v.*God Daemon`]
+  }
+  matcher {
+    name = "{{.Comm}}"
+    comm = ["postgres", "redis-server", "nginx", "alloy"]
+  }
+}
+
+discovery.relabel "node_queue_processes" {
+  targets = prometheus.exporter.process.node_queue.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+  rule {
+    target_label = "job"
+    replacement  = "integrations/process_exporter"
+  }
+}
+
+prometheus.scrape "node_queue_processes" {
+  targets         = discovery.relabel.node_queue_processes.output
+  forward_to      = [prometheus.remote_write.metrics_service.receiver]
+  scrape_interval = "60s"
+}
+
+// ---- App logs (winston JSON; debug level is not shipped) --------------------------
+local.file_match "node_queue_app" {
+  path_targets = [{
+    "__path__" = "/home/syauqiahmd/sites/node_queue_v1/logs/{error,warn,info}/*.log",
+    "job"      = "node_queue",
+  }]
+  sync_period = "30s"
+}
+
+loki.source.file "node_queue_app" {
+  targets       = local.file_match.node_queue_app.targets
+  forward_to    = [loki.process.node_queue_app.receiver]
+  tail_from_end = true
+}
+
+loki.process "node_queue_app" {
+  forward_to = [loki.process.redact.receiver]
+
+  stage.json {
+    expressions = { level = "level", service = "service", ts = "timestamp" }
+  }
+  stage.timestamp {
+    source = "ts"
+    format = "RFC3339"
+  }
+  stage.labels {
+    values = { level = "", service = "" }
+  }
+}
+
+// ---- PM2 stderr (crashes before the logger starts, unhandled errors) --------------
+local.file_match "pm2_stderr" {
+  path_targets = [{
+    "__path__" = "/home/syauqiahmd/.pm2/logs/node-queue-*-error-*.log",
+    "job"      = "pm2",
+    "stream"   = "stderr",
+  }]
+  sync_period = "30s"
+}
+
+discovery.relabel "pm2_stderr" {
+  targets = local.file_match.pm2_stderr.targets
+
+  rule {
+    source_labels = ["__path__"]
+    regex         = `.*/(node-queue-[a-z]+)-error-[0-9]+\.log`
+    target_label  = "service"
+  }
+}
+
+loki.source.file "pm2_stderr" {
+  targets       = discovery.relabel.pm2_stderr.output
+  forward_to    = [loki.process.redact.receiver]
+  tail_from_end = true
+}
+
+// ---- nginx (JSON access log for all 3 domains + error log) ------------------------
+local.file_match "nginx" {
+  path_targets = [
+    { "__path__" = "/var/log/nginx/access.json.log", "job" = "nginx", "stream" = "access" },
+    { "__path__" = "/var/log/nginx/error.log", "job" = "nginx", "stream" = "error" },
+  ]
+  sync_period = "30s"
+}
+
+loki.source.file "nginx" {
+  targets       = local.file_match.nginx.targets
+  forward_to    = [loki.process.redact.receiver]
+  tail_from_end = true
+}
+
+// ---- Redaction: last step before anything leaves the server ------------------------
+// Defense in depth on top of the app-side masking (src/infra/utils/redact.js), and the
+// only masking for logs written by code deployed before that existed.
+loki.process "redact" {
+  forward_to = [loki.write.grafana_cloud_loki.receiver]
+
+  // Query strings can carry search filters (?phoneNumber=...): drop them.
+  stage.replace {
+    expression = `"path":"[^"?]*(\?[^"]*)"`
+    replace    = ""
+  }
+  stage.replace {
+    expression = `(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) [^ ?"]*(\?[^ "]*)`
+    replace    = ""
+  }
+  stage.replace {
+    expression = `referrer: "[^"?]*(\?[^"]*)"`
+    replace    = ""
+  }
+  // JWTs / bearer tokens
+  stage.replace {
+    expression = `(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)`
+    replace    = "[REDACTED]"
+  }
+  // Emails
+  stage.replace {
+    expression = `([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})`
+    replace    = "[EMAIL]"
+  }
+  // Indonesian mobile numbers (+628..., 628..., 08...), not when part of a longer ID
+  stage.replace {
+    expression = `(?:^|[^0-9A-Za-z_+-])((?:\+62|62|0)8[0-9]{7,11})(?:[^0-9A-Za-z_-]|$)`
+    replace    = "[PHONE]"
+  }
+  stage.static_labels {
+    values = { host = "qms-vps" }
+  }
+}

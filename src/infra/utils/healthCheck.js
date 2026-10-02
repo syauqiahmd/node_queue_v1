@@ -75,6 +75,38 @@ class HealthCheck {
     }
   }
 
+  // Runtime readiness probe used by GET /health. Unlike runChecks() it never exits the
+  // process, and it skips S3 so an external outage there doesn't mark the API as down.
+  async getStatus(timeoutMs = 2000) {
+    const withTimeout = (promise) =>
+      Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error(`Timed out after ${timeoutMs}ms`)), timeoutMs).unref();
+        }),
+      ]);
+
+    const probe = async (name, check) => {
+      try {
+        await withTimeout(check());
+        return 'up';
+      } catch (error) {
+        this.logger.warn(`Health check failed: ${name}`, { context: 'HealthCheck', error });
+        return 'down';
+      }
+    };
+
+    const [database, redis] = await Promise.all([
+      probe('database', () => this.prisma.$queryRaw`SELECT 1`),
+      probe('redis', () => this.redisClient.ping()),
+    ]);
+
+    return {
+      healthy: database === 'up' && redis === 'up',
+      checks: { database, redis },
+    };
+  }
+
   async runChecks() {
     this.logger.info('Running infrastructure health checks...', { context: 'StartupCheck' });
     const dbOk = await this.checkDbConnection();

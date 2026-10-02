@@ -14,6 +14,7 @@ describe('ErrorHandlerMiddleware', () => {
   beforeEach(() => {
     mockLogger = {
       error: jest.fn(),
+      warn: jest.fn(),
     };
 
     mockResponseFormatter = {
@@ -48,7 +49,12 @@ describe('ErrorHandlerMiddleware', () => {
       });
       errorHandlerMiddleware.errorHandler(err, mockReq, mockRes, mockNext);
 
-      expect(mockLogger.error).toHaveBeenCalledWith('ErrorHandler:', err);
+      expect(mockLogger.warn).toHaveBeenCalledWith('ErrorHandler: CUSTOM_CODE - Custom error', {
+        statusCode: 418,
+        errorCode: 'CUSTOM_CODE',
+        fields: null,
+      });
+      expect(mockLogger.error).not.toHaveBeenCalled();
       expect(mockResponseFormatter.errorResponse).toHaveBeenCalledWith(mockRes, {
         message: 'Custom error',
         code: 'CUSTOM_CODE',
@@ -219,6 +225,12 @@ describe('ErrorHandlerMiddleware', () => {
     it('should handle generic Error', () => {
       const err = new Error('Generic error');
       errorHandlerMiddleware.errorHandler(err, mockReq, mockRes, mockNext);
+
+      expect(mockLogger.error).toHaveBeenCalledWith('ErrorHandler: Generic error', {
+        error: err,
+        statusCode: 500,
+      });
+      expect(mockLogger.warn).not.toHaveBeenCalled();
 
       expect(mockResponseFormatter.errorResponse).toHaveBeenCalledWith(mockRes, {
         message: 'Something went wrong',
