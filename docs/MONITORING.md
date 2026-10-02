@@ -13,6 +13,7 @@ the queries to build dashboards and alerts from.
 | PostgreSQL | Up, connections by state, database size, transactions, deadlocks, cache hits, locks | Alloy `prometheus.exporter.postgres` (read-only `grafana_monitor` role) | `pg_*` |
 | Redis | Up, memory, clients, hits/misses, evictions, commands/s | Alloy `prometheus.exporter.redis` | `redis_*` |
 | DB backup log | Each backup run's output (`~/backups/node_queue/backup.log`) | Alloy, exact-path file (ACL: traverse on the folder, read on this file only — not the dumps); config in [`monitoring/backup_log.alloy`](./monitoring/backup_log.alloy) | `{job="backup"}` |
+| TLS certificates | Expiry of the certificate nginx serves for each domain | `/usr/local/bin/node-queue-tls-metric` (hourly cron, [`monitoring/node-queue-tls-metric.sh`](./monitoring/node-queue-tls-metric.sh)) writes a textfile Alloy reads | `node_queue_tls_cert_expiry_timestamp_seconds` |
 | DB backups | Last success time, size, S3 upload — see [BACKUP.md](./BACKUP.md) | `scripts/backupDb.js` writes a textfile Alloy reads | `node_queue_db_backup_*` |
 | Processes | CPU, memory, restarts per service: `node-queue-api`, `node-queue-cron`, `node-queue-websocket`, `qms-mpp-ui`, `pm2-daemon`, `postgres`, `redis-server`, `nginx`, `alloy` | Alloy `prometheus.exporter.process` | `namedprocess_namegroup_*{groupname="..."}` |
 | App logs | winston JSON from all 3 services (`error`, `warn`, `info`; `debug` is not shipped) | Alloy tails `logs/{error,warn,info}/*.log` | `{job="node_queue", service="node-queue-api"}` |
@@ -226,6 +227,7 @@ Notification templates `qms-telegram`; contact point message
 | DB backup failed | `node_queue_db_backup_success == 0` | 0m |
 | Postgres / Redis down | `pg_up == 0` / `redis_up == 0` | 2m |
 | Long transaction | longest transaction `> 300` s | 5m |
-| TLS certificate expiring | days left `< 14` | 1h |
+| TLS certificate expiring | `min by (domain) ((node_queue_tls_cert_expiry_timestamp_seconds - time()) / 86400)` `< 14` | 1h |
+| Site down (external check) | Synthetics success ratio over 10 min `< 0.5` (one multi-HTTP check: API `/health`, websocket `/health`, UI; Singapore + Calgary) | 0m |
 | S3 / TTS failing | external-service error count `> 3` in 15m | 0m |
 | Disk filling | used `> 0.8` | 30m |
