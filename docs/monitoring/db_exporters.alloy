@@ -1,0 +1,49 @@
+
+// ---- PostgreSQL (read-only grafana_monitor role with pg_monitor) ------------------
+prometheus.exporter.postgres "node_queue" {
+  data_source_names        = [sys.env("POSTGRES_MONITOR_DSN")]
+  disable_settings_metrics = true
+}
+
+discovery.relabel "postgres" {
+  targets = prometheus.exporter.postgres.node_queue.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+  rule {
+    target_label = "job"
+    replacement  = "integrations/postgres_exporter"
+  }
+}
+
+prometheus.scrape "postgres" {
+  targets         = discovery.relabel.postgres.output
+  forward_to      = [prometheus.remote_write.metrics_service.receiver]
+  scrape_interval = "60s"
+}
+
+// ---- Redis (localhost only, no password) -------------------------------------------
+prometheus.exporter.redis "node_queue" {
+  redis_addr = "127.0.0.1:6379"
+}
+
+discovery.relabel "redis" {
+  targets = prometheus.exporter.redis.node_queue.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+  rule {
+    target_label = "job"
+    replacement  = "integrations/redis_exporter"
+  }
+}
+
+prometheus.scrape "redis" {
+  targets         = discovery.relabel.redis.output
+  forward_to      = [prometheus.remote_write.metrics_service.receiver]
+  scrape_interval = "60s"
+}
