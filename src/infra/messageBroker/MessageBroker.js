@@ -14,6 +14,9 @@ class MessageBroker {
     });
     this.subscriber.on('error', (err) => {
       logger.error('Redis subscriber error', { error: err, context: 'MessageBroker' });
+      if (this._closing) {
+        return;
+      }
       Promise.resolve()
         .then(() => this.ensureSubscriber())
         .then(() => this.resubscribeAll())
@@ -37,6 +40,9 @@ class MessageBroker {
     });
     this.subscriber.on('end', () => {
       logger.warn('Redis subscriber connection ended', { context: 'MessageBroker' });
+      if (this._closing) {
+        return;
+      }
       Promise.resolve()
         .then(() => this.ensureSubscriber())
         .then(() => this.resubscribeAll())
@@ -47,6 +53,7 @@ class MessageBroker {
     this.handlers = new Map();
     this._connectingPub = false;
     this._connectingSub = false;
+    this._closing = false;
   }
 
   async ensurePublisher() {
@@ -143,18 +150,22 @@ class MessageBroker {
         );
     }
   }
-  close() {
+  async close() {
+    this._closing = true;
+    await Promise.all([this._quit(this.subscriber), this._quit(this.publisher)]);
+    logger.info('MessageBroker closed', { context: 'MessageBroker' });
+  }
+
+  async _quit(client) {
+    if (!client.isOpen) {
+      return;
+    }
     try {
-      this.subscriber.unsubscribe();
-      if (this.publisher.isOpen) {
-        this.publisher.quit();
-      }
-      if (this.subscriber.isOpen) {
-        this.subscriber.quit();
-      }
-      logger.info('MessageBroker closed', { context: 'MessageBroker' });
+      await client.quit();
     } catch (err) {
-      logger.error('Error closing MessageBroker', { error: err, context: 'MessageBroker' });
+      // QUIT fails when Redis already dropped the socket; force-close instead.
+      logger.warn('Redis quit failed, destroying client', { error: err, context: 'MessageBroker' });
+      client.destroy();
     }
   }
 }

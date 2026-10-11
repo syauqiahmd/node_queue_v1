@@ -67,8 +67,18 @@ class RedisClient {
   }
 
   async disconnect() {
-    if (this.client.isOpen) {
+    if (!this.client.isOpen) {
+      return;
+    }
+    try {
       await this.client.quit();
+    } catch (error) {
+      // QUIT fails when Redis already dropped the socket (e.g. Redis restarted during shutdown).
+      this.logger.warn('[REDIS] Graceful quit failed, destroying client', {
+        context: 'Redis Client',
+        error,
+      });
+      this.client.destroy();
     }
   }
 

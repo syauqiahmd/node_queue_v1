@@ -13,7 +13,7 @@ registerProcessHandlers({
   onShutdown: async () => {
     cron.getTasks().forEach((task) => task.stop());
     await container.resolve('prismaClient').$disconnect();
-    container.resolve('messageBroker').close();
+    await container.resolve('messageBroker').close();
   },
 });
 
