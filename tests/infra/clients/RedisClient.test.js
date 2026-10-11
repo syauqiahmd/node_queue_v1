@@ -4,6 +4,7 @@ jest.mock('redis', () => ({
     isOpen: false,
     ping: jest.fn().mockResolvedValue('PONG'),
     quit: jest.fn(),
+    destroy: jest.fn(),
   })),
 }));
 
@@ -50,5 +51,13 @@ describe('RedisClient', () => {
     redisClient.client.isOpen = true;
     await redisClient.disconnect();
     expect(redisClient.client.quit).toHaveBeenCalled();
+  });
+
+  it('disconnect destroys the client when quit fails', async () => {
+    redisClient.client.isOpen = true;
+    redisClient.client.quit.mockRejectedValueOnce(new Error('read ECONNRESET'));
+
+    await expect(redisClient.disconnect()).resolves.toBeUndefined();
+    expect(redisClient.client.destroy).toHaveBeenCalled();
   });
 });

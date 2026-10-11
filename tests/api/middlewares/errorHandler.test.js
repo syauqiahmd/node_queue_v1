@@ -222,6 +222,37 @@ describe('ErrorHandlerMiddleware', () => {
       });
     });
 
+    it('should handle malformed JSON body as 400', () => {
+      const err = new SyntaxError("Expected property name or '}' in JSON at position 1");
+      err.status = 400;
+      err.type = 'entity.parse.failed';
+
+      errorHandlerMiddleware.errorHandler(err, mockReq, mockRes, mockNext);
+
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(mockResponseFormatter.errorResponse).toHaveBeenCalledWith(mockRes, {
+        message: 'Malformed request body',
+        code: 'BAD_REQUEST',
+        statusCode: 400,
+        fields: null,
+      });
+    });
+
+    it('should keep body-parser status for oversized payloads', () => {
+      const err = new Error('request entity too large');
+      err.status = 413;
+      err.type = 'entity.too.large';
+
+      errorHandlerMiddleware.errorHandler(err, mockReq, mockRes, mockNext);
+
+      expect(mockResponseFormatter.errorResponse).toHaveBeenCalledWith(mockRes, {
+        message: 'request entity too large',
+        code: 'BAD_REQUEST',
+        statusCode: 413,
+        fields: null,
+      });
+    });
+
     it('should handle generic Error', () => {
       const err = new Error('Generic error');
       errorHandlerMiddleware.errorHandler(err, mockReq, mockRes, mockNext);

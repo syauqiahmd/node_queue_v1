@@ -38,6 +38,17 @@ class ErrorHandlerMiddleware {
     return { code, message, statusCode };
   }
 
+  // body-parser errors (malformed JSON, payload too large, ...) carry a 4xx `status`.
+  isBodyParserError(err) {
+    return typeof err.type === 'string' && err.type.startsWith('entity.') && err.status < 500;
+  }
+
+  generateBodyParserErrorMessage(err) {
+    const message =
+      err.type === 'entity.parse.failed' ? 'Malformed request body' : err.message || 'Bad request';
+    return { code: 'BAD_REQUEST', message, statusCode: err.status };
+  }
+
   errorHandler = (err, req, res, _next) => {
     if (!err) {
       return _next();
@@ -71,6 +82,8 @@ class ErrorHandlerMiddleware {
       message = err.message || 'Business logic error';
       statusCode = err.statusCode || 400;
       fields = err.fields || null;
+    } else if (this.isBodyParserError(err)) {
+      ({ code, message, statusCode } = this.generateBodyParserErrorMessage(err));
     }
 
     // Log once per error: client errors (4xx) are warnings, only server errors (5xx) are errors.

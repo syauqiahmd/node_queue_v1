@@ -27,11 +27,11 @@ messageBroker.subscribe('websocket', ({ event, data }) => {
   webSocketGateway.broadcast(event, data);
 });
 
-const shutdown = () => {
+const shutdown = async () => {
   try {
     webSocketServer.server.close();
     if (typeof messageBroker.close === 'function') {
-      messageBroker.close();
+      await messageBroker.close();
     }
   } catch (err) {
     logger.error('Error during websocket shutdown', { error: err, context: 'WebSocketService' });

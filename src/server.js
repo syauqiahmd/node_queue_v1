@@ -23,7 +23,7 @@ registerProcessHandlers({
     await new Promise((resolve) => server.close(() => resolve()));
     await container.resolve('prismaClient').$disconnect();
     await redisClient.disconnect();
-    container.resolve('messageBroker').close();
+    await container.resolve('messageBroker').close();
   },
 });
 
