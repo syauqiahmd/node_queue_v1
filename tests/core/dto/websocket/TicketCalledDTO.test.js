@@ -4,6 +4,7 @@ const baseTicket = {
   id: 'ticket-1',
   prefix: 'A',
   queueNumber: 123,
+  serviceId: 'service-1',
   service: {
     name: 'Service A',
     organization: { name: 'Org A' },
@@ -20,6 +21,7 @@ describe('toTicketCalledDTO', () => {
       id: 'ticket-1',
       queueNumber: 'A-123',
       prefix: 'A',
+      serviceId: 'service-1',
       serviceName: 'Service A',
       counterNumber: 5,
       calledBy: 5,

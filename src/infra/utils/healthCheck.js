@@ -118,13 +118,12 @@ class HealthCheck {
         context: 'StartupCheck',
       });
       return true;
-    } else {
-      this.logger.error(
-        'One or more critical infrastructure services failed to connect. Exiting application.',
-        { context: 'StartupCheck' }
-      );
-      process.exit(1);
     }
+    this.logger.error(
+      'One or more critical infrastructure services failed to connect. Exiting application.',
+      { context: 'StartupCheck' }
+    );
+    process.exit(1);
   }
 }
 

@@ -49,55 +49,74 @@ class ErrorHandlerMiddleware {
     return { code: 'BAD_REQUEST', message, statusCode: err.status };
   }
 
+  // Maps any error to the API error shape. Unknown errors are 500s.
+  classifyError(err) {
+    // Prisma known errors
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      return { ...this.generatePrismaErrorMessage(err), fields: null };
+    }
+    if (err instanceof Prisma.PrismaClientValidationError) {
+      return {
+        code: 'VALIDATION_ERROR',
+        message: err.message.split('\n').pop().trim(),
+        statusCode: 400,
+        fields: null,
+      };
+    }
+    if (err.name === 'ValidationError') {
+      // Joi or custom validation
+      return {
+        code: 'VALIDATION_ERROR',
+        message: err.message,
+        statusCode: 400,
+        fields: err.details?.map((d) => ({
+          field: d.path.join('.'),
+          message: d.message,
+        })),
+      };
+    }
+    if (err instanceof BusinessError) {
+      // Custom business exception
+      return {
+        code: err.code || 'BUSINESS_ERROR',
+        message: err.message || 'Business logic error',
+        statusCode: err.statusCode || 400,
+        fields: err.fields || null,
+      };
+    }
+    if (this.isBodyParserError(err)) {
+      return { ...this.generateBodyParserErrorMessage(err), fields: null };
+    }
+    return {
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Something went wrong',
+      statusCode: 500,
+      fields: null,
+    };
+  }
+
+  // Log once per error: client errors (4xx) are warnings, only server errors (5xx) are errors.
+  logError(err, { code, message, statusCode, fields }) {
+    if (statusCode >= 500) {
+      // Nested under `error` so only name/message/code/stack are logged, not extra properties
+      // such as body-parser's raw `body` (which can contain passwords).
+      this.logger.error(`ErrorHandler: ${err.message}`, { error: err, statusCode });
+      return;
+    }
+    this.logger.warn(`ErrorHandler: ${code} - ${message}`, {
+      statusCode,
+      errorCode: code,
+      fields,
+    });
+  }
+
   errorHandler = (err, req, res, _next) => {
     if (!err) {
       return _next();
     }
 
-    let code = 'INTERNAL_SERVER_ERROR';
-    let message = 'Something went wrong';
-    let statusCode = 500;
-    let fields = null;
-
-    // Prisma known errors
-    // Use this.prisma.Prisma instead of Prisma directly
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      ({ code, message, statusCode } = this.generatePrismaErrorMessage(err));
-    } else if (err instanceof Prisma.PrismaClientValidationError) {
-      code = 'VALIDATION_ERROR';
-      message = err.message.split('\n').pop().trim();
-      statusCode = 400;
-    } else if (err.name === 'ValidationError') {
-      // Joi or custom validation
-      code = 'VALIDATION_ERROR';
-      message = err.message;
-      statusCode = 400;
-      fields = err.details?.map((d) => ({
-        field: d.path.join('.'),
-        message: d.message,
-      }));
-    } else if (err instanceof BusinessError) {
-      // Custom business exception
-      code = err.code || 'BUSINESS_ERROR';
-      message = err.message || 'Business logic error';
-      statusCode = err.statusCode || 400;
-      fields = err.fields || null;
-    } else if (this.isBodyParserError(err)) {
-      ({ code, message, statusCode } = this.generateBodyParserErrorMessage(err));
-    }
-
-    // Log once per error: client errors (4xx) are warnings, only server errors (5xx) are errors.
-    if (statusCode >= 500) {
-      // Nested under `error` so only name/message/code/stack are logged, not extra properties
-      // such as body-parser's raw `body` (which can contain passwords).
-      this.logger.error(`ErrorHandler: ${err.message}`, { error: err, statusCode });
-    } else {
-      this.logger.warn(`ErrorHandler: ${code} - ${message}`, {
-        statusCode,
-        errorCode: code,
-        fields,
-      });
-    }
+    const { code, message, statusCode, fields } = this.classifyError(err);
+    this.logError(err, { code, message, statusCode, fields });
 
     return this.responseFormatter.errorResponse(res, {
       message,

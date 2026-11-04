@@ -9,11 +9,10 @@ class ResponseFormatter {
       message,
     };
 
+    response.data = data;
     if (typeof data === 'object' && data !== null && 'totalRecord' in data) {
       response.totalRecord = data.totalRecord;
       response.data = data.data !== undefined ? data.data : data;
-    } else {
-      response.data = data;
     }
     this.logger.debug(`response: ${JSON.stringify(response)}`, {
       context: '[SUCCESS]',

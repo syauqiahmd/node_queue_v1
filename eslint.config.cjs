@@ -40,6 +40,14 @@ module.exports = defineConfig([
       'prefer-const': 'warn',
       'object-shorthand': ['error', 'always'],
       'arrow-spacing': ['error', { before: true, after: true }],
+      // Team convention: no else / else-if; use early returns and guard clauses.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'IfStatement[alternate]',
+          message: 'Avoid else; use an early return or a guard clause.',
+        },
+      ],
 
       // Formatting-related
       'max-len': 'off',

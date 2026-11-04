@@ -56,8 +56,8 @@ class UserService {
         data: userData,
       });
 
+      await tx.userOrganization.deleteMany({ where: { userId: id } });
       if (updatedUser.role === 'USER') {
-        await tx.userOrganization.deleteMany({ where: { userId: id } });
         await tx.userOrganization.create({
           data: {
             userId: id,
@@ -66,8 +66,6 @@ class UserService {
             updatedBy: userData.updatedBy || 'System',
           },
         });
-      } else {
-        await tx.userOrganization.deleteMany({ where: { userId: id } });
       }
 
       return updatedUser;

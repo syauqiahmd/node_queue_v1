@@ -1,5 +1,6 @@
 const winston = require('winston');
-const { asyncLocalStorage } = require('../../../src/infra/utils/asyncContext');
+// Loaded up front so the mocked asyncContext is the instance log.helper picks up.
+require('../../../src/infra/utils/asyncContext');
 
 jest.mock('winston', () => {
   const mFormat = {
@@ -11,7 +12,7 @@ jest.mock('winston', () => {
     printf: jest.fn().mockReturnThis(),
   };
   // winston.format(...) returns a function that is immediately invoked in the code: winston.format(fn)()
-  const formatFn = jest.fn((fn) => {
+  const formatFn = jest.fn(() => {
     return jest.fn();
   });
   Object.assign(formatFn, mFormat);

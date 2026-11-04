@@ -67,7 +67,7 @@ describe('AuthController', () => {
         isActive: true,
         password: 'hashed-password',
         assigneeOrganization: [
-          { organization: { name: 'Org 1', FullName: 'Organization 1' }, organizationId: 'org-1' },
+          { organization: { name: 'Org 1', fullName: 'Organization 1' }, organizationId: 'org-1' },
         ],
       };
       mockUserService.userDetailByUsername.mockResolvedValue(user);
@@ -92,6 +92,12 @@ describe('AuthController', () => {
           data: expect.objectContaining({ token: 'new-token' }),
         })
       );
+      const { userDetail } = mockRes.json.mock.calls[0][0].data;
+      expect(userDetail.organization).toEqual({
+        organizationId: 'org-1',
+        name: 'Org 1',
+        fullName: 'Organization 1',
+      });
     });
 
     it('should login successfully with empty assigneeOrganization', async () => {

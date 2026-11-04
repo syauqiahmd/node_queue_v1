@@ -91,6 +91,20 @@ describe('ValidateMiddleware', () => {
       expect(msg).toBe('id must be a valid value');
     });
 
+    it('should return the custom rule message for any.custom', () => {
+      const err = {
+        type: 'any.custom',
+        context: { message: 'endDate must be within 1 month from startDate' },
+      };
+      const msg = validateMiddleware.generateJoiErrorMessage(err);
+      expect(msg).toBe('endDate must be within 1 month from startDate');
+    });
+
+    it('should fall back for any.custom without a message', () => {
+      const msg = validateMiddleware.generateJoiErrorMessage({ type: 'any.custom', context: {} });
+      expect(msg).toBe('Validation failed');
+    });
+
     it('should return default message for unknown type', () => {
       const err = { type: 'unknown.type' };
       const msg = validateMiddleware.generateJoiErrorMessage(err);

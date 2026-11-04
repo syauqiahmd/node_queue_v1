@@ -33,6 +33,10 @@ class ValidateMiddleware {
       case 'string.guid':
         errorMessage = 'id must be a valid value';
         break;
+      case 'any.custom':
+        // Custom rules (e.g. report date ranges) put their human message in the context.
+        errorMessage = err.context?.message || errorMessage;
+        break;
       default:
         errorMessage = 'Validation failed';
         break;

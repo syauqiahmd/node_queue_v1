@@ -39,15 +39,15 @@ class RedisClient {
 
   async connect() {
     try {
-      if (!this.client.isOpen) {
-        await this.client.connect();
-        this.logger.info('[REDIS] Redis client connected successfully', {
-          context: 'Redis Client',
-        });
-        this.connected = true;
-      } else {
+      if (this.client.isOpen) {
         this.logger.info('[REDIS] Redis client already open', { context: 'Redis Client' });
+        return;
       }
+      await this.client.connect();
+      this.logger.info('[REDIS] Redis client connected successfully', {
+        context: 'Redis Client',
+      });
+      this.connected = true;
     } catch (error) {
       this.logger.error('[REDIS] Failed to connect to Redis', { context: 'Redis Client', error });
       this.connected = false;

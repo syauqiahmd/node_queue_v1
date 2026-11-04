@@ -51,6 +51,9 @@ class MessageBroker {
         );
     });
     this.handlers = new Map();
+    // One listener per channel. node-redis keeps listeners in a Set, so re-subscribing with the
+    // same function (initial subscribe + resubscribe on 'ready') doesn't deliver messages twice.
+    this.listeners = new Map();
     this._connectingPub = false;
     this._connectingSub = false;
     this._closing = false;
@@ -85,9 +88,7 @@ class MessageBroker {
       this.handlers.set(channel, handler);
       Promise.resolve()
         .then(() => this.ensureSubscriber())
-        .then(() =>
-          this.subscriber.subscribe(channel, (message) => this.handleMessage(channel, message))
-        )
+        .then(() => this.subscriber.subscribe(channel, this.listenerFor(channel)))
         .then(() => logger.info('Subscribed to channel', { channel, context: 'MessageBroker' }))
         .catch((e) =>
           logger.error('Redis subscribe failed', { error: e, channel, context: 'MessageBroker' })
@@ -118,18 +119,25 @@ class MessageBroker {
     }
   }
 
+  listenerFor(channel) {
+    if (!this.listeners.has(channel)) {
+      this.listeners.set(channel, (message) => this.handleMessage(channel, message));
+    }
+    return this.listeners.get(channel);
+  }
+
   handleMessage(channel, message) {
     try {
       const payload = typeof message === 'string' ? JSON.parse(message) : message;
       const handler = this.handlers.get(channel);
-      if (handler) {
-        handler(payload);
-      } else {
+      if (!handler) {
         logger.warn('No handler for channel', {
           channel,
           context: 'MessageBroker',
         });
+        return;
       }
+      handler(payload);
     } catch (err) {
       logger.error('Failed to handle broker message', {
         error: err,
@@ -144,7 +152,7 @@ class MessageBroker {
     }
     for (const [channel] of this.handlers.entries()) {
       await this.subscriber
-        .subscribe(channel, (message) => this.handleMessage(channel, message))
+        .subscribe(channel, this.listenerFor(channel))
         .catch((e) =>
           logger.error('Redis subscribe failed', { error: e, channel, context: 'MessageBroker' })
         );
