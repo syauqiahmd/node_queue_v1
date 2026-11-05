@@ -14,6 +14,18 @@ class S3Client {
       s3ForcePathStyle: true, // Required for some S3-compatible storage providers
     });
     this.bucketName = process.env.S3_BUCKET_NAME;
+    // Base URL browsers use to fetch public objects (e.g. https://example.com/qms-media) when
+    // S3_ENDPOINT is internal-only, such as a storage container behind a reverse proxy.
+    this.publicBaseUrl = (process.env.S3_PUBLIC_URL || '').trim().replace(/\/+$/, '');
+  }
+
+  // URL returned to clients for an uploaded object: S3_PUBLIC_URL + key when set,
+  // otherwise the location reported by the S3 endpoint.
+  publicUrlFor(key, location) {
+    if (!this.publicBaseUrl) {
+      return location;
+    }
+    return `${this.publicBaseUrl}/${encodeURI(key.replace(/^\/+/, ''))}`;
   }
 
   async uploadFile(fileBuffer, fileName, contentType, expiresInSeconds = null) {
@@ -33,10 +45,11 @@ class S3Client {
 
     try {
       const data = await this.s3.upload(params).promise();
+      const url = this.publicUrlFor(fileName, data.Location);
       this.logger.info(
-        `File uploaded successfully to S3: ${data.Location}${expiresInSeconds ? ` (expires in ${expiresInSeconds}s)` : ''}`
+        `File uploaded successfully to S3: ${url}${expiresInSeconds ? ` (expires in ${expiresInSeconds}s)` : ''}`
       );
-      return data.Location;
+      return url;
     } catch (error) {
       this.logger.error(`Error uploading file to S3: ${error.message}`);
       throw error;

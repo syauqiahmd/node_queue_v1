@@ -162,6 +162,7 @@ The following environment variables are used to configure the application. These
 | `RATE_LIMIT_WINDOW` | The time window for rate limiting in minutes. | `1` |
 | `RATE_LIMIT_MAX` | The maximum number of requests allowed per IP within the time window. | |
 | `GOOGLE_APPLICATION_CREDENTIALS` | The absolute path to your Google Cloud service account credentials JSON file. | |
+| `S3_PUBLIC_URL` | Optional public base URL (including the bucket path) returned for uploaded files, e.g. generated call sounds. Set it when `S3_ENDPOINT` is internal-only (storage container behind a reverse proxy). Empty = use the URL reported by `S3_ENDPOINT`. | |
 | `PRE_CALCULATE_TIME` | The cron schedule for the daily statistics calculation job. | `'0 21 * * *'` |
 | `HOUSEKEEPING_TIME` | The cron schedule for the housekeeping/archiving job. | `'0 22 * * 0'` |
 
