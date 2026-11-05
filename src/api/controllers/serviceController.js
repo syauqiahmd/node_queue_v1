@@ -16,18 +16,23 @@ class ServiceController {
         pageSize = 10,
         sortBy = 'createdAt',
         sortOrder = 'desc',
+        pagination,
         ...filters
       } = req.query;
 
       this.logger.info('[ServiceController] Getting all services', { filters, page, pageSize });
 
-      const data = await this.serviceService.getAll({
-        ...filters,
-        page: parseInt(page, 10),
-        pageSize: parseInt(pageSize, 10),
-        sortBy,
-        sortOrder,
-      });
+      // `?pagination=false` returns every matching service, e.g. for dropdowns.
+      const data = await this.serviceService.getAll(
+        {
+          ...filters,
+          page: parseInt(page, 10),
+          pageSize: parseInt(pageSize, 10),
+          sortBy,
+          sortOrder,
+        },
+        pagination !== 'false'
+      );
       return res.status(200).json({ success: true, data });
     } catch (err) {
       next(err);

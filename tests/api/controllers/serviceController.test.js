@@ -65,6 +65,19 @@ describe('ServiceController', () => {
   });
 
   describe('getAll', () => {
+    it('should return every service when pagination=false', async () => {
+      mockReq.query = { pagination: 'false', organizationId: 'org-1' };
+      mockServiceService.getAll.mockResolvedValue({ totalRecord: 0, data: [] });
+
+      await serviceController.getAll(mockReq, mockRes, mockNext);
+
+      expect(mockServiceService.getAll).toHaveBeenCalledWith(
+        expect.objectContaining({ organizationId: 'org-1' }),
+        false
+      );
+      expect(mockServiceService.getAll.mock.calls[0][0]).not.toHaveProperty('pagination');
+    });
+
     it('should return list of services', async () => {
       mockReq.query = { page: '1', pageSize: '10' };
       const data = [{ id: 1, name: 'S1' }];
@@ -72,12 +85,15 @@ describe('ServiceController', () => {
 
       await serviceController.getAll(mockReq, mockRes, mockNext);
 
-      expect(mockServiceService.getAll).toHaveBeenCalledWith({
-        page: 1,
-        pageSize: 10,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-      });
+      expect(mockServiceService.getAll).toHaveBeenCalledWith(
+        {
+          page: 1,
+          pageSize: 10,
+          sortBy: 'createdAt',
+          sortOrder: 'desc',
+        },
+        true
+      );
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, data });
     });
