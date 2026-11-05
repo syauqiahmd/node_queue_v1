@@ -47,13 +47,13 @@ cron.schedule(
       const date = nowInAppTz();
       const formatedDate = date.toISOString().split('T')[0];
       const result = await queueService.generateDailyStats(formatedDate);
-      if (result) {
-        logger.info(
-          `[CRON] Daily report generation completed successfully. Created ${result.count} daily stats.`
-        );
-      } else {
+      if (!result) {
         logger.info('[CRON] Daily report generation completed successfully. No data to create.');
+        return;
       }
+      logger.info(
+        `[CRON] Daily report generation completed successfully. Created ${result.count} daily stats.`
+      );
     } catch (error) {
       logger.error('[CRON] Daily report generation failed', error);
     }

@@ -108,3 +108,16 @@ describe('maskPhone / maskEmail', () => {
     expect(maskEmail('not-an-email')).toBe('***');
   });
 });
+
+describe('email pattern performance', () => {
+  it('stays fast on long text without an @ (no catastrophic backtracking)', () => {
+    const input = 'a'.repeat(50000);
+    const start = Date.now();
+    expect(redact(input)).toBe(input);
+    expect(Date.now() - start).toBeLessThan(200);
+  });
+
+  it('still masks emails with subdomains and plus tags', () => {
+    expect(redact('mail john.doe+x@mail.example.co.id today')).not.toContain('john.doe+x@');
+  });
+});

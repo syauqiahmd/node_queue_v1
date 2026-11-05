@@ -85,6 +85,26 @@ class TicketService {
     return { newTicket, totalWaitingQueue };
   }
 
+  async countPeopleAhead(ticket, sameQueue) {
+    if (ticket.isPriority) {
+      // Priority tickets are dequeued oldest-first among themselves (see
+      // queueService.callNextQueue), so only earlier priority tickets are ahead.
+      return this.prisma.ticket.count({
+        where: { ...sameQueue, isPriority: true, createdAt: { lt: ticket.createdAt } },
+      });
+    }
+    // callNextQueue always drains every waiting priority ticket before serving
+    // a non-priority one, so ALL waiting priority tickets count as "ahead" of a
+    // non-priority ticket, regardless of creation order.
+    const [priorityAhead, normalAhead] = await Promise.all([
+      this.prisma.ticket.count({ where: { ...sameQueue, isPriority: true } }),
+      this.prisma.ticket.count({
+        where: { ...sameQueue, isPriority: false, createdAt: { lt: ticket.createdAt } },
+      }),
+    ]);
+    return priorityAhead + normalAhead;
+  }
+
   async getQueuePosition(ticketId) {
     const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
 
@@ -93,10 +113,12 @@ class TicketService {
     }
 
     let status = 'waiting';
+    if (ticket.isCall) {
+      status = 'calling';
+    }
+    // Resolved wins over calling.
     if (ticket.isResolved) {
       status = 'resolved';
-    } else if (ticket.isCall) {
-      status = 'calling';
     }
 
     let peopleAhead = null;
@@ -111,24 +133,7 @@ class TicketService {
         id: { not: ticket.id },
       };
 
-      if (ticket.isPriority) {
-        // Priority tickets are dequeued oldest-first among themselves (see
-        // queueService.callNextQueue), so only earlier priority tickets are ahead.
-        peopleAhead = await this.prisma.ticket.count({
-          where: { ...sameQueue, isPriority: true, createdAt: { lt: ticket.createdAt } },
-        });
-      } else {
-        // callNextQueue always drains every waiting priority ticket before serving
-        // a non-priority one, so ALL waiting priority tickets count as "ahead" of a
-        // non-priority ticket, regardless of creation order.
-        const [priorityAhead, normalAhead] = await Promise.all([
-          this.prisma.ticket.count({ where: { ...sameQueue, isPriority: true } }),
-          this.prisma.ticket.count({
-            where: { ...sameQueue, isPriority: false, createdAt: { lt: ticket.createdAt } },
-          }),
-        ]);
-        peopleAhead = priorityAhead + normalAhead;
-      }
+      peopleAhead = await this.countPeopleAhead(ticket, sameQueue);
 
       // 1-indexed spot in line: 0 people ahead means you're #1 (next up).
       queueRank = peopleAhead + 1;

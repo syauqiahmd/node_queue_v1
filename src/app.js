@@ -31,9 +31,9 @@ const createApp = (container) => {
             origin.startsWith('https://localhost')));
       if (isLocalhost || whitelist.includes(origin)) {
         callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+        return;
       }
+      callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     // Without this, browsers block JS from reading Content-Disposition on cross-origin

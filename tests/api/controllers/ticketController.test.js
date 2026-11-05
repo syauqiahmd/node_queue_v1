@@ -80,10 +80,8 @@ describe('TicketController', () => {
       expect(mockTicketService.generateQueueNumberAndCreateTicket).toHaveBeenCalledWith(
         mockReq.body
       );
-      expect(mockBroadcastService.emit).toHaveBeenCalledWith('new-ticket', expectedResponseData, [
-        'service-s-1',
-        'monitor-room',
-      ]);
+      // ticketService broadcasts `ticket:created`; the controller must not send a second event.
+      expect(mockBroadcastService.emit).not.toHaveBeenCalled();
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,

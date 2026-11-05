@@ -26,7 +26,9 @@ const EMAIL_KEYS = new Set(['email']);
 // Indonesian mobile numbers as accepted by phoneNormalizer.js: +628…, 628…, 08…
 // Not preceded by a word char or `-`, so digit-only blocks inside UUIDs/IDs aren't matched.
 const PHONE_PATTERN = /(?<![\w+-])(?:\+62|62|0)8\d{7,11}(?![\w-])/g;
-const EMAIL_PATTERN = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+// The lookbehind only lets a match start at the beginning of a word, which keeps this linear;
+// without it a long string took seconds, and this runs on every log line.
+const EMAIL_PATTERN = /(?<![\w.%+-])[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 const JWT_PATTERN = /\beyJ[\w-]+\.[\w-]+\.[\w-]+/g;
 const BEARER_PATTERN = /\bBearer\s+[\w.~+/-]+=*/gi;
 

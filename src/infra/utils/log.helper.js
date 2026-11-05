@@ -86,37 +86,37 @@ class Logger {
       ],
     });
 
-    if (!isProduction) {
-      this.logger.add(
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.printf(
-              ({ timestamp, level, message, stack, transactionId, requestContext, userId }) => {
-                let log = `${timestamp} ${level}: `;
-                if (transactionId) {
-                  log += `[${transactionId}] `;
-                }
-                if (requestContext) {
-                  log += `[${requestContext.method} ${requestContext.path}] `;
-                }
-                if (userId !== undefined) {
-                  log += `[User:${userId}] `;
-                }
-                log += stack || message;
-                return log;
-              }
-            )
-          ),
-        })
-      );
-    } else {
+    if (isProduction) {
       // PM2 already persists stdout to its own log files, so in production only echo
       // warnings and errors there to avoid storing every line twice.
       this.logger.add(
         new winston.transports.Console({ level: process.env.LOG_CONSOLE_LEVEL || 'warn' })
       );
+      return;
     }
+    this.logger.add(
+      new winston.transports.Console({
+        format: winston.format.combine(
+          winston.format.colorize(),
+          winston.format.printf(
+            ({ timestamp, level, message, stack, transactionId, requestContext, userId }) => {
+              let log = `${timestamp} ${level}: `;
+              if (transactionId) {
+                log += `[${transactionId}] `;
+              }
+              if (requestContext) {
+                log += `[${requestContext.method} ${requestContext.path}] `;
+              }
+              if (userId !== undefined) {
+                log += `[User:${userId}] `;
+              }
+              log += stack || message;
+              return log;
+            }
+          )
+        ),
+      })
+    );
   }
 
   // Expose winston's logger methods

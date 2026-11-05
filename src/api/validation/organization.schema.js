@@ -3,13 +3,13 @@ const Joi = require('joi');
 
 const createOrganizationSchema = Joi.object({
   name: Joi.string().trim().required(),
-  fullName: Joi.string().trim().optional(),
+  fullName: Joi.string().trim().allow('', null).optional(),
   logoUrl: Joi.string().uri().optional(),
 }).required(); // Ensure object is not empty
 
 const updateOrganizationSchema = Joi.object({
   name: Joi.string().trim().required(),
-  fullName: Joi.string().trim().optional(),
+  fullName: Joi.string().trim().allow('', null).optional(),
   isActive: Joi.boolean().required(),
   logoUrl: Joi.string().uri().optional(),
 }).required(); // Ensure object is not empty

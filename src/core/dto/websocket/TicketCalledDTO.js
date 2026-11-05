@@ -2,6 +2,7 @@ const toTicketCalledDTO = (ticket, caller) => ({
   id: ticket.id,
   queueNumber: `${ticket.prefix}-${ticket.queueNumber}`,
   prefix: ticket.prefix,
+  serviceId: ticket.serviceId,
   serviceName: ticket.service.name,
   counterNumber: ticket.latestAssigneeCounter.counterNumber,
   calledBy: caller?.fullName || caller?.userName || ticket.latestAssigneeCounter.counterNumber,

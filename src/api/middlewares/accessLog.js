@@ -52,9 +52,9 @@ class AccessLogMiddleware {
       // Uptime monitors hit /health every minute; keep those out of the info log.
       if (path === HEALTH_PATH) {
         this.logger.debug(message, meta);
-      } else {
-        this.logger.info(message, meta);
+        return;
       }
+      this.logger.info(message, meta);
     });
 
     res.on('finish', () => log(false));

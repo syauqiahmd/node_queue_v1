@@ -145,7 +145,11 @@ describe('QueueService', () => {
 
   describe('callNextQueue', () => {
     it('should call the next priority ticket if available', async () => {
-      const payload = { serviceId: 'service-1', counterId: 'counter-1', caller: { fullName: 'Ahmad Syauqi', userName: 'syauqi' } };
+      const payload = {
+        serviceId: 'service-1',
+        counterId: 'counter-1',
+        caller: { fullName: 'Ahmad Syauqi', userName: 'syauqi' },
+      };
 
       mockPrisma.counter.findUnique.mockResolvedValue({ id: 'counter-1', counterNumber: 1 });
 
@@ -191,7 +195,11 @@ describe('QueueService', () => {
     });
 
     it('should call normal ticket if no priority ticket', async () => {
-      const payload = { serviceId: 'service-1', counterId: 'counter-1', caller: { fullName: 'Ahmad Syauqi' } };
+      const payload = {
+        serviceId: 'service-1',
+        counterId: 'counter-1',
+        caller: { fullName: 'Ahmad Syauqi' },
+      };
 
       mockPrisma.counter.findUnique.mockResolvedValue({ id: 'counter-1', counterNumber: 1 });
 

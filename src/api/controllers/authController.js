@@ -30,7 +30,7 @@ class AuthController {
         organization: {
           organizationId: data.assigneeOrganization[0]?.organizationId || '',
           name: data.assigneeOrganization[0]?.organization?.name || '',
-          fullName: data.assigneeOrganization[0]?.organization?.FullName || '',
+          fullName: data.assigneeOrganization[0]?.organization?.fullName || '',
         },
       };
 

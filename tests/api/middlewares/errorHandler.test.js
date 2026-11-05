@@ -179,9 +179,6 @@ describe('ErrorHandlerMiddleware', () => {
     });
 
     it('should handle PrismaClientValidationError', () => {
-      // Mock PrismaClientValidationError to behave as expected for instanceof check
-      const OriginalPrismaClientValidationError = Prisma.PrismaClientValidationError;
-
       // We create a mock class that extends Error to pass instanceof check if possible,
       // or we just skip this test if we can't instantiate it.
       // But we can monkey-patch the prototype if needed.

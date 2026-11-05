@@ -17,9 +17,9 @@ class WebSocketGateway {
       const handler = this.handlers.get(event);
       if (handler) {
         handler(ws, data);
-      } else {
-        this.broadcast(event, data);
+        return;
       }
+      this.broadcast(event, data);
     } catch (error) {
       logger.error('Failed to parse message or handle event', { error, context: 'WebSocket' });
     }

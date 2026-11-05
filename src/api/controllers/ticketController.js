@@ -1,7 +1,6 @@
 class TicketController {
-  constructor({ ticketService, broadcastService }) {
+  constructor({ ticketService }) {
     this.ticketService = ticketService;
-    this.broadcastService = broadcastService;
   }
 
   async create(req, res, next) {
@@ -19,8 +18,7 @@ class TicketController {
         createdAt: newTicket.createdAt,
         totalWaitingQueue: totalWaitingQueue.totalRecords,
       };
-      const rooms = [`service-${req.body.serviceId}`, 'monitor-room'];
-      this.broadcastService.emit('new-ticket', responseData, rooms);
+      // ticketService already broadcasts `ticket:created`.
       return res.status(201).json({ success: true, data: responseData, message: 'Created' });
     } catch (err) {
       next(err);
