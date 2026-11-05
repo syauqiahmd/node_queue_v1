@@ -8,7 +8,7 @@
  *   node scripts/downloadBackup.js latest [dest]    download the newest backup
  *   node scripts/downloadBackup.js <file> [dest]    download a specific backup
  *
- * dest defaults to /tmp/<file>. Reads S3_* from .env (or BACKUP_ENV_FILE). See docs/BACKUP.md.
+ * dest defaults to /tmp/<file>. Reads S3_* from .env (or BACKUP_ENV_FILE). See "Backup & Restore" in the QMS docs (https://app.notion.com/p/40f52441ab0481de824be81d31260c40).
  */
 const fs = require('fs');
 const path = require('path');

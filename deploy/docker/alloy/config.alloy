@@ -1,0 +1,366 @@
+// Grafana Alloy config for the Docker deployment (copy to /etc/alloy/config.alloy).
+// Replace the <...> placeholders; the top blocks come from Grafana Cloud's Linux integration.
+// Secrets live in /etc/default/alloy: GCLOUD_RW_API_KEY, POSTGRES_MONITOR_DSN, REDIS_PASSWORD.
+prometheus.exporter.self "alloy_check" { }
+
+discovery.relabel "alloy_check" {
+  targets = prometheus.exporter.self.alloy_check.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+
+  rule {
+    target_label = "alloy_hostname"
+    replacement  = constants.hostname
+  }
+
+  rule {
+    target_label = "job"
+    replacement  = "integrations/alloy-check"
+  }
+}
+
+prometheus.scrape "alloy_check" {
+  targets    = discovery.relabel.alloy_check.output
+  forward_to = [prometheus.relabel.alloy_check.receiver]  
+
+  scrape_interval = "60s"
+}
+
+prometheus.relabel "alloy_check" {
+  forward_to = [prometheus.remote_write.metrics_service.receiver]
+
+  rule {
+    source_labels = ["__name__"]
+    regex         = "(prometheus_target_sync_length_seconds_sum|prometheus_target_scrapes_.*|prometheus_target_interval.*|prometheus_sd_discovered_targets|alloy_build.*|prometheus_remote_write_wal_samples_appended_total|process_start_time_seconds)"
+    action        = "keep"
+  }
+}
+
+prometheus.remote_write "metrics_service" {
+  endpoint {
+    url = "https://prometheus-prod-52-prod-ap-southeast-2.grafana.net/api/prom/push"
+
+    basic_auth {
+      username = "<grafana-cloud-prometheus-user-id>"
+      password = sys.env("GCLOUD_RW_API_KEY")
+    }
+  }
+}
+
+loki.write "grafana_cloud_loki" {
+  endpoint {
+    url = "https://logs-prod-032.grafana.net/loki/api/v1/push"
+
+    basic_auth {
+      username = "<grafana-cloud-loki-user-id>"
+      password = sys.env("GCLOUD_RW_API_KEY")
+    }
+  }
+}
+prometheus.exporter.unix "integrations_node_exporter" {
+  disable_collectors = ["ipvs", "btrfs", "infiniband", "xfs", "zfs"]
+  enable_collectors  = ["meminfo"]
+
+  // Backup metrics written by ~/bin/backupDb.js (node_queue_db_backup_*)
+  textfile {
+    directory = "/var/lib/node_queue_metrics"
+  }
+
+  filesystem {
+    fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+    mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
+    mount_timeout        = "5s"
+  }
+
+  netclass {
+    ignored_devices = "^(veth.*|cali.*|[a-f0-9]{15})$"
+  }
+
+  netdev {
+    device_exclude = "^(veth.*|cali.*|[a-f0-9]{15})$"
+  }
+}
+
+discovery.relabel "integrations_node_exporter" {
+  targets = prometheus.exporter.unix.integrations_node_exporter.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+
+  rule {
+    target_label = "job"
+    replacement  = "integrations/node_exporter"
+  }
+}
+
+prometheus.scrape "integrations_node_exporter" {
+  targets         = discovery.relabel.integrations_node_exporter.output
+  forward_to      = [prometheus.remote_write.metrics_service.receiver]
+  scrape_interval = "60s"
+}
+
+// ===================================================================================
+// QMS on vm-server-qms (Kominfo), Docker Compose stack in /home/<deploy-user>/site.
+// Adapted from the old VPS config: PM2 is replaced by containers. Forwards to the
+// remote_write / loki.write blocks defined at the top of this file.
+// ===================================================================================
+
+// ---- Per-process CPU / memory (container processes are visible from the host) ------
+prometheus.exporter.process "node_queue" {
+  track_children = false
+
+  matcher {
+    name    = "node-queue-api"
+    cmdline = [`^node src/server\.js`]
+  }
+  matcher {
+    name    = "node-queue-cron"
+    cmdline = [`^node src/jobs/cron\.js`]
+  }
+  matcher {
+    name    = "node-queue-websocket"
+    cmdline = [`^node src/websocket\.js`]
+  }
+  matcher {
+    name    = "seaweedfs"
+    cmdline = [`weed .*\bserver\b`]
+  }
+  matcher {
+    name = "{{.Comm}}"
+    comm = ["postgres", "redis-server", "nginx", "alloy", "dockerd", "containerd"]
+  }
+}
+
+discovery.relabel "node_queue_processes" {
+  targets = prometheus.exporter.process.node_queue.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+  rule {
+    target_label = "job"
+    replacement  = "integrations/process_exporter"
+  }
+}
+
+prometheus.scrape "node_queue_processes" {
+  targets         = discovery.relabel.node_queue_processes.output
+  forward_to      = [prometheus.remote_write.metrics_service.receiver]
+  scrape_interval = "60s"
+}
+
+// ---- App logs (winston JSON, bind-mounted from the containers; debug is not shipped) -
+local.file_match "node_queue_app" {
+  path_targets = [{
+    "__path__" = "/home/<deploy-user>/site/logs/backend/{error,warn,info}/*.log",
+    "job"      = "node_queue",
+  }]
+  sync_period = "30s"
+}
+
+loki.source.file "node_queue_app" {
+  targets       = local.file_match.node_queue_app.targets
+  forward_to    = [loki.process.node_queue_app.receiver]
+  tail_from_end = true
+}
+
+loki.process "node_queue_app" {
+  forward_to = [loki.process.redact.receiver]
+
+  stage.json {
+    expressions = { level = "level", service = "service", ts = "timestamp" }
+  }
+  stage.timestamp {
+    source = "ts"
+    format = "RFC3339"
+  }
+  stage.labels {
+    values = { level = "", service = "" }
+  }
+}
+
+// ---- Container stdout/stderr via journald (compose logging driver, tag "qms") ------
+// Labels mirror the old VPS so dashboards keep working:
+//   web container          -> job="nginx", stream="access" (stdout) / "error" (stderr)
+//   api/cron/websocket     -> job="pm2", stream="stderr", service="node-queue-*"
+//                             (stdout is dropped: winston already writes it to files)
+loki.relabel "journal" {
+  forward_to = []
+
+  rule {
+    source_labels = ["__journal_container_name"]
+    target_label  = "container"
+  }
+  rule {
+    source_labels = ["__journal_priority"]
+    target_label  = "priority"
+  }
+}
+
+loki.source.journal "containers" {
+  matches       = "SYSLOG_IDENTIFIER=qms"
+  relabel_rules = loki.relabel.journal.rules
+  forward_to    = [loki.process.containers.receiver]
+  max_age       = "1h"
+}
+
+loki.process "containers" {
+  forward_to = [loki.process.redact.receiver]
+
+  stage.match {
+    selector = `{container="qms-web-1", priority="6"}`
+    stage.static_labels {
+      values = { job = "nginx", stream = "access" }
+    }
+  }
+  stage.match {
+    selector = `{container="qms-web-1", priority=~"[0-5]"}`
+    stage.static_labels {
+      values = { job = "nginx", stream = "error" }
+    }
+  }
+  stage.match {
+    selector = `{container=~"qms-(api|cron|websocket)-1", priority="6"}`
+    action   = "drop"
+  }
+  stage.match {
+    selector = `{container=~"qms-(api|cron|websocket)-1"}`
+    stage.static_labels {
+      values = { job = "pm2", stream = "stderr" }
+    }
+  }
+  stage.match {
+    selector = `{container="qms-api-1"}`
+    stage.static_labels {
+      values = { service = "node-queue-api" }
+    }
+  }
+  stage.match {
+    selector = `{container="qms-cron-1"}`
+    stage.static_labels {
+      values = { service = "node-queue-cron" }
+    }
+  }
+  stage.match {
+    selector = `{container="qms-websocket-1"}`
+    stage.static_labels {
+      values = { service = "node-queue-websocket" }
+    }
+  }
+  // Anything else (e.g. the one-shot migrate container) is not shipped.
+  stage.match {
+    selector = `{container=~".+", job=""}`
+    action   = "drop"
+  }
+  stage.label_drop {
+    values = ["container", "priority"]
+  }
+}
+
+// ---- DB backup run log (systemd unit qms-backup.service -> job="backup", as on the old VPS)
+loki.source.journal "db_backup" {
+  matches    = "_SYSTEMD_UNIT=qms-backup.service"
+  forward_to = [loki.process.db_backup.receiver]
+  max_age    = "24h"
+}
+
+loki.process "db_backup" {
+  forward_to = [loki.process.redact.receiver]
+
+  stage.static_labels {
+    values = { job = "backup" }
+  }
+}
+
+// ---- Redaction: last step before anything leaves the server ------------------------
+loki.process "redact" {
+  forward_to = [loki.write.grafana_cloud_loki.receiver]
+
+  // Query strings can carry search filters (?phoneNumber=...): drop them.
+  stage.replace {
+    expression = `"path":"[^"?]*(\?[^"]*)"`
+    replace    = ""
+  }
+  stage.replace {
+    expression = `(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) [^ ?"]*(\?[^ "]*)`
+    replace    = ""
+  }
+  stage.replace {
+    expression = `referrer: "[^"?]*(\?[^"]*)"`
+    replace    = ""
+  }
+  // JWTs / bearer tokens
+  stage.replace {
+    expression = `(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)`
+    replace    = "[REDACTED]"
+  }
+  // Emails
+  stage.replace {
+    expression = `([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})`
+    replace    = "[EMAIL]"
+  }
+  // Indonesian mobile numbers (+628..., 628..., 08...), not when part of a longer ID
+  stage.replace {
+    expression = `(?:^|[^0-9A-Za-z_+-])((?:\+62|62|0)8[0-9]{7,11})(?:[^0-9A-Za-z_-]|$)`
+    replace    = "[PHONE]"
+  }
+  stage.static_labels {
+    values = { host = "qms-kominfo" }
+  }
+}
+
+// ---- PostgreSQL (read-only grafana_monitor role with pg_monitor; container port on 127.0.0.1)
+prometheus.exporter.postgres "node_queue" {
+  data_source_names        = [sys.env("POSTGRES_MONITOR_DSN")]
+  disable_settings_metrics = true
+}
+
+discovery.relabel "postgres" {
+  targets = prometheus.exporter.postgres.node_queue.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+  rule {
+    target_label = "job"
+    replacement  = "integrations/postgres_exporter"
+  }
+}
+
+prometheus.scrape "postgres" {
+  targets         = discovery.relabel.postgres.output
+  forward_to      = [prometheus.remote_write.metrics_service.receiver]
+  scrape_interval = "60s"
+}
+
+// ---- Redis (container port on 127.0.0.1, password-protected) -----------------------
+prometheus.exporter.redis "node_queue" {
+  redis_addr     = "127.0.0.1:6379"
+  redis_password = sys.env("REDIS_PASSWORD")
+}
+
+discovery.relabel "redis" {
+  targets = prometheus.exporter.redis.node_queue.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+  rule {
+    target_label = "job"
+    replacement  = "integrations/redis_exporter"
+  }
+}
+
+prometheus.scrape "redis" {
+  targets         = discovery.relabel.redis.output
+  forward_to      = [prometheus.remote_write.metrics_service.receiver]
+  scrape_interval = "60s"
+}

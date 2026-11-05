@@ -58,7 +58,7 @@
       "title": "\ud83d\udcd6 Runbook",
       "tooltip": "\ud83d\udcd6 Runbook",
       "type": "link",
-      "url": "https://github.com/syauqiahmd/node_queue_v1/blob/main/docs/MONITORING.md"
+      "url": "https://app.notion.com/p/40f52441ab04810d8717e26add841d89"
     },
     {
       "icon": "external link",
@@ -74,7 +74,7 @@
       "title": "\ud83d\udcbe Backup & restore",
       "tooltip": "\ud83d\udcbe Backup & restore",
       "type": "link",
-      "url": "https://github.com/syauqiahmd/node_queue_v1/blob/main/docs/BACKUP.md"
+      "url": "https://app.notion.com/p/40f52441ab0481de824be81d31260c40"
     }
   ],
   "panels": [
@@ -268,7 +268,7 @@
         "type": "prometheus",
         "uid": "grafanacloud-prom"
       },
-      "description": "Time since the last successful nightly backup (02:30 WITA). Red after 26h. See docs/BACKUP.md.",
+      "description": "Time since the last successful nightly backup (02:30 WITA). Red after 26h. See Backup & Restore in the QMS docs.",
       "fieldConfig": {
         "defaults": {
           "color": {

@@ -1,7 +1,7 @@
 
 // ===================================================================================
 // node_queue observability: per-process metrics + logs. Managed by hand, documented in
-// docs/MONITORING.md of the node_queue repo. Forwards to the remote_write / loki.write
+// "Monitoring" in the QMS docs (https://app.notion.com/p/40f52441ab04810d8717e26add841d89). Forwards to the remote_write / loki.write
 // blocks defined at the top of this file.
 // ===================================================================================
 
