@@ -1,0 +1,239 @@
+# QMS Docker Compose stack. Copy deploy/docker/ to the server (e.g. ~/site) and clone the
+# two repos next to it as ./qms-be (node_queue) and ./qms-ui (node-queue-ui). Run from that folder.
+# Full guide: https://app.notion.com/p/40f52441ab0481cfa87bfe82da33f31f (Notion, "Deploy with Docker Compose")
+#   Deploy / update:   docker compose up -d --build
+#   Status / logs:     docker compose ps   |   docker compose logs -f api
+#
+# Internal connection settings (DB, Redis, S3) come from ./.env and are injected below.
+# Application settings live in ./env/backend.env and ./env/ui.env.
+
+name: qms
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "5" }
+
+# App + web containers log to journald (tag "qms") so Grafana Alloy can ship stderr and
+# nginx logs without root/docker access. `docker compose logs` keeps working.
+x-logging-journald: &logging-journald
+  driver: journald
+  options: { tag: "qms" }
+
+x-backend: &backend
+  image: qms-be:latest
+  pull_policy: never
+  env_file: ./env/backend.env
+  environment: &backend-env
+    # Same query options as the old VPS (session timezone + timeouts).
+    DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public&options=-c%20timezone%3DAsia%2FMakassar&connect_timeout=10&pool_timeout=10
+    REDIS_HOST: redis
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: ${REDIS_PASSWORD}
+    S3_ENDPOINT: http://seaweedfs:8333
+    S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+    S3_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+    S3_BUCKET_NAME: ${S3_BUCKET}
+    S3_REGION: us-east-1
+    PORT: "8000"
+    WEBSOCKET_PORT: "8080"
+  volumes:
+    - ./logs/backend:/app/logs
+    - ./secrets:/app/secrets:ro
+  restart: unless-stopped
+  logging: *logging-journald
+  networks: [qms]
+
+services:
+  # ---------------------------------------------------------------- data services
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: Asia/Makassar
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Host loopback only, for the Alloy postgres exporter (role grafana_monitor).
+    ports: ["127.0.0.1:5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 768m
+    restart: unless-stopped
+    logging: *logging
+    networks: [qms]
+
+  redis:
+    image: redis:7-alpine
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redisdata:/data
+    # Host loopback only, for the Alloy redis exporter.
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 320m
+    restart: unless-stopped
+    logging: *logging
+    networks: [qms]
+
+  # S3-compatible storage (MinIO images are no longer published). S3 API on :8333,
+  # filer on :8888 (used by nginx to serve public audio). Nothing is exposed to the host.
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.50
+    command: >
+      server -dir=/data -ip=seaweedfs -ip.bind=0.0.0.0
+      -master.volumeSizeLimitMB=1024 -volume.max=0
+      -filer -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+    volumes:
+      - s3data:/data
+      - ./secrets/seaweedfs-s3.json:/etc/seaweedfs/s3.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9333/cluster/status >/dev/null && wget -qO- http://127.0.0.1:8888/ >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+    mem_limit: 512m
+    restart: unless-stopped
+    logging: *logging
+    networks: [qms]
+
+  # One-shot: create the bucket (idempotent).
+  seaweedfs-init:
+    image: chrislusf/seaweedfs:4.50
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        echo "s3.bucket.list" | weed shell -master=seaweedfs:9333 2>/dev/null | grep -qw "$$S3_BUCKET" \
+          || echo "s3.bucket.create -name $$S3_BUCKET" | weed shell -master=seaweedfs:9333
+        echo "bucket $$S3_BUCKET ready"
+    environment:
+      S3_BUCKET: ${S3_BUCKET}
+    depends_on:
+      seaweedfs: { condition: service_healthy }
+    restart: "no"
+    networks: [qms]
+
+  # ---------------------------------------------------------------- backend (1 image, 4 roles)
+  migrate:
+    <<: *backend
+    # The backend image is built here once; api / cron / websocket reuse it.
+    build:
+      context: ./qms-be
+      dockerfile: ../docker/backend.Dockerfile
+    pull_policy: build
+    command: ["npx", "prisma", "migrate", "deploy", "--schema", "src/infra/db/prisma/schema.prisma"]
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api:
+    <<: *backend
+    command: ["node", "src/server.js"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8000/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    mem_limit: 768m
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      seaweedfs-init: { condition: service_completed_successfully }
+      migrate: { condition: service_completed_successfully }
+
+  cron:
+    <<: *backend
+    command: ["node", "src/jobs/cron.js"]
+    mem_limit: 384m
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+
+  websocket:
+    <<: *backend
+    command: ["node", "src/websocket.js"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+    mem_limit: 256m
+    depends_on:
+      redis: { condition: service_healthy }
+
+  # Nightly DB backup (scripts/backupDb.js), started by the systemd timer qms-backup.timer:
+  #   docker compose --profile tools run --rm backup
+  # Dump -> ./backup-db, only the 3 newest dumps are kept; private copy in S3 db-backups/
+  # (3 days). Metrics for Grafana -> /var/lib/node_queue_metrics. Restore: https://app.notion.com/p/40f52441ab0481de824be81d31260c40
+  backup:
+    <<: *backend
+    profiles: ["tools"]
+    command:
+      - sh
+      - -c
+      - node scripts/backupDb.js && ls -1t /backups/*.dump | tail -n +4 | xargs -r rm -f -- && echo "kept $$(ls /backups/*.dump | wc -l) local dumps"
+    environment:
+      <<: *backend-env
+      BACKUP_ENV_FILE: /dev/null
+      BACKUP_DIR: /backups
+      BACKUP_METRICS_FILE: /metrics/db_backup.prom
+      BACKUP_LOCAL_RETENTION_DAYS: "30"
+      BACKUP_S3_RETENTION_DAYS: "3"
+    volumes:
+      - ./backup-db:/backups
+      - /var/lib/node_queue_metrics:/metrics
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # ---------------------------------------------------------------- UI + reverse proxy
+  web:
+    image: qms-ui:latest
+    build:
+      context: ./qms-ui
+      dockerfile: ../docker/ui.Dockerfile
+      additional_contexts:
+        env: ./env
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./secrets/tls:/etc/nginx/tls:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/nginx-health >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    mem_limit: 128m
+    restart: unless-stopped
+    logging: *logging-journald
+    networks: [qms]
+
+# Data volumes are "external": compose never creates or deletes them, so
+# `docker compose down -v` cannot wipe the database. scripts/init-env.sh creates them.
+volumes:
+  pgdata:
+    external: true
+    name: qms_pgdata
+  redisdata:
+    external: true
+    name: qms_redisdata
+  s3data:
+    external: true
+    name: qms_s3data
+
+networks:
+  qms:

@@ -12,7 +12,7 @@
  *   4. write Prometheus metrics for Grafana alerting (read by Alloy's textfile collector)
  *
  * Usage: node scripts/backupDb.js   (reads DATABASE_URL and S3_* from .env)
- * Restore: see docs/BACKUP.md
+ * Restore: see "Backup & Restore" in the QMS docs (https://app.notion.com/p/40f52441ab0481de824be81d31260c40)
  */
 const path = require('path');
 require('dotenv').config({
