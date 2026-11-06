@@ -129,7 +129,8 @@ services:
     build:
       context: ./qms-be
       dockerfile: ../docker/backend.Dockerfile
-    pull_policy: build
+    # No pull_policy: plain `up -d` reuses the existing image (no network needed);
+    # `up -d --build` rebuilds it.
     command: ["npx", "prisma", "migrate", "deploy", "--schema", "src/infra/db/prisma/schema.prisma"]
     restart: "no"
     depends_on:
