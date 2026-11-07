@@ -79,6 +79,23 @@ class OrganizationController {
     }
   }
 
+  // multipart/form-data with one image in the `logo` field (parsed by the logoUpload middleware)
+  async uploadLogo(req, res, next) {
+    try {
+      if (!req.file) {
+        throw this.businessException.BadRequest('Logo file is required (form field "logo")');
+      }
+      const data = await this.organizationService.uploadLogo(
+        req.params.organizationId,
+        req.file.buffer,
+        this.identityHelper.getCurrentUserId()
+      );
+      return res.status(200).json({ success: true, data, message: 'Logo updated' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async remove(req, res, next) {
     try {
       const data = await this.organizationService.remove(req.params.organizationId);

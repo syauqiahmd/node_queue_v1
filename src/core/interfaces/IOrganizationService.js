@@ -6,6 +6,7 @@
  * @property {(id: string, data: object) => Promise<object>} update
  * @property {(id: string) => Promise<void>} remove
  * @property {(payload: object) => Promise<object[]>} getAllWithService
+ * @property {(id: string, buffer: Buffer, updatedBy: string) => Promise<object>} uploadLogo
  */
 
 /**
@@ -28,6 +29,9 @@ const IOrganizationService = {
     throw new Error('Method not implemented.');
   },
   getAllWithService: async (payload) => {
+    throw new Error('Method not implemented.');
+  },
+  uploadLogo: async (id, buffer, updatedBy) => {
     throw new Error('Method not implemented.');
   },
 };

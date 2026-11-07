@@ -57,6 +57,32 @@ describe('AuthController', () => {
   });
 
   describe('login', () => {
+    it('keeps the Redis session for the remaining lifetime of the JWT', async () => {
+      const nowSec = 1_800_000_000;
+      jest.spyOn(Date, 'now').mockReturnValue(nowSec * 1000);
+      mockReq.body = { userName: 'user1', password: 'password' };
+      mockUserService.userDetailByUsername.mockResolvedValue({
+        id: 1,
+        userName: 'user1',
+        isActive: true,
+        password: 'hashed-password',
+        assigneeOrganization: [],
+      });
+      mockAuthUtils.comparePassword.mockResolvedValue(true);
+      mockAuthUtils.generateToken.mockReturnValue('new-token');
+      mockAuthUtils.decodeToken.mockReturnValue({ exp: nowSec + 6 * 3600 });
+
+      await authController.login(mockReq, mockRes, mockNext);
+
+      expect(mockRedisClient.set).toHaveBeenCalledWith(
+        'auth:token:new-token',
+        expect.any(String),
+        'EX',
+        6 * 3600
+      );
+      Date.now.mockRestore();
+    });
+
     it('should login successfully and return token', async () => {
       mockReq.body = { userName: 'user1', password: 'password' };
       const user = {

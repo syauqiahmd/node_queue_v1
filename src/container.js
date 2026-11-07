@@ -65,6 +65,7 @@ container.register({
   mainRouter: asFunction(require('./api/routes')).singleton(),
   prismaClient: asValue(prisma), // Register the prisma client instance
   validateMiddleware: asClass(require('./api/middlewares/validate')).singleton(), // Register ValidateMiddleware
+  logoUpload: asClass(require('./api/middlewares/logoUpload')).singleton(), // multipart logo uploads
   loggerContext: asClass(require('./api/middlewares/loggerContext')).singleton(), // Register LoggerContextMiddleware
   asyncContext: asValue(asyncContext), // Register asyncContext
   rateLimiter: asClass(require('./api/middlewares/rateLimiter')).singleton(), // Register RateLimiterMiddleware

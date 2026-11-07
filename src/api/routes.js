@@ -14,6 +14,7 @@ module.exports = ({
   privateController,
   healthController,
   validateMiddleware,
+  logoUpload,
   counterSchema,
   organizationSchema,
   generalSchema,
@@ -108,6 +109,7 @@ module.exports = ({
     organizationController,
     authMiddleware,
     validateMiddleware,
+    logoUpload,
     organizationSchema,
   });
   router.use('/organizations', authMiddleware.authenticateToken, organizationRoutes);

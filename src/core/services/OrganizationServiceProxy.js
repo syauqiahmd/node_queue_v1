@@ -71,26 +71,39 @@ class OrganizationServiceProxy {
     return data;
   }
 
-  async create(data) {
-    const result = await this.organizationService.create(data);
+  // Organization data is embedded in other cached entries: services (kiosk/monitor lists),
+  // counters (service.organization) and users (their organization).
+  async invalidateAfterWrite(id = null) {
+    if (id) {
+      await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
+    }
     await this.cacheService.invalidate(this.cacheKeyPrefix);
     await this.cacheService.invalidate('service:');
+    await this.cacheService.invalidate('counter:');
+    await this.cacheService.invalidate('user:');
+  }
+
+  async create(data) {
+    const result = await this.organizationService.create(data);
+    await this.invalidateAfterWrite();
     return result;
   }
 
   async update(id, data) {
     const result = await this.organizationService.update(id, data);
-    await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
-    await this.cacheService.invalidate(this.cacheKeyPrefix);
-    await this.cacheService.invalidate('service:');
+    await this.invalidateAfterWrite(id);
+    return result;
+  }
+
+  async uploadLogo(id, buffer, updatedBy) {
+    const result = await this.organizationService.uploadLogo(id, buffer, updatedBy);
+    await this.invalidateAfterWrite(id);
     return result;
   }
 
   async remove(id) {
     const result = await this.organizationService.remove(id);
-    await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
-    await this.cacheService.invalidate(this.cacheKeyPrefix);
-    await this.cacheService.invalidate('service:');
+    await this.invalidateAfterWrite(id);
     return result;
   }
 }

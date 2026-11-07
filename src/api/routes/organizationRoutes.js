@@ -5,6 +5,7 @@ module.exports = ({
   organizationController,
   authMiddleware,
   validateMiddleware,
+  logoUpload,
   organizationSchema,
 }) => {
   /**
@@ -98,6 +99,28 @@ module.exports = ({
     validateMiddleware.validate(organizationSchema.idOrganizationSchema, 'params'),
     validateMiddleware.validate(organizationSchema.updateOrganizationSchema),
     organizationController.update.bind(organizationController)
+  );
+
+  /**
+   * POST /organizations/{organizationId}/logo
+   * @summary Upload the organization logo (PNG, JPEG or WEBP, max 1 MB)
+   * @description Stores the image in S3 under org-logos/ and sets logoUrl to its public URL.
+   * Send multipart/form-data with the file in the field `logo`.
+   * @tags Organization
+   * @security BearerAuth
+   * @param {string} organizationId.path.required - Organization ID using UUID format
+   * @returns {object} 200 - Updated organization with the new logoUrl
+   * @returns {object} 400 - Missing file, unsupported image type or file larger than 1 MB
+   * @returns {object} 401 - Unauthorized
+   * @returns {object} 404 - Not Found
+   * @returns {object} 500 - Internal Server Error
+   */
+  router.post(
+    '/:organizationId/logo',
+    authMiddleware.authorize(['ADMIN']),
+    validateMiddleware.validate(organizationSchema.idOrganizationSchema, 'params'),
+    logoUpload.single,
+    organizationController.uploadLogo.bind(organizationController)
   );
 
   /**

@@ -1,25 +1,13 @@
+const { isAllowedOrigin } = require('../../infra/utils/allowedOrigins');
+
 class OriginCheckMiddleware {
   constructor({ businessException }) {
     this.businessException = businessException;
-    this.allowedOrigins = (process.env.CORS_ORIGIN || '')
-      .split(',')
-      .map((origin) => origin.trim())
-      .filter(Boolean);
   }
 
-  isLocalOrigin(origin) {
-    return (
-      origin.startsWith('http://localhost') ||
-      origin.startsWith('http://127.0.0.1') ||
-      origin.startsWith('https://localhost')
-    );
-  }
-
+  // CORS_ORIGIN, plus localhost only in development (src/infra/utils/allowedOrigins.js).
   isAllowedOrigin(origin) {
-    if (!origin) {
-      return false;
-    }
-    return this.isLocalOrigin(origin) || this.allowedOrigins.includes(origin);
+    return isAllowedOrigin(origin);
   }
 
   originFromReferer(referer) {
