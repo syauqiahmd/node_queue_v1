@@ -210,6 +210,8 @@ describe('OrganizationServiceProxy', () => {
 
       expect(mockOrganizationServiceReal.create).toHaveBeenCalledWith(data);
       expect(mockCacheService.invalidate).toHaveBeenCalledWith('organization:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('counter:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('user:');
       expect(result).toEqual(createdData);
     });
   });
@@ -226,6 +228,8 @@ describe('OrganizationServiceProxy', () => {
       expect(mockOrganizationServiceReal.update).toHaveBeenCalledWith(id, data);
       expect(mockCacheService.del).toHaveBeenCalledWith(`organization:id:${id}`);
       expect(mockCacheService.invalidate).toHaveBeenCalledWith('organization:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('counter:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('user:');
       expect(result).toEqual(updatedData);
     });
   });
@@ -241,6 +245,8 @@ describe('OrganizationServiceProxy', () => {
       expect(mockOrganizationServiceReal.remove).toHaveBeenCalledWith(id);
       expect(mockCacheService.del).toHaveBeenCalledWith(`organization:id:${id}`);
       expect(mockCacheService.invalidate).toHaveBeenCalledWith('organization:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('counter:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('user:');
       expect(result).toEqual(deletedData);
     });
   });

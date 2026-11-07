@@ -36,10 +36,18 @@ describe('OriginCheckMiddleware', () => {
     expect(mockNext).toHaveBeenCalledWith();
   });
 
-  it('should allow localhost regardless of whitelist', () => {
+  it('should allow localhost in development', () => {
+    process.env.NODE_ENV = 'development';
     mockReq.headers.origin = 'http://localhost:5173';
     build().enforceForWrites(mockReq, mockRes, mockNext);
     expect(mockNext).toHaveBeenCalledWith();
+  });
+
+  it('should reject localhost outside development', () => {
+    process.env.NODE_ENV = 'production';
+    mockReq.headers.origin = 'http://localhost:5173';
+    build().enforceForWrites(mockReq, mockRes, mockNext);
+    expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
   });
 
   it('should reject a non-whitelisted origin', () => {

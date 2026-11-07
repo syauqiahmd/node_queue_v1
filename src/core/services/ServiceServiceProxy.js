@@ -57,6 +57,7 @@ class ServiceServiceProxy {
     const result = await this.serviceService.create(data);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
     await this.cacheService.invalidate('organization:');
+    await this.cacheService.invalidate('counter:'); // counters embed their service
     return result;
   }
 
@@ -65,6 +66,7 @@ class ServiceServiceProxy {
     await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
     await this.cacheService.invalidate('organization:');
+    await this.cacheService.invalidate('counter:'); // counters embed their service
     return result;
   }
 
@@ -73,6 +75,7 @@ class ServiceServiceProxy {
     await this.cacheService.del(`${this.cacheKeyPrefix}id:${id}`);
     await this.cacheService.invalidate(this.cacheKeyPrefix);
     await this.cacheService.invalidate('organization:');
+    await this.cacheService.invalidate('counter:'); // counters embed their service
     return result;
   }
 

@@ -1,21 +1,27 @@
 const mockUpload = jest.fn();
+const mockDeleteObject = jest.fn();
 
 jest.mock('aws-sdk', () => ({
-  S3: jest.fn(() => ({ upload: mockUpload })),
+  S3: jest.fn(() => ({ upload: mockUpload, deleteObject: mockDeleteObject })),
 }));
 
 const S3Client = require('../../../src/infra/clients/S3Client');
+
+// Sets S3_PUBLIC_URL, or removes it when value is undefined.
+const setPublicUrl = (value) => {
+  if (value === undefined) {
+    delete process.env.S3_PUBLIC_URL;
+    return;
+  }
+  process.env.S3_PUBLIC_URL = value;
+};
 
 describe('S3Client.uploadFile', () => {
   const originalPublicUrl = process.env.S3_PUBLIC_URL;
   let mockLogger;
 
   const createClient = (publicUrl) => {
-    if (publicUrl === undefined) {
-      delete process.env.S3_PUBLIC_URL;
-    } else {
-      process.env.S3_PUBLIC_URL = publicUrl;
-    }
+    setPublicUrl(publicUrl);
     return new S3Client({ logger: mockLogger });
   };
 
@@ -31,11 +37,7 @@ describe('S3Client.uploadFile', () => {
   });
 
   afterAll(() => {
-    if (originalPublicUrl === undefined) {
-      delete process.env.S3_PUBLIC_URL;
-    } else {
-      process.env.S3_PUBLIC_URL = originalPublicUrl;
-    }
+    setPublicUrl(originalPublicUrl);
   });
 
   it('returns the S3 location when S3_PUBLIC_URL is not set', async () => {
@@ -87,5 +89,43 @@ describe('S3Client.uploadFile', () => {
       'boom'
     );
     expect(mockLogger.error).toHaveBeenCalledWith('Error uploading file to S3: boom');
+  });
+});
+
+describe('S3Client logo helpers', () => {
+  const originalPublicUrl = process.env.S3_PUBLIC_URL;
+  const logger = { info: jest.fn(), error: jest.fn() };
+
+  afterEach(() => {
+    setPublicUrl(originalPublicUrl);
+  });
+
+  it('maps a public URL back to its object key', () => {
+    process.env.S3_PUBLIC_URL = 'https://qms.example.com/qms-media/';
+    const client = new S3Client({ logger });
+
+    expect(client.keyFromPublicUrl('https://qms.example.com/qms-media/org-logos/a%20b.png')).toBe(
+      'org-logos/a b.png'
+    );
+    expect(client.keyFromPublicUrl('https://elsewhere.example/org-logos/a.png')).toBe(null);
+    expect(client.keyFromPublicUrl(null)).toBe(null);
+  });
+
+  it('returns null when S3_PUBLIC_URL is not set', () => {
+    delete process.env.S3_PUBLIC_URL;
+    const client = new S3Client({ logger });
+
+    expect(client.keyFromPublicUrl('https://qms.example.com/qms-media/org-logos/a.png')).toBe(null);
+  });
+
+  it('deletes a single object', async () => {
+    mockDeleteObject.mockReturnValue({ promise: () => Promise.resolve({}) });
+    const client = new S3Client({ logger });
+
+    await client.deleteFile('org-logos/old.png');
+
+    expect(mockDeleteObject).toHaveBeenCalledWith(
+      expect.objectContaining({ Key: 'org-logos/old.png' })
+    );
   });
 });

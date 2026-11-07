@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const expressJSDocSwagger = require('express-jsdoc-swagger');
+const { corsOriginCallback } = require('./infra/utils/allowedOrigins');
 
 const createApp = (container) => {
   const app = express();
@@ -9,32 +10,9 @@ const createApp = (container) => {
   // This is required for express-rate-limit to correctly identify users when running behind a proxy
   app.set('trust proxy', 1);
 
-  const whitelist = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
-  if (process.env.NODE_ENV === 'development') {
-    whitelist.push(
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://localhost:8000',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:8000'
-    );
-  }
-
   const corsOptions = {
-    origin: (origin, callback) => {
-      const isLocalhost =
-        !origin ||
-        (typeof origin === 'string' &&
-          (origin.startsWith('http://localhost') ||
-            origin.startsWith('http://127.0.0.1') ||
-            origin.startsWith('https://localhost')));
-      if (isLocalhost || whitelist.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-      callback(new Error('Not allowed by CORS'));
-    },
+    // CORS_ORIGIN, plus localhost only in development (src/infra/utils/allowedOrigins.js).
+    origin: corsOriginCallback,
     credentials: true,
     // Without this, browsers block JS from reading Content-Disposition on cross-origin
     // responses, so CSV report downloads (report.js/visitor.js/visitorHistory.js stores)

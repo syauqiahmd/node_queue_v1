@@ -164,6 +164,7 @@ describe('ServiceServiceProxy', () => {
 
       expect(mockServiceServiceReal.create).toHaveBeenCalledWith(data);
       expect(mockCacheService.invalidate).toHaveBeenCalledWith('service:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('counter:');
       expect(result).toEqual(createdData);
     });
   });
@@ -180,6 +181,7 @@ describe('ServiceServiceProxy', () => {
       expect(mockServiceServiceReal.update).toHaveBeenCalledWith(id, data);
       expect(mockCacheService.del).toHaveBeenCalledWith(`service:id:${id}`);
       expect(mockCacheService.invalidate).toHaveBeenCalledWith('service:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('counter:');
       expect(result).toEqual(updatedData);
     });
   });
@@ -195,6 +197,7 @@ describe('ServiceServiceProxy', () => {
       expect(mockServiceServiceReal.remove).toHaveBeenCalledWith(id);
       expect(mockCacheService.del).toHaveBeenCalledWith(`service:id:${id}`);
       expect(mockCacheService.invalidate).toHaveBeenCalledWith('service:');
+      expect(mockCacheService.invalidate).toHaveBeenCalledWith('counter:');
       expect(result).toEqual(deletedData);
     });
   });

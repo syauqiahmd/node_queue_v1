@@ -56,6 +56,28 @@ class S3Client {
     }
   }
 
+  // Inverse of publicUrlFor: the object key behind a URL this client returned, or null when
+  // the URL does not point into S3_PUBLIC_URL (e.g. an external link).
+  keyFromPublicUrl(url) {
+    if (!this.publicBaseUrl || typeof url !== 'string') {
+      return null;
+    }
+    const prefix = `${this.publicBaseUrl}/`;
+    if (!url.startsWith(prefix)) {
+      return null;
+    }
+    try {
+      return decodeURI(url.slice(prefix.length));
+    } catch {
+      return null;
+    }
+  }
+
+  async deleteFile(key) {
+    await this.s3.deleteObject({ Bucket: this.bucketName, Key: key }).promise();
+    this.logger.info(`Deleted file from S3: ${key}`);
+  }
+
   async deleteFilesInDirectory(dirName) {
     let deletedCount = 0;
     let continuationToken = null;
